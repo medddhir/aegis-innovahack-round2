@@ -12,11 +12,11 @@ Recommended CLI command after the remote repository exists:
 ```bash
 gh api --method PUT \
   -H "Accept: application/vnd.github+json" \
-  repos/medddhir/aegis-innovahack-round2/collaborators/problemshooter \
-  -f permission=push
+  repos/medddhir/aegis-innovahack/collaborators/Sohamore \
+  -f permission=pull
 ```
 
-If the first account cannot be invited, replace `problemshooter` with `Sohamore`.
+If that account cannot be invited, replace `Sohamore` with `problemshooter`.
 
 ## Hourly commit rule
 

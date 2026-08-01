@@ -2,11 +2,11 @@
 
 Create a public repository named `aegis-innovahack` under `medddhir`.
 
-Add at least one official organiser as a collaborator:
-- `problemshooter`
-- `Sohamore`
+Add one official organiser as a collaborator:
+- Preferred: `Sohamore`
+- Fallback: `problemshooter`
 
-Recommended: add both so monitoring access is not blocked by a pending invitation.
+One accepted invitation is sufficient. Use read-only access unless the organisers explicitly request write access.
 
 ## Push from Ubuntu
 
@@ -44,7 +44,7 @@ Browser path:
 
 `Repository → Settings → Collaborators → Add people`
 
-Add `problemshooter` and/or `Sohamore`.
+Add `Sohamore`. If that invitation cannot be sent or accepted, add `problemshooter`.
 
 ## Hourly commit rule
 
