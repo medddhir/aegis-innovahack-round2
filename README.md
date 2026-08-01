@@ -5,6 +5,7 @@
 Aegis is an independent financial control and kill-switch prototype built for InnovaHack Chapter 1 — Round 2, FinTech track.
 
 - **Live prototype:** https://aegis-innovahack.vercel.app
+- **Official GitHub target:** https://github.com/medddhir/aegis-innovahack-round2
 - **Environment:** Simulated INR / no real funds
 - **Parent company:** TurboPay Technologies Pvt. Ltd.
 

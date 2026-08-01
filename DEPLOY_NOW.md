@@ -1,6 +1,6 @@
 # Deploy Aegis Now
 
-The repository already contains an authentic first commit and is Vercel-ready.
+The repository contains preserved authentic commit history and is Vercel-ready.
 
 ## 1. Create and push the official public repository
 
@@ -28,7 +28,7 @@ git push -u origin main
 gh api --method PUT \
   -H "Accept: application/vnd.github+json" \
   repos/medddhir/aegis-innovahack-round2/collaborators/problemshooter \
-  -f permission=push
+  -f permission=pull
 ```
 
 If that fails, use:
@@ -37,7 +37,7 @@ If that fails, use:
 gh api --method PUT \
   -H "Accept: application/vnd.github+json" \
   repos/medddhir/aegis-innovahack-round2/collaborators/Sohamore \
-  -f permission=push
+  -f permission=pull
 ```
 
 Verify:

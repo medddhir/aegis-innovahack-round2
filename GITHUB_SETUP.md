@@ -1,29 +1,27 @@
-# Mandatory GitHub Setup
+# Mandatory GitHub Setup — Round 2
 
-Create a public repository named `aegis-innovahack` under `medddhir`.
+Official repository name:
 
-Add one official organiser as a collaborator:
-- Preferred: `Sohamore`
-- Fallback: `problemshooter`
+`medddhir/aegis-innovahack-round2`
 
-One accepted invitation is sufficient. Use read-only access unless the organisers explicitly request write access.
+Add exactly one official organiser account as a collaborator:
 
-## Push from Ubuntu
+- Preferred: `problemshooter`
+- Fallback: `Sohamore`
+
+Read access is sufficient for monitoring unless the organisers explicitly request write access.
+
+## Push the preserved repository from Ubuntu
+
+The downloadable project archive already contains the authentic `.git` history. Do **not** run `git init` again.
 
 ```bash
-cd /root
-mkdir -p aegis-innovahack
-# Copy the downloaded project contents into /root/aegis-innovahack first.
-cd /root/aegis-innovahack
+cd /root/aegis
 
-git init
-git branch -M main
-git config user.name "Medhir Lokhande"
-git config user.email "medhir@turbo-pay.in"
-git add .
-git commit -m "feat: launch Aegis financial guardrail prototype"
+git status
+git log --oneline --decorate -10
 
-gh repo create medddhir/aegis-innovahack \
+gh repo create medddhir/aegis-innovahack-round2 \
   --public \
   --description "Aegis — independent financial guardrails and kill switch for autonomous AI agents" \
   --source=. \
@@ -34,27 +32,41 @@ gh repo create medddhir/aegis-innovahack \
 If the repository was created in the browser instead:
 
 ```bash
-git remote add origin https://github.com/medddhir/aegis-innovahack.git
+git remote add origin https://github.com/medddhir/aegis-innovahack-round2.git
 git push -u origin main
 ```
 
-## Add organiser collaborator
-
-Browser path:
-
-`Repository → Settings → Collaborators → Add people`
-
-Add `Sohamore`. If that invitation cannot be sent or accepted, add `problemshooter`.
-
-## Hourly commit rule
-
-At each meaningful checkpoint:
+## Add the organiser collaborator
 
 ```bash
-git status
-git add .
-git commit -m "<honest description of the completed work>"
-git push
+gh api --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  repos/medddhir/aegis-innovahack-round2/collaborators/problemshooter \
+  -f permission=pull
 ```
 
-Do not use empty, fake, squashed, or backdated commits.
+Fallback:
+
+```bash
+gh api --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  repos/medddhir/aegis-innovahack-round2/collaborators/Sohamore \
+  -f permission=pull
+```
+
+Verify the invitation/permission:
+
+```bash
+gh api repos/medddhir/aegis-innovahack-round2/collaborators/problemshooter/permission
+```
+
+## Mandatory hourly commit protocol
+
+Set a 50-minute timer. At each checkpoint, commit only genuine completed work:
+
+```bash
+cd /root/aegis
+./scripts/hourly-checkpoint.sh "checkpoint: <honest description of completed work>"
+```
+
+The helper refuses to create an empty commit. Never fake, backdate, squash, or create empty checkpoints. Stop all commits before the official submission deadline.
