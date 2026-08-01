@@ -35,17 +35,33 @@ const send = (method, params = {}) => new Promise((resolve, reject) => {
 
 await send('Page.enable');
 await send('Runtime.enable');
+await send('Log.enable');
+await send('Network.enable');
+await send('Network.setCacheDisabled', { cacheDisabled: true });
+const browserErrors = [];
+socket.addEventListener('message', event => {
+  const message = JSON.parse(event.data);
+  if (message.method === 'Runtime.exceptionThrown') {
+    const detail = message.params.exceptionDetails;
+    browserErrors.push(detail?.exception?.description || `${detail?.text || 'Runtime exception'} @ ${detail?.url || 'unknown'}:${detail?.lineNumber ?? 0}`);
+  }
+  if (message.method === 'Log.entryAdded' && ['error', 'warning'].includes(message.params.entry?.level)) {
+    browserErrors.push(message.params.entry.text);
+  }
+});
+const isMobile = width < 768;
 await send('Emulation.setDeviceMetricsOverride', {
   width,
   height,
   deviceScaleFactor: 1,
-  mobile: true,
+  mobile: isMobile,
   screenWidth: width,
   screenHeight: height,
-  screenOrientation: { type: 'portraitPrimary', angle: 0 },
+  screenOrientation: { type: isMobile ? 'portraitPrimary' : 'landscapePrimary', angle: 0 },
 });
-await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+await send('Emulation.setTouchEmulationEnabled', { enabled: isMobile, maxTouchPoints: isMobile ? 5 : 1 });
 await send('Page.navigate', { url });
+browserErrors.length = 0;
 await new Promise(resolve => setTimeout(resolve, waitMs));
 
 const auditResult = await send('Runtime.evaluate', {
@@ -54,6 +70,10 @@ const auditResult = await send('Runtime.evaluate', {
     pageOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
     modalOverflow:(document.querySelector('#judgeCard')?.scrollWidth||0)-(document.querySelector('#judgeCard')?.clientWidth||0),
     audit:document.querySelector('#aegis-browser-audit')?.textContent||null,
+    browserErrors:${JSON.stringify(browserErrors)},
+    contractProof:document.documentElement.dataset.contractProof||null,
+    contractTests:document.querySelector('[data-contract-field="tests"]')?.textContent.trim()||null,
+    ringRenderer:document.querySelector('#magicRingsMount')?.dataset.rendererState||null,
     action:document.querySelector('#judgeNext')?.textContent.trim()||null,
     actionRect:(()=>{const r=document.querySelector('#judgeNext')?.getBoundingClientRect();return r?{left:r.left,right:r.right,width:r.width}:null})(),
     regions:Object.fromEntries(['#judgeCard','.judge-body','.judge-context','.judge-execution','.judge-proof'].map(s=>{const e=document.querySelector(s),r=e?.getBoundingClientRect();return [s,r?{top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,height:r.height,order:getComputedStyle(e).order}:null]}))

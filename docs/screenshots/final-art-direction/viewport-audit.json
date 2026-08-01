@@ -1,0 +1,165 @@
+{
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 59.04,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 52,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 48,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 48,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 44,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 40.95,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    },
+    {
+      "width": 360,
+      "height": 800,
+      "horizontalOverflow": 0,
+      "modalHorizontalOverflow": 0,
+      "actionReachable": true,
+      "focusInsideModal": true,
+      "judgeState": "AWAITING_OWNER_ACTION",
+      "proofState": "verified",
+      "regulatoryPresent": true,
+      "critical": {
+        "heroHeadline": 37.8,
+        "judgeAmount": 19,
+        "decisiveRule": 14,
+        "riskState": 14,
+        "policyVersion": 14,
+        "fundsMoved": 14,
+        "judgeAction": 14,
+        "legal": 13
+      },
+      "consoleErrors": []
+    }
+  ],
+  "reducedMotion": {
+    "renderer": "fallback",
+    "judgeState": "COMPLETE",
+    "engineDecision": "SETTLED AFTER FINAL REVALIDATIONFinal revalidation passed; ₹1,200 settled to CloudGrid.FUNDS MOVED · ₹1,200 · SIMULATED ONLY",
+    "horizontalOverflow": 0,
+    "consoleErrors": []
+  }
+}

@@ -64,6 +64,7 @@ const state = {
   eventCursor: 0,
   twinResults: null,
   twinTimers: [],
+  lastEvasionCluster: null,
   judgeEvidence: new Map(),
   judgeView: null,
   judgePreviousFocus: null,
@@ -95,6 +96,18 @@ function setContractProofField(field, value) {
   $$(`[data-contract-field="${field}"]`).forEach(element => { element.textContent = value; });
 }
 
+function updateProofLedgerSummary() {
+  const ledger = state.engine?.getLedger?.() ?? [];
+  const event = ledger.at(-1);
+  const rule = $('#proofEventRule');
+  const status = $('#proofEventStatus');
+  if (!rule || !status) return;
+  rule.textContent = event?.ruleChecked ?? 'NO RECORDED EVENT';
+  status.textContent = event
+    ? `${event.finalSettlementStatus} · ${formatINR(event.fundsMoved)} moved · ledger-backed`
+    : 'Run a scenario · ledger-backed · no cryptographic claim';
+}
+
 async function loadContractProof() {
   try {
     const response = await fetch('./contract-proof.json', { cache: 'no-store' });
@@ -102,11 +115,16 @@ async function loadContractProof() {
     const proof = await response.json();
     if (proof.environment !== 'LOCAL_EVM' || proof.realFundsMoved !== false) throw new Error('Contract proof boundary is invalid.');
     const bytecodeHash = String(proof.hashes?.deploymentBytecode ?? '').replace(/^sha256:/, '');
+    const sourceHash = String(proof.hashes?.contractSource ?? '').replace(/^sha256:/, '');
     setContractProofField('tests', `${proof.contractTests.passed}/${proof.contractTests.total}`);
     setContractProofField('bytecode', bytecodeHash ? `${bytecodeHash.slice(0, 12)}…` : 'UNAVAILABLE');
+    setContractProofField('bytecode-full', bytecodeHash || 'UNAVAILABLE');
+    setContractProofField('source', sourceHash || 'UNAVAILABLE');
     setContractProofField('parity', `${proof.attackVectors.parity} · ${proof.attackVectors.passed}/${proof.attackVectors.total}`);
+    setContractProofField('parity-short', `${proof.attackVectors.passed}/${proof.attackVectors.total}`);
     setContractProofField('environment', proof.environment.replace('_', ' '));
     setContractProofField('funds', String(proof.realFundsMoved).toUpperCase());
+    $$('[data-browser-tests]').forEach(element => { element.textContent = String(proof.browserTests?.total ?? '—'); });
     document.documentElement.dataset.contractProof = 'verified';
   } catch (error) {
     setContractProofField('tests', 'UNAVAILABLE');
@@ -252,6 +270,12 @@ function renderMetrics() {
   $('#topPolicy').textContent = snapshot.policyLabel;
   $('#capsulePolicyVersion').textContent = `POLICY VERSION · ${snapshot.policyLabel}`;
   $('#capsuleVendorCount').textContent = snapshot.policy.approvedRecipients.length;
+  const authorityPolicy = $('#authorityPolicyVersion');
+  if (authorityPolicy) authorityPolicy.textContent = snapshot.policyLabel;
+  const authorityBudget = $('#authorityBudgetTotal');
+  if (authorityBudget) authorityBudget.textContent = formatINR(snapshot.policy.totalTaskBudget);
+  const authorityCap = $('#authorityTransactionCap');
+  if (authorityCap) authorityCap.textContent = formatINR(snapshot.policy.perTransactionCap);
   renderRisk();
 }
 
@@ -290,6 +314,14 @@ function renderRisk() {
     value.className = values[index][1];
   });
   $('#automaticResponse p').textContent = `${risk.state} (${risk.score}/100): ${risk.response}`;
+  const authorityState = $('#authorityRiskState');
+  if (authorityState) {
+    authorityState.textContent = risk.state;
+    authorityState.className = className;
+    $('#authorityRiskScore').textContent = String(risk.score);
+    $('#authorityRiskResponse').textContent = risk.response;
+    $$('.governor-scale li').forEach(item => item.classList.toggle('active', item.textContent.trim().toUpperCase() === risk.state));
+  }
 }
 
 function renderAll({ focusLatest = true } = {}) {
@@ -353,9 +385,68 @@ function setHeroFlow(result = null) {
       : visual.flow === 'pending' ? 'OPEN · UNSETTLED' : 'OPEN · NO TRANSFER';
 }
 
+function presentStoryResult(result = null, { cluster = null } = {}) {
+  const surface = $('#storyFlow');
+  if (!surface) return;
+  const snapshot = state.engine.getSnapshot();
+  const visual = createCoreVisualState(result, snapshot.risk.state);
+  surface.dataset.flow = visual.flow;
+  surface.dataset.risk = visual.risk;
+  surface.dataset.failLayer = visual.failingLayer;
+  surface.dataset.walletGate = visual.walletGate;
+  $('#storyPolicy').textContent = snapshot.policyLabel;
+  $('#storyRisk').textContent = `${snapshot.risk.state} · ${snapshot.risk.score}/100`;
+  $('#storyKillSwitch').disabled = snapshot.pendingCount === 0 || snapshot.frozen;
+  const clusterPanel = $('#storyCluster');
+  clusterPanel.hidden = !cluster;
+  clusterPanel.innerHTML = cluster ? evasionClusterMarkup(cluster, { compact: true }) : '';
+  if (!result) {
+    $('#storyOutcome').textContent = 'READY';
+    $('#storyReason').textContent = 'Select a request to run it through the canonical policy engine.';
+    $('#storyRule').textContent = 'AWAITING_TRANSACTION_INTENT';
+    $('#storyTransaction').textContent = '₹0 · simulated';
+    $('#storyFunds').textContent = '₹0';
+    return;
+  }
+  const outcome = displayDecision(result.decision);
+  $('#storyOutcome').textContent = outcome;
+  $('#storyOutcome').dataset.glitchLabel = outcome;
+  $('#storyReason').textContent = result.reason;
+  $('#storyRule').textContent = result.ruleChecked;
+  $('#storyTransaction').textContent = result.intent
+    ? `${formatINR(result.intent.amount)} · ${result.intent.recipient}`
+    : 'Owner policy action';
+  $('#storyFunds').textContent = formatINR(result.fundsMoved);
+  if (['BLOCK', 'INVALIDATE', 'FREEZE'].includes(result.decision)) pulseOnce($('#storyOutcome'), 'letter-glitch-event');
+}
+
+function runStoryScenario(name, button) {
+  $$('.story-scenario').forEach(item => item.classList.toggle('active', item === button));
+  const surface = $('#storyFlow');
+  surface.dataset.flow = 'running';
+  surface.dataset.scanActive = 'true';
+  surface.dataset.visualActive = 'true';
+  const result = executeScenario(name);
+  presentStoryResult(result, { cluster: name === 'evasion' ? state.lastEvasionCluster : null });
+  window.setTimeout(() => {
+    surface.dataset.scanActive = 'false';
+    surface.dataset.visualActive = 'false';
+  }, reducedMotion() ? 0 : 360);
+  return result;
+}
+
+function activateStoryKillSwitch() {
+  if ($('#storyKillSwitch').disabled) return;
+  const { outcome } = performOwnerFreeze({ present: false });
+  presentStoryResult(outcome);
+  pulseOnce($('#storyFlow'), 'story-freeze-event');
+}
+
 function afterDecision(result, options = {}) {
   renderAll();
+  updateProofLedgerSummary();
   setHeroFlow(result);
+  presentStoryResult(result, { cluster: options.clusterModel ?? null });
   if (options.attackResult) showAttackResult(result, options);
   toast(`${displayDecision(result.decision)} · ${result.ruleChecked}`);
   return result;
@@ -393,6 +484,7 @@ function runEvasion({ present = true } = {}) {
   const result = results.at(-1);
   const total = intents.reduce((sum, intent) => sum + intent.amount, 0);
   const clusterModel = createEvasionClusterModel(intents, result);
+  state.lastEvasionCluster = clusterModel;
   if (present) {
     afterDecision(result, {
       attackResult: true,
@@ -487,6 +579,7 @@ function startPending(seconds, { managedByJudge = false } = {}) {
   }
   $('#pendingBanner').classList.remove('hidden');
   setHeroFlow(result);
+  presentStoryResult(result);
   $('#countdown').textContent = state.pendingSeconds;
   $('#pendingTrack').style.width = '0%';
   $('.pending-info strong').textContent = `Intent #${result.intent.id}`;
@@ -494,6 +587,7 @@ function startPending(seconds, { managedByJudge = false } = {}) {
   let elapsed = 0;
   requestAnimationFrame(() => { $('#pendingTrack').style.width = '5%'; });
   renderAll();
+  updateProofLedgerSummary();
   state.countdownId = setInterval(() => {
     elapsed += 1;
     state.pendingSeconds -= 1;
@@ -528,8 +622,10 @@ function performOwnerFreeze({ present = true } = {}) {
   clearPendingTimer();
   state.pendingIntentId = null;
   renderAll();
+  updateProofLedgerSummary();
   const invalidatedEvent = result.invalidated.at(-1);
   setHeroFlow(invalidatedEvent ?? result.freezeEvent);
+  presentStoryResult(invalidatedEvent ?? result.freezeEvent);
   if (invalidatedEvent && present) {
     showAttackResult({ ...invalidatedEvent, fundsMoved: invalidatedEvent.fundsMoved }, { reason: invalidatedEvent.reason });
     toast('Agent frozen — pending intent invalidated before settlement');
@@ -629,6 +725,8 @@ function runTwin() {
     $('#v1Result').style.color = model.legacyBypassed ? 'var(--red)' : 'var(--green)';
     $('#v2Result').textContent = `${model.hardenedBypassed} OF ${model.totalAttacks} ATTACKS BYPASSED`;
     $('#v2Result').style.color = model.hardenedBypassed ? 'var(--red)' : 'var(--green)';
+    $('#proofTwinV1').textContent = `${model.legacyBypassed} / ${model.totalAttacks} BYPASSED`;
+    $('#proofTwinV2').textContent = `${model.hardenedBypassed} / ${model.totalAttacks} BYPASSED`;
     $('.twin-replay-grid .policy-card.strong')?.classList.add('twin-winner');
     const summary = $('#twinSummary');
     summary.classList.remove('hidden');
@@ -737,6 +835,7 @@ function resetEnvironment({ notify = true, preserveView = false, resetJudge = tr
     eventCursor: 0,
     twinResults: null,
     twinTimers: [],
+    lastEvasionCluster: null,
     judgeEvidence: new Map(),
     judgeView: null,
     renderedEventIds: new Set(),
@@ -751,6 +850,8 @@ function resetEnvironment({ notify = true, preserveView = false, resetJudge = tr
   $('#v1Result').style.color = '';
   $('#v2Result').textContent = 'Not tested';
   $('#v2Result').style.color = '';
+  $('#proofTwinV1').textContent = 'AWAITING REPLAY';
+  $('#proofTwinV2').textContent = 'AWAITING REPLAY';
   $('#v1Replay').innerHTML = '';
   $('#v2Replay').innerHTML = '';
   $('#v1Loss').textContent = '₹0';
@@ -774,7 +875,9 @@ function resetEnvironment({ notify = true, preserveView = false, resetJudge = tr
   $('#capsuleCapDisplay').textContent = '₹2,500';
   $('#proofTerminal').dataset.eventId = '';
   setHeroFlow();
+  presentStoryResult();
   renderAll();
+  updateProofLedgerSummary();
   if (resetJudge && !$('#judgeModal').classList.contains('hidden')) {
     $('#judgeModal').classList.add('hidden');
     document.body.classList.remove('judge-open');
@@ -1132,6 +1235,11 @@ function activateJudgeKillSwitch() {
       authorisationEvent: state.judgeEvidence.get(4)?.pending?.ledgerEvent,
     });
     renderJudgeView(view);
+    const revokeTitle = $('#judgeResult strong');
+    if (revokeTitle) {
+      revokeTitle.dataset.glitchLabel = revokeTitle.textContent;
+      pulseOnce(revokeTitle, 'letter-glitch-event');
+    }
     pulseOnce($('#judgeCard'), 'kill-choreography');
     judgeMachine.complete(token);
     renderJudgeControls();
@@ -1324,7 +1432,7 @@ function initDepthPresentation() {
     });
   });
 
-  const visualSurfaces = $$('#heroFlow, #judgeVisual, #contract-enforcement, .glyph-matrix-host');
+  const visualSurfaces = $$('#heroFlow, #storyFlow, #judgeVisual, #proof, .glyph-matrix-host');
   if (!('IntersectionObserver' in window)) visualSurfaces.forEach(surface => { surface.dataset.visualActive = 'true'; });
   else {
     const observer = new IntersectionObserver(entries => {
@@ -1380,17 +1488,21 @@ function initLocalCapturePresentation() {
   if (!localCaptureMode) return;
   document.body.dataset.capture = localCaptureMode;
   const later = (callback, delay = 40) => window.setTimeout(callback, delay);
-  const captureScroll = element => {
+  const captureScroll = (element, offset = 56) => {
     document.documentElement.style.scrollBehavior = 'auto';
-    window.scrollTo(0, Math.max(0, element.offsetTop - 72));
+    window.scrollTo(0, Math.max(0, window.scrollY + element.getBoundingClientRect().top + offset));
   };
+  if (localCaptureMode === 'authority') return later(() => captureScroll($('#authority')));
+  if (localCaptureMode === 'intervention') return later(() => captureScroll($('#intervention')));
+  if (localCaptureMode === 'proof') return later(() => captureScroll($('#proof')));
+  if (localCaptureMode === 'control') return later(() => captureScroll($('#control-centre'), -45));
   if (localCaptureMode === 'core') return later(() => { runSafe(); document.body.classList.add('capture-core'); });
   if (localCaptureMode === 'judge-approved') return later(() => { openJudgeMode(); executeJudgeScenario(); });
   if (localCaptureMode === 'judge-blocked') return later(() => { openJudgeMode(); rebuildJudgeTo(1); executeJudgeScenario(); });
   if (localCaptureMode === 'evasion') return later(() => {
     switchView('attack');
     runEvasion();
-    captureScroll($('#control-centre'));
+    captureScroll($('[data-panel="attack"]'), -82);
   });
   if (['pending', 'kill', 'mobile-judge', 'audit-projector'].includes(localCaptureMode)) return later(() => {
     openJudgeMode();
@@ -1403,9 +1515,9 @@ function initLocalCapturePresentation() {
   if (localCaptureMode === 'twin') return later(() => {
     switchView('twin');
     runTwin();
-    captureScroll($('#control-centre'));
+    captureScroll($('[data-panel="twin"]'), -82);
   });
-  if (localCaptureMode === 'contract') return later(() => captureScroll($('#contract-enforcement')));
+  if (localCaptureMode === 'contract') return later(() => captureScroll($('#proof')));
   if (localCaptureMode === 'forensics') return later(() => {
     openJudgeMode();
     rebuildJudgeTo(4);
@@ -1415,7 +1527,7 @@ function initLocalCapturePresentation() {
       closeJudgeMode();
       switchView('forensics');
       renderForensics();
-      captureScroll($('#control-centre'));
+      captureScroll($('[data-panel="forensics"]'), -82);
     }, 760);
   });
 }
@@ -1427,6 +1539,12 @@ function initInteractions() {
   initDepthPresentation();
   $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
   $$('.scenario-button, .attack-option').forEach(button => button.addEventListener('click', () => executeScenario(button.dataset.scenario)));
+  $$('.story-scenario[data-story-scenario]').forEach(button => button.addEventListener('click', () => runStoryScenario(button.dataset.storyScenario, button)));
+  $('#storyKillSwitch').addEventListener('click', activateStoryKillSwitch);
+  $$('[data-open-view]').forEach(button => button.addEventListener('click', () => {
+    switchView(button.dataset.openView);
+    $('#control-centre').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth' });
+  }));
   $$('[data-freeze-button]').forEach(button => button.addEventListener('click', freezeAgent));
   $$('.chip').forEach(chip => chip.addEventListener('click', () => chip.classList.toggle('selected')));
   $('#clearEvents').addEventListener('click', () => { state.eventCursor = state.engine.getLedger().length; renderEvents(); });
@@ -1452,15 +1570,17 @@ function initInteractions() {
     }
   });
   const narrative = $('.narrative-band');
-  narrative.classList.add('reveal-statement');
-  if (reducedMotion() || !('IntersectionObserver' in window)) narrative.classList.add('is-revealed');
-  else {
+  if (narrative) {
+    narrative.classList.add('reveal-statement');
+    if (reducedMotion() || !('IntersectionObserver' in window)) narrative.classList.add('is-revealed');
+    else {
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting)) return;
       narrative.classList.add('is-revealed');
       observer.disconnect();
     }, { threshold: 0.35 });
     observer.observe(narrative);
+    }
   }
   $('#launchJudgeMode').addEventListener('click', openJudgeMode);
   $('#launchJudgeModeBottom').addEventListener('click', openJudgeMode);

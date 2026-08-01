@@ -90,6 +90,8 @@ The Forensic Proof Ledger is written by the engine, not by the display layer. At
 
 The live intent stream and forensic terminal read recorded ledger entries. Metric transitions terminate at the engine snapshot value, and reduced-motion mode writes that value directly. Browser diagnostics are read-only and exist to verify visible state against the engine during local tests.
 
+The final public composition has five chapters—Thesis, Authority, Intervention, Proof, and The System—without adding another product layer. `public/aegis-rings.js` is the only WebGL scene. It reads the already-derived `data-flow` and `data-fail-layer` values on the hero instrument and draws four ring accents; it cannot submit, evaluate, settle, or mutate a transaction. The semantic SVG/CSS Core is always present beneath it. The enhancement is disabled on mobile, coarse pointers, reduced-motion, low-power devices, and context failure; it pauses off-screen and deletes its buffer and shader program on disposal.
+
 ## Locked innovations
 
 1. Task-Bound Budget Capsules

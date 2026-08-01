@@ -1,8 +1,10 @@
-# Aegis Design System
+# Aegis Design System — Institutional Futurism
 
 ## Visual philosophy
 
-Aegis is a calm financial-security command centre. Normal operation is quiet, structured, and blue-toned; defensive states become progressively more explicit only when the canonical engine reports risk, a block, invalidation, or freeze. The interface avoids trading-terminal density, game motifs, neon spectacle, and idle animation.
+Aegis balances academic precision, financial-infrastructure restraint, and cinematic technical demonstration: approximately 70% calm authority, 20% analytical detail, and 10% impact. Normal operation is quiet, structured, and blue-toned; defensive states become progressively more explicit only when the canonical engine reports risk, a block, invalidation, or freeze. The interface avoids trading-terminal density, game motifs, neon spectacle, and idle animation.
+
+The public experience is five chapters rather than a feature-card catalogue: Thesis, Authority, Intervention, Proof, and The System. Each viewport has one dominant idea, no more than three surface levels, no repeated trust badge, and at most one active glow.
 
 The hierarchy is designed for a projected judging screen:
 
@@ -13,7 +15,7 @@ The hierarchy is designed for a projected judging screen:
 
 ## Signature Aegis Core
 
-The Aegis Core is the system’s primary visual explanation. Four nested policy rings map to the canonical check families:
+The Aegis Instrument is the system’s primary visual explanation. Four nested policy rings map to the canonical check families:
 
 1. **Identity** — agent existence, freeze state, policy version, and nonce validity
 2. **Task Intent** — Capsule task, expiry, counterparty, and category
@@ -21,6 +23,8 @@ The Aegis Core is the system’s primary visual explanation. Four nested policy 
 4. **Behaviour Risk** — Evasion Shield and Risk Governor
 
 The centre shield represents the independent enforcement boundary. A neutral Core is static. During an actual evaluation the rings validate in order; an approval completes the emerald path to the simulated wallet, a block marks only the decisive ring, a pending intent pauses in amber, and invalidation closes the wallet gate. A verified owner freeze closes every ring and deactivates the path. `public/visual-state.js` performs only this result-to-presentation mapping and has no financial decision authority.
+
+Desktop may receive one progressive raw-WebGL ring accent. It is local, lazy, bounded to the hero, paused off-screen, capped at 1.5 device-pixel ratio, and disposed on page exit or context loss. It reads visual state already produced by the locked mapping. The complete SVG/CSS object remains visible and is mandatory on mobile, reduced-motion, low-power, and failure paths.
 
 ## System state choreography
 
@@ -47,7 +51,7 @@ Red is deliberately rare. It is never used as a decorative brand accent or idle 
 - Interface and narrative: local system sans-serif stack (`Inter` when already installed, then platform UI fonts).
 - Evidence: local system monospace stack for policy IDs, intent IDs, rule names, timestamps, and forensic output.
 - No remote font request is made.
-- Interface body copy targets 15–16 px. Important controls are at least 14 px; compact evidence labels remain at least 9–12 px depending on viewport and are paired with larger values.
+- Interface body copy targets 16–18 px. Important controls are 14–16 px; critical labels are 13–15 px; decisive rules and amounts are at least 14 px; technical identifiers and regulatory copy are at least 12.5–14 px.
 - Financial values use tabular numerals and preserve exact engine formatting.
 
 ## Status language

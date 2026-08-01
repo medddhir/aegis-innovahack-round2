@@ -15,6 +15,10 @@
     "passed": 33,
     "failed": 0
   },
+  "browserTests": {
+    "total": 88,
+    "source": "tests/*.test.js"
+  },
   "attackVectors": {
     "total": 8,
     "passed": 8,

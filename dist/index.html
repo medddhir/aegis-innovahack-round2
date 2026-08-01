@@ -27,9 +27,10 @@
       <span>AEGIS</span>
     </a>
     <nav class="header-nav" aria-label="Primary navigation">
-      <a href="#system">System</a>
-      <a href="#control-centre">Control Centre</a>
+      <a href="#authority">Authority</a>
+      <a href="#intervention">Intervention</a>
       <a href="#proof">Proof</a>
+      <a href="#control-centre">System</a>
     </nav>
     <div class="header-actions">
       <span class="prototype-pill">SIMULATED INR</span>
@@ -38,20 +39,20 @@
   </header>
 
   <main id="top">
-    <section class="hero section-shell">
+    <section class="hero section-shell chapter chapter-thesis" id="thesis" aria-labelledby="thesisTitle">
       <div class="hero-copy">
-        <div class="eyebrow reveal-1"><span class="status-dot"></span> INNOVAHACK ROUND 2 · FINTECH</div>
-        <h1 class="reveal-2">AI agents can spend in milliseconds.<br><span>Aegis makes disobedience financially impossible.</span></h1>
-        <p class="hero-sub reveal-3">An independent financial control layer that evaluates every transaction intent, blocks policy evasion, revokes pending payments and preserves a complete forensic proof trail.</p>
+        <div class="eyebrow reveal-1"><span class="status-dot"></span> AEGIS / INDEPENDENT FINANCIAL CONTROL PLANE</div>
+        <h1 class="reveal-2" id="thesisTitle">AI agents can spend in milliseconds.<br><span>Aegis makes disobedience financially impossible.</span></h1>
+        <p class="hero-sub reveal-3">Aegis sits between an autonomous agent and its money—enforcing task, recipient, spending, risk, and owner-control policies outside the agent’s own logic.</p>
         <div class="hero-actions reveal-4">
           <button class="primary-cta specular-cta" id="launchJudgeMode">Launch Live Attack Simulation <span>↗</span></button>
-          <a class="secondary-cta" href="#control-centre">Open Control Centre</a>
+          <a class="secondary-cta" href="#control-centre" aria-label="Open Control Centre — enter the full product">Enter Control Centre</a>
         </div>
-        <div class="hero-trust reveal-5">
-          <span>✓ Simulated INR</span>
-          <span>✓ Deterministic enforcement</span>
-          <span>✓ Owner-controlled freeze</span>
-          <span>✓ ₹0 real funds</span>
+        <div class="hero-trust reveal-5" aria-label="Simulated INR · No real funds · Deterministic enforcement · Owner-controlled freeze">
+          <span><b data-browser-tests>—</b> Browser tests</span>
+          <span><b data-contract-field="tests">—</b> Contract tests</span>
+          <span><b data-contract-field="parity-short">—</b> Rule parity</span>
+          <span><b>₹0</b> Real funds</span>
         </div>
       </div>
 
@@ -61,6 +62,7 @@
           <div class="core-endpoint core-agent"><span>AI</span><strong>AUTONOMOUS<br>AGENT</strong><small>Transaction intent</small></div>
           <div class="core-rail rail-in" aria-hidden="true"><i></i><b></b></div>
           <div class="signature-core" data-depth-level="3" aria-label="Aegis Core policy layers">
+            <div class="magic-rings-mount" id="magicRingsMount" data-renderer-state="fallback" aria-hidden="true"></div>
             <div class="core-strands" aria-hidden="true"><i></i><i></i><i></i></div>
             <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="coreTitle coreDesc">
               <title id="coreTitle">Aegis Core</title><desc id="coreDesc">Four independent enforcement layers surrounding the Aegis shield.</desc>
@@ -95,27 +97,138 @@
       </div>
     </section>
 
-    <section class="narrative-band" id="system">
-      <p>The agent may be autonomous.</p>
-      <h2>The money never is.</h2>
-      <div class="narrative-line"></div>
+    <section class="authority-chapter section-shell chapter" id="authority" aria-labelledby="authorityTitle">
+      <header class="chapter-heading">
+        <span>02 / AUTHORITY</span>
+        <h2 id="authorityTitle">Authority is defined before autonomy begins.</h2>
+        <p>An agent receives a bounded financial mandate—not possession of the money. The same policy document sets purpose, counterparty, value, time, and behavioural tolerance.</p>
+      </header>
+      <div class="authority-instrument">
+        <div class="policy-document">
+          <div class="policy-document-head"><span>ACTIVE POLICY INSTRUMENT</span><b id="authorityPolicyVersion">PROCUREMENT-V4</b></div>
+          <h3>Cloud infrastructure procurement</h3>
+          <p class="policy-statement">Procurement-07 may purchase cloud-compute capacity only from approved counterparties, within the active task budget, before expiry.</p>
+          <dl class="policy-terms">
+            <div><dt>Task</dt><dd>Purchase cloud-compute capacity</dd></div>
+            <div><dt>Total authority</dt><dd id="authorityBudgetTotal">₹10,000</dd></div>
+            <div><dt>Per transaction</dt><dd id="authorityTransactionCap">₹2,500</dd></div>
+            <div><dt>Counterparties</dt><dd>CloudGrid · ComputeHub</dd></div>
+            <div><dt>Expiry</dt><dd>02 AUG 2026 · 18:00 UTC</dd></div>
+          </dl>
+          <button type="button" class="text-link" data-open-view="capsules">Inspect Budget Capsule <span>→</span></button>
+        </div>
+        <div class="policy-connection" aria-hidden="true"><span></span><b>BEHAVIOUR<br>MODIFIES AUTHORITY</b><span></span></div>
+        <div class="governor-evidence">
+          <span class="research-label">ADAPTIVE RISK GOVERNOR</span>
+          <div class="governor-state"><strong id="authorityRiskState">NORMAL</strong><b><span id="authorityRiskScore">12</span>/100</b></div>
+          <ol class="governor-scale" aria-label="Risk progression">
+            <li class="active">Normal</li><li>Caution</li><li>Restricted</li><li>Quarantined</li><li>Frozen</li>
+          </ol>
+          <div class="governor-response"><small>AUTOMATIC RESPONSE</small><p id="authorityRiskResponse">Standard controls active. Behaviour remains within policy.</p></div>
+          <button type="button" class="text-link" data-open-view="risk">Review deterministic thresholds <span>→</span></button>
+        </div>
+      </div>
     </section>
 
-    <section class="architecture section-shell">
-      <div class="section-heading">
-        <span class="eyebrow">THE CONTROL PRINCIPLE</span>
-        <h2>The agent requests. Aegis decides.</h2>
-        <p>The agent never receives unrestricted settlement authority. Every request passes through an external, deterministic policy engine.</p>
-      </div>
-      <div class="decision-grid">
-        <article class="decision-card approve"><span>01</span><h3>Approve</h3><p>Intent matches its task, recipient, amount and active policy.</p></article>
-        <article class="decision-card hold"><span>02</span><h3>Hold</h3><p>Valid intent enters a settlement queue for final revalidation.</p></article>
-        <article class="decision-card block"><span>03</span><h3>Block</h3><p>A policy violation stops at the enforcement layer, not inside the agent.</p></article>
-        <article class="decision-card freeze"><span>04</span><h3>Freeze</h3><p>The owner revokes future and unsettled transaction authority instantly.</p></article>
+    <section class="intervention-chapter chapter" id="intervention" aria-labelledby="interventionTitle">
+      <header class="chapter-heading section-shell">
+        <span>03 / INTERVENTION</span>
+        <h2 id="interventionTitle">A valid payment may proceed. An invalid one never reaches settlement.</h2>
+        <p>Attack requests enter from the left. Independent policy layers decide in the centre. The protected wallet receives only a finally revalidated intent.</p>
+      </header>
+      <div class="intervention-stage section-shell" id="storyFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" data-wallet-gate="open">
+        <div class="attack-sequence" aria-label="Attack request sequence">
+          <span class="research-label">REQUEST SEQUENCE</span>
+          <button class="story-scenario active" data-story-scenario="safe"><i>01</i><span><b>Valid transaction</b><small>₹1,200 · CloudGrid</small></span></button>
+          <button class="story-scenario" data-story-scenario="overspend"><i>02</i><span><b>Oversized transaction</b><small>₹8,500 · cap ₹2,500</small></span></button>
+          <button class="story-scenario" data-story-scenario="unknown"><i>03</i><span><b>Unknown recipient</b><small>Outside allowlist</small></span></button>
+          <button class="story-scenario" data-story-scenario="evasion"><i>04</i><span><b>Threshold splitting</b><small>4 × ₹1,999 · 11 seconds</small></span></button>
+          <button class="story-scenario" data-story-scenario="pending"><i>05</i><span><b>Pending settlement</b><small>Owner may revoke authority</small></span></button>
+          <button class="story-scenario kill-row" id="storyKillSwitch" disabled><i>06</i><span><b>Owner Kill Switch</b><small>Available during pending settlement</small></span></button>
+        </div>
+
+        <div class="instrument-field">
+          <div class="policy-scan-field" aria-hidden="true"><i></i></div>
+          <div class="story-agent"><span>AGENT</span><b>Procurement-07</b></div>
+          <div class="story-beam story-beam-in" aria-hidden="true"><i></i></div>
+          <div class="story-core" aria-label="Four independent policy layers">
+            <span class="story-ring story-ring-risk" data-core-layer="risk"><b>BEHAVIOUR RISK</b></span>
+            <span class="story-ring story-ring-limits" data-core-layer="limits"><b>LIMITS</b></span>
+            <span class="story-ring story-ring-intent" data-core-layer="intent"><b>TASK INTENT</b></span>
+            <span class="story-ring story-ring-identity" data-core-layer="identity"><b>IDENTITY</b></span>
+            <i class="story-shield">A</i>
+          </div>
+          <div class="story-beam story-beam-out" aria-hidden="true"><i></i></div>
+          <div class="story-vault"><i></i><span>PROTECTED<br>WALLET</span></div>
+          <div class="story-rule"><small>DECISIVE RULE</small><b id="storyRule">AWAITING_TRANSACTION_INTENT</b></div>
+        </div>
+
+        <aside class="intervention-outcome" aria-live="polite">
+          <span class="research-label">ENGINE OUTCOME</span>
+          <strong id="storyOutcome">READY</strong>
+          <p id="storyReason">Select a request to run it through the canonical policy engine.</p>
+          <dl>
+            <div><dt>Transaction</dt><dd id="storyTransaction">₹0 · simulated</dd></div>
+            <div><dt>Policy</dt><dd id="storyPolicy">PROCUREMENT-V4</dd></div>
+            <div><dt>Risk</dt><dd id="storyRisk">NORMAL · 12/100</dd></div>
+            <div><dt>Funds moved</dt><dd id="storyFunds">₹0</dd></div>
+          </dl>
+          <div class="story-cluster" id="storyCluster" hidden></div>
+          <button type="button" class="text-link" data-open-view="attack">Open full Attack Lab <span>→</span></button>
+        </aside>
       </div>
     </section>
 
-    <section class="control-wrap" id="control-centre">
+    <section class="proof-chapter section-shell chapter" id="proof" aria-labelledby="proofChapterTitle">
+      <header class="chapter-heading">
+        <span>04 / PROOF</span>
+        <h2 id="proofChapterTitle">Enforced twice. Explained once.</h2>
+        <p>The browser explains the risk. The contract enforces the overlapping settlement boundary. The ledger preserves how each decision was reached.</p>
+      </header>
+      <div class="proof-instrument">
+        <article class="proof-mode">
+          <span>01 / POLICY DIGITAL TWIN</span>
+          <h3>Same attacks. Two policies.</h3>
+          <p>Both configurations receive the same six engine-generated attack vectors on the same deterministic clock.</p>
+          <div class="proof-comparison"><b>V1 <em id="proofTwinV1">AWAITING REPLAY</em></b><i>→</i><b>V2 <em id="proofTwinV2">AWAITING REPLAY</em></b></div>
+          <button class="text-link" type="button" data-open-view="twin">Run synchronized comparison <span>→</span></button>
+        </article>
+        <article class="proof-mode">
+          <span>02 / FORENSIC LEDGER</span>
+          <h3>Every outcome retains its cause.</h3>
+          <p>Intent, policy version, decisive rule, risk signals, owner action, settlement state, and funds moved remain connected.</p>
+          <div class="proof-event"><small>SELECTED EVIDENCE</small><b id="proofEventRule">NO RECORDED EVENT</b><em id="proofEventStatus">Run a scenario · ledger-backed · no cryptographic claim</em></div>
+          <button class="text-link" type="button" data-open-view="forensics">Inspect recorded evidence <span>→</span></button>
+        </article>
+        <article class="proof-mode contract-mode">
+          <span>03 / CONTRACT ENFORCEMENT</span>
+          <h3>Independent settlement authority.</h3>
+          <p>Owner and agent roles, limits, nonces, pending reservations, and version invalidation are verified in a local-EVM policy wallet.</p>
+          <div class="contract-facts">
+            <b><span data-contract-field="tests">—</span><small>CONTRACT TESTS</small></b>
+            <b><span data-contract-field="parity-short">—</span><small>RULE PARITY</small></b>
+            <b><span data-contract-field="environment">LOCAL EVM</span><small>ENVIRONMENT</small></b>
+            <b><span data-contract-field="funds">FALSE</span><small>REAL FUNDS MOVED</small></b>
+          </div>
+        </article>
+      </div>
+      <details class="proof-disclosure">
+        <summary>View complete technical evidence <span>+</span></summary>
+        <div class="proof-disclosure-grid">
+          <div><small>CONTRACT SOURCE SHA-256</small><code data-contract-field="source">LOADING</code></div>
+          <div><small>BYTECODE SHA-256</small><code data-contract-field="bytecode-full">LOADING</code></div>
+          <div><small>DEPLOYMENT</small><b>NOT PUBLICLY DEPLOYED</b></div>
+          <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source ↗</a>
+        </div>
+      </details>
+    </section>
+
+    <section class="control-wrap chapter" id="control-centre" aria-labelledby="controlCentreChapterTitle">
+      <header class="chapter-heading section-shell system-heading">
+        <span>05 / THE SYSTEM</span>
+        <h2 id="controlCentreChapterTitle">The research instrument becomes an operating system.</h2>
+        <p>Inspect the active mandate, run deterministic attacks, freeze authority, compare policies, and replay the evidence from one operational surface.</p>
+      </header>
       <div class="control-shell" id="controlShell">
         <aside class="sidebar">
           <div class="sidebar-head">
@@ -155,7 +268,7 @@
           <div class="view-panel active" data-panel="overview">
             <div class="metric-grid">
               <article class="metric-card state-card">
-                <div class="metric-label">Agent State</div>
+                <div class="metric-label">System State</div>
                 <div class="state-orb" id="stateOrb"><span></span><b id="stateValue">NORMAL</b></div>
                 <div class="risk-row"><span>Behaviour risk</span><strong><em id="riskValue">12</em>/100</strong></div>
                 <div class="risk-bar"><span id="riskBar"></span></div>
@@ -307,7 +420,7 @@
             </div>
           </div>
 
-          <div class="view-panel" data-panel="forensics" id="proof">
+          <div class="view-panel" data-panel="forensics" id="forensic-proof">
             <div class="feature-intro"><span class="feature-index">FEATURE 06</span><h3>Forensic Proof Ledger & Attack Replay</h3><p>Every decision is traceable to the exact agent, policy version, risk signal and owner action that produced it.</p></div>
             <section class="incident-scrubber panel" aria-label="Recorded incident stages">
               <div class="scrubber-head"><div><span>INCIDENT SCRUBBER</span><strong>SELECT RECORDED EVIDENCE</strong></div><small>LEDGER-BACKED · NO CRYPTOGRAPHIC CLAIM</small></div>
@@ -401,7 +514,8 @@ Waiting for a policy decision...</pre>
 
   <footer>
     <div class="brand"><span class="brand-mark small"><span></span></span><span>AEGIS</span></div>
-    <p>A prototype by TurboPay Technologies Pvt. Ltd.</p>
+    <p>Research prototype by Medhir Lokhande and Hrushikesh Lokhande · TurboPay Technologies Pvt. Ltd.</p>
+    <a class="footer-source" href="https://github.com/medddhir/aegis-innovahack-round2" target="_blank" rel="noreferrer">Source and verification evidence ↗</a>
     <p class="legal">This prototype uses simulated/test funds. Any production deployment involving real-money movement, custody or operation of a payment system would require applicable regulatory approvals and integration with licensed financial or payment partners.</p>
   </footer>
 
@@ -479,5 +593,6 @@ Waiting for a policy decision...</pre>
   </div>
 
   <script type="module" src="./app.js"></script>
+  <script type="module" src="./aegis-rings.js"></script>
 </body>
 </html>

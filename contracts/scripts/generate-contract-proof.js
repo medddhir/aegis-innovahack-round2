@@ -10,6 +10,7 @@ const artifactPath = path.join(contractRoot, 'artifacts', 'src', 'AegisPolicyWal
 const testPath = path.join(contractRoot, 'test-results.json');
 const parityPath = path.join(contractRoot, 'parity-results.json');
 const vectorPath = path.join(contractRoot, 'test-vectors', 'aegis-vectors.json');
+const browserTestRoot = path.join(projectRoot, 'tests');
 
 function requireFile(filePath, instruction) {
   if (!fs.existsSync(filePath)) throw new Error(`${instruction}: ${path.relative(projectRoot, filePath)}`);
@@ -31,6 +32,12 @@ const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf8'));
 const testResults = JSON.parse(fs.readFileSync(testPath, 'utf8'));
 const parityResults = JSON.parse(fs.readFileSync(parityPath, 'utf8'));
 const vectors = JSON.parse(fs.readFileSync(vectorPath, 'utf8'));
+const browserTestTotal = fs.readdirSync(browserTestRoot)
+  .filter(file => file.endsWith('.test.js'))
+  .reduce((total, file) => {
+    const source = fs.readFileSync(path.join(browserTestRoot, file), 'utf8');
+    return total + (source.match(/\btest\s*\(/g) || []).length;
+  }, 0);
 
 if (testResults.failed !== 0 || parityResults.parity !== 'PASS') {
   throw new Error('Refusing to publish a passing contract proof from failed tests or failed vector parity.');
@@ -54,6 +61,10 @@ const proof = {
     total: testResults.tests,
     passed: testResults.passed,
     failed: testResults.failed,
+  },
+  browserTests: {
+    total: browserTestTotal,
+    source: 'tests/*.test.js',
   },
   attackVectors: {
     total: vectors.vectors.length,

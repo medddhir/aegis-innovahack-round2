@@ -47,4 +47,4 @@ Run Scenario 6, then open **Forensics**. The incident scrubber selects available
 
 ## Contract proof handoff
 
-After Judge Mode, scroll to **Enforced twice. Explained once.** The first panel identifies the browser risk/explanation layer; the second identifies the Solidity Policy Wallet's owner/agent roles, allowlist, limits, nonce, two-phase settlement, and version invalidation. The strip below is loaded from `contract-proof.json` and shows the actual passing contract-test count, bytecode hash prefix, vector parity, local environment, and `REAL FUNDS MOVED: FALSE`.
+After Judge Mode, scroll to Chapter 4, **Enforced twice. Explained once.** Its unified proof surface presents the engine-derived Policy Digital Twin, the latest actual ledger evidence, and the Solidity Policy Wallet together. Contract values are loaded from `contract-proof.json`: the actual passing test count, vector parity, local environment, and `REAL FUNDS MOVED: FALSE`. Full source and bytecode hashes stay behind **View complete technical evidence** so the default view remains readable.
