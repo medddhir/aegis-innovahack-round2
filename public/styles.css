@@ -465,3 +465,232 @@ html[data-contract-proof="unavailable"] .contract-proof-strip{border-color:rgba(
   .contract-enforcement{padding:20px}.contract-enforcement h2{font-size:34px}.contract-environment{white-space:normal;line-height:1.4}.enforcement-layer{padding:20px}.enforcement-layer h3{font-size:20px}.contract-proof-strip{grid-template-columns:1fr}.contract-proof-strip>div{border-right:0;border-bottom:1px solid var(--line)!important}.contract-proof-strip>a{grid-column:auto}.contract-proof-strip strong.mono{font-size:9px}
   .judge-contract-proof summary{font-size:0;max-width:none}.judge-contract-proof summary:after{content:"CONTRACT PARITY";font:7px var(--mono);letter-spacing:.04em}.judge-contract-proof summary:before{width:5px;height:5px;margin-right:4px}
 }
+
+/* Sprint 6: final projector-readable typography and bounded 2.5D presentation. */
+:root{
+  --font-caption:12px;
+  --font-label:13px;
+  --font-body:16px;
+  --font-body-large:17px;
+  --font-card-title:20px;
+  --font-section-title:clamp(34px,4vw,54px);
+  --font-display:clamp(46px,5.4vw,78px);
+  --text-secondary:#aebdca;
+  --text-tertiary:#91a4b6;
+  --depth-0:0px;
+  --depth-1:8px;
+  --depth-2:18px;
+  --depth-3:32px;
+  --depth-4:46px;
+}
+body{font-size:var(--font-body);line-height:1.55;color:#f3f7fa}
+p{line-height:1.65}
+.hero-sub,.section-heading>p,.feature-intro p,.contract-enforcement-intro{color:var(--text-secondary)}
+.eyebrow,.prototype-pill,.panel-tag,.system-kicker,.feature-index,.layer-number{font-size:var(--font-caption);letter-spacing:.075em}
+.header-nav,.freeze-mini,.kill-switch,.primary-cta,.secondary-cta{font-size:14px}
+.hero-trust{font-size:13px;color:#a7b7c5;line-height:1.45}
+.hero-sub{font-size:var(--font-body-large)}
+.hero h1{font-size:clamp(48px,4.1vw,62px);line-height:1.015}
+.hero-actions{flex-wrap:nowrap;margin-top:27px}.hero-actions .primary-cta{padding-inline:16px;gap:9px}.hero-actions .secondary-cta{padding-inline:15px}.hero-trust{margin-top:20px}
+.feature-intro p,.proof-grid article p,.enforcement-layer p,.final-cta p{font-size:15px}
+.feature-intro h3{font-size:clamp(32px,3.5vw,44px)}
+.panel-head h3,.capsule-card h4,.policy-card h4{font-size:var(--font-card-title)}
+.panel-tag,.metric-label,.capsule-top,.policy-version span,.policy-version b,.twin-sync-head span,.twin-sync-head small{font-size:var(--font-label);letter-spacing:.055em}
+.metric-card>small,.event-main small,.timeline-content small,.control-footer,.capsule-card p,.automatic-response p{font-size:13px;color:var(--text-tertiary);line-height:1.55}
+.event-main strong,.timeline-content strong,.signal-list,.capsule-builder label,.capsule-builder input,.chip,.attack-option span,.attack-option b{font-size:13px}
+.event-time,.event-evidence span,.event-status,.sidebar-head small,.sidebar-foot small{font-size:12px}
+.sidebar-head strong,.sidebar-foot strong,.nav-item{font-size:13px}
+.nav-item span{font-size:12px}
+.control-topbar h2{font-size:21px}
+.agent-strip span,.agent-strip strong{font-size:13px}
+.big-number{font-variant-numeric:tabular-nums}
+.terminal-panel pre{font-size:13px;line-height:1.72;color:#bdd0dc}
+.terminal-bar b,.replay-buttons button,.timeline-time,.scrubber-head span,.scrubber-head small,.scrubber-head strong,.incident-stage span,.incident-stage small{font-size:12px;letter-spacing:.035em}
+.contract-environment,.contract-proof-strip small,.contract-proof-strip strong,.contract-proof-strip strong.mono,.enforcement-link b,.enforcement-layer li{font-size:12px;line-height:1.5}
+.contract-proof-strip>a{font-size:13px}
+footer p,.legal{font-size:13px;color:#9fb0c0;line-height:1.65}
+
+/* Five deliberate depth levels: canvas, operational, active, Core/vault, intent. */
+[data-depth-level="1"]{--surface-z:var(--depth-1)}
+[data-depth-level="2"]{--surface-z:var(--depth-2)}
+[data-depth-level="3"]{--surface-z:var(--depth-3)}
+.hero-system,.judge-visual,.contract-enforcement{perspective:1000px}
+.core-scene,.judge-core-scene,.signature-core,.vault-boundary,.twin-replay-grid,.evasion-convergence{transform-style:preserve-3d}
+.panel,.metric-card,.enforcement-layer{background-color:#0b1721;box-shadow:inset 0 1px rgba(235,248,255,.045),0 13px 34px rgba(0,0,0,.16)}
+.capsule-card.active,.judge-visual,.contract-enforcement{box-shadow:inset 0 1px rgba(239,249,255,.06),0 24px 70px rgba(0,0,0,.28)}
+
+/* Layered Aegis Core: depth is presentational; state remains dataset-driven. */
+.signature-core{
+  --tilt-x:0deg;
+  --tilt-y:0deg;
+  transform:rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--surface-z, var(--depth-3)));
+  transition:transform 220ms ease,filter 220ms ease;
+  isolation:isolate;
+}
+.signature-core[data-tilt-active="true"]{transition:transform 90ms linear}
+.signature-core:before{content:"";position:absolute;z-index:-2;inset:9%;border-radius:50%;background:radial-gradient(circle at 38% 30%,rgba(123,210,255,.14),rgba(7,23,35,.78) 58%,transparent 72%);box-shadow:inset 8px 10px 28px rgba(178,225,255,.04),inset -12px -15px 34px rgba(0,0,0,.45),0 30px 60px rgba(0,0,0,.32);transform:translateZ(-12px)}
+.signature-core-svg{position:relative;z-index:2;transform:translateZ(18px);filter:drop-shadow(0 18px 25px rgba(0,0,0,.26))}
+.core-orbit-risk{filter:drop-shadow(0 1px 1px rgba(85,199,255,.13))}
+.core-orbit-limits{filter:drop-shadow(0 2px 2px rgba(85,199,255,.18))}
+.core-orbit-intent{filter:drop-shadow(0 3px 3px rgba(85,199,255,.22))}
+.core-orbit-identity{filter:drop-shadow(0 4px 4px rgba(85,199,255,.28))}
+.core-shield{filter:drop-shadow(0 9px 9px rgba(0,0,0,.48)) drop-shadow(0 0 8px rgba(85,199,255,.15))}
+.core-layer-label{z-index:8;min-height:24px;padding:5px 7px;font-size:12px;line-height:1.25;letter-spacing:.045em;color:#b7cfdf;background:rgba(5,17,26,.9);box-shadow:0 7px 16px rgba(0,0,0,.28)}
+.core-rule-callout small{font-size:12px}.core-rule-callout strong{font-size:13px;line-height:1.35}
+.core-endpoint strong{font-size:12px}.core-endpoint small,.core-wallet:after{font-size:12px;color:#91a5b7}
+.core-endpoint>span{font-size:14px}
+.core-status-strip small{font-size:12px}.core-status-strip strong,.core-status-strip b{font-size:13px}
+
+.core-strands{position:absolute;z-index:0;inset:10% 31% 10% -18%;pointer-events:none;transform:translateZ(-20px);opacity:.25}
+.core-strands i{position:absolute;left:0;width:100%;height:32%;border-top:1px solid rgba(100,203,255,.55);border-radius:50%;opacity:.22;transform-origin:right center}
+.core-strands i:nth-child(1){top:19%;transform:rotate(8deg)}
+.core-strands i:nth-child(2){top:45%;transform:rotate(0)}
+.core-strands i:nth-child(3){top:70%;transform:rotate(-8deg)}
+[data-flow="running"][data-visual-active="true"] .core-strands{opacity:.85}
+[data-flow="running"][data-visual-active="true"] .core-strands i{animation:strandSignal 620ms ease-out both}
+[data-flow="running"][data-visual-active="true"] .core-strands i:nth-child(2){animation-delay:80ms}
+[data-flow="running"][data-visual-active="true"] .core-strands i:nth-child(3){animation-delay:160ms}
+[data-flow="approved"] .core-strands i{border-color:rgba(65,207,149,.55)}
+[data-flow="blocked"] .core-strands i,[data-flow="invalidated"] .core-strands i,[data-flow="frozen"] .core-strands i{border-color:rgba(239,91,107,.55)}
+[data-flow="pending"] .core-strands i{border-color:rgba(243,185,79,.58)}
+
+/* A dimensional protected-wallet boundary and mechanical settlement gate. */
+.core-wallet,.judge-wallet{position:relative;transform:translateZ(var(--depth-3))}.core-wallet{min-width:112px}
+.vault-boundary{position:relative;width:66px;height:66px;margin-bottom:22px;display:grid;place-items:center;border:1px solid rgba(110,190,230,.32);border-radius:50%;background:radial-gradient(circle at 38% 31%,#18384d,#091722 65%);box-shadow:inset 3px 4px 8px rgba(205,238,255,.08),inset -7px -8px 15px rgba(0,0,0,.42),0 12px 25px rgba(0,0,0,.34);perspective:260px}
+.vault-boundary:before,.vault-boundary:after{content:"";position:absolute;border-radius:50%;pointer-events:none}.vault-boundary:before{inset:5px;border:1px solid rgba(119,203,249,.24)}.vault-boundary:after{inset:12px;border:1px dashed rgba(119,203,249,.22)}
+.vault-chamber{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#07121c;color:#c9edff;font:700 17px var(--mono);box-shadow:inset 0 0 12px rgba(88,185,255,.16)}
+.vault-door{position:absolute;z-index:4;inset:5px;border:1px solid rgba(137,212,255,.52);border-radius:50%;background:radial-gradient(circle at 37% 30%,rgba(38,77,101,.96),#0a1822 72%);transform-origin:8% 50%;transform:rotateY(-54deg) translateZ(7px);transition:transform 380ms cubic-bezier(.2,.8,.2,1),border-color 180ms,box-shadow 180ms;box-shadow:inset 2px 2px 7px rgba(220,244,255,.1),0 6px 12px rgba(0,0,0,.36)}
+.vault-door:before,.vault-door:after,.vault-door b{content:"";position:absolute;inset:50% auto auto 50%;background:rgba(140,208,245,.35);transform:translate(-50%,-50%)}
+.vault-door:before{width:72%;height:1px}.vault-door:after{width:1px;height:72%}.vault-door b{width:13px;height:13px;border:1px solid rgba(158,221,255,.56);border-radius:50%;background:#0d2535}
+.vault-seal{position:absolute;z-index:7;top:calc(100% + 7px);left:50%;width:104px;transform:translateX(-50%);font-size:0;font-style:normal;text-align:center;color:#9ec9e3;white-space:nowrap}
+.vault-seal:after{content:"OPEN · PROTECTED";font:700 12px/1.3 var(--mono);letter-spacing:.035em}
+.judge-wallet .vault-seal{left:auto;right:-10px;width:145px;transform:none}
+[data-flow="pending"] .vault-door{border-color:rgba(243,185,79,.72);box-shadow:inset 2px 2px 7px rgba(255,224,159,.1),0 0 18px rgba(243,185,79,.14)}
+[data-flow="pending"] .vault-seal:after{content:"OPEN · UNSETTLED";color:#f1c96e}
+[data-flow="approved"] .vault-door{border-color:rgba(65,207,149,.65)}
+[data-flow="approved"] .vault-seal:after{content:"SETTLED · SIMULATED";color:#8fe1bd}
+[data-wallet-gate="closed"] .vault-door,[data-flow="invalidated"] .vault-door,[data-flow="frozen"] .vault-door{transform:rotateY(0) translateZ(8px);border-color:rgba(239,91,107,.76);box-shadow:inset 0 0 20px rgba(119,13,31,.35),0 0 20px rgba(239,91,107,.13)}
+[data-flow="invalidated"] .vault-seal:after{content:"INVALIDATED · NOT REACHED";color:#ff9eaa}
+[data-flow="frozen"] .vault-seal{white-space:normal;width:150px}
+[data-flow="frozen"] .vault-seal:after{content:"FINANCIAL AUTHORITY REVOKED";color:#ff9eaa}
+
+/* Risk state is ambient and bounded to policy boundaries. */
+body[data-risk-state="caution"] .site-header{box-shadow:inset 0 -1px rgba(243,185,79,.34)}
+body[data-risk-state="restricted"] .site-header,body[data-risk-state="restricted"] .capsule-card.active{box-shadow:inset 0 -1px rgba(242,135,58,.48)}
+body[data-risk-state="quarantined"] .site-header,body[data-risk-state="quarantined"] .capsule-card.active{box-shadow:inset 0 -1px rgba(175,72,136,.54)}
+body[data-risk-state="frozen"] .site-header,body[data-risk-state="frozen"] .capsule-card.active{box-shadow:inset 0 -1px rgba(151,23,48,.7)}
+body[data-risk-state="caution"] .nav-item.active:before{background:var(--amber)}
+body[data-risk-state="restricted"] .nav-item.active:before{background:var(--orange)}
+body[data-risk-state="quarantined"] .nav-item.active:before{background:#b45b99}
+body[data-risk-state="frozen"] .nav-item.active:before{background:#b11f3c}
+
+/* Specular CTA reacts only to direct pointer proximity. */
+.specular-cta{--specular-x:50%;--specular-y:50%;position:relative;isolation:isolate;overflow:hidden;box-shadow:inset 0 1px rgba(255,255,255,.78),0 13px 32px rgba(32,126,183,.18)}
+.specular-cta:before{content:"";position:absolute;z-index:-1;inset:1px;border-radius:11px;background:radial-gradient(circle at var(--specular-x) var(--specular-y),rgba(255,255,255,.85),rgba(211,237,252,.86) 28%,rgba(168,218,247,.78) 68%);transition:background-position 120ms}
+.primary-cta:active,.secondary-cta:active{transform:translateY(1px);box-shadow:0 5px 14px rgba(0,0,0,.24)}
+body.capture-core .hero{display:block;width:min(1040px,92vw);padding-top:92px}body.capture-core .hero-copy{display:none}body.capture-core .hero-system.signature-system{height:calc(100svh - 120px);max-height:780px;min-height:650px}body.capture-core .signature-core{max-width:460px}
+body:is([data-capture="evasion"],[data-capture="twin"],[data-capture="forensics"]) main>section:not(#control-centre){display:none}
+body:is([data-capture="evasion"],[data-capture="twin"],[data-capture="forensics"]) #control-centre{padding-top:92px}
+body:is([data-capture="evasion"],[data-capture="twin"],[data-capture="forensics"]) .view-panel.active{animation:none}
+body[data-capture="contract"] main>section:not(#contract-enforcement){display:none}
+body[data-capture="contract"] #contract-enforcement{margin-top:100px;margin-bottom:20px}
+
+/* Evasion and Twin use shallow planes, never a carousel. */
+.cluster-sources{perspective:700px;transform-style:preserve-3d}
+.cluster-intent{box-shadow:inset 0 1px rgba(255,255,255,.04),0 10px 24px rgba(0,0,0,.25)}
+.cluster-intent:nth-child(1){transform:translateZ(8px) translateY(-3px)}
+.cluster-intent:nth-child(2){transform:translateZ(18px) translateY(2px)}
+.cluster-intent:nth-child(3){transform:translateZ(28px) translateY(-1px)}
+.cluster-intent:nth-child(4){transform:translateZ(38px) translateY(3px)}
+.cluster-intent small,.cluster-intent span{font-size:12px}.cluster-intent b{font-size:19px}
+.cluster-verdict small,.cluster-verdict span,.cluster-verdict code,.cluster-verdict b{font-size:13px;line-height:1.5}.cluster-verdict strong{font-size:31px}
+.attack-visual:has(.attack-cluster:not(.hidden)) .attack-cluster{padding-right:18px;padding-bottom:96px}
+.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result{left:18px;right:18px;bottom:16px;width:auto;display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px}
+.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result strong{margin:0}.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result p{margin:0}.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result small{text-align:right}
+.twin-replay-grid{perspective:1000px}.policy-card.weak{transform:rotateY(1.25deg) translateZ(4px)}.policy-card.strong{transform:rotateY(-1.25deg) translateZ(14px)}
+.twin-replay-row>span,.twin-replay-row em,.twin-replay-row small{font-size:12px}.twin-replay-row>b{font-size:13px}.twin-loss span{font-size:12px}
+
+/* Contract-proof Lightfall is confined to this section and viewport-aware. */
+.contract-enforcement{position:relative;overflow:hidden;background:linear-gradient(155deg,#0a1721 0%,#08121b 58%,#0a151e 100%)}
+.contract-enforcement>*:not(.contract-lightfall){position:relative;z-index:2}
+.contract-lightfall{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none;opacity:.44}
+.contract-lightfall i{position:absolute;top:-22%;width:1px;height:72%;background:linear-gradient(transparent,rgba(107,203,255,.34),transparent);transform:rotate(17deg);opacity:.25}
+.contract-lightfall i:nth-child(1){left:23%}.contract-lightfall i:nth-child(2){left:51%;height:82%;opacity:.17}.contract-lightfall i:nth-child(3){left:76%;height:65%}
+.contract-enforcement[data-visual-active="true"] .contract-lightfall i{animation:lightfall 3.8s ease-in-out infinite}
+.contract-enforcement[data-visual-active="true"] .contract-lightfall i:nth-child(2){animation-delay:520ms}.contract-enforcement[data-visual-active="true"] .contract-lightfall i:nth-child(3){animation-delay:1040ms}
+.contract-depth-path{display:flex;align-items:center;justify-content:center;gap:13px;margin:0 0 24px;padding:12px;border:1px solid rgba(131,193,230,.14);border-radius:12px;background:rgba(5,15,23,.62);font:700 12px var(--mono);letter-spacing:.045em;color:#a8cadf}
+.contract-depth-path i{font-style:normal;color:#64c9f5;transform:rotate(-90deg)}
+.enforcement-layer{transform:translateZ(var(--surface-z, var(--depth-1)))}
+
+/* One meaningful, contained forensic glyph field. */
+.glyph-matrix-host{position:relative;overflow:hidden;isolation:isolate}
+.glyph-matrix{position:absolute;z-index:-1;inset:44px 0 0;display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:18px;overflow:hidden;opacity:.032;color:#a4dcfa;font:700 22px/3 var(--mono);letter-spacing:.3em;pointer-events:none;transform:rotate(-6deg) scale(1.1)}
+.glyph-matrix span{white-space:nowrap}
+.glyph-matrix-host[data-visual-active="true"] .glyph-matrix{animation:glyphDrift 8s ease-in-out infinite alternate}
+.glyph-matrix-host pre{position:relative;z-index:2;background:rgba(5,15,23,.84)}
+
+/* Judge theatre: readable flat evidence over three shallow visual planes. */
+.judge-body{perspective:1200px;transform-style:preserve-3d}
+.judge-context{position:relative;z-index:1;transform:translateZ(-10px)}
+.judge-execution{position:relative;z-index:2;transform:translateZ(12px)}
+.judge-proof{position:relative;z-index:3;transform:translateZ(22px);background:rgba(10,22,32,.96)}
+.judge-copy>span,.judge-head-title>span,.judge-head-title>b,.judge-simulated-badge,.judge-state-badge{font-size:12px;letter-spacing:.045em}
+.judge-copy p{font-size:15px;color:#b3c1cd;line-height:1.62}
+.judge-endpoint small,.invalidated-seal small{font-size:12px}
+.judge-visual>strong{font-size:19px}
+.judge-live-meta small,.judge-pipeline b,.judge-result strong,.judge-result small,.judge-facts small,.judge-rule-trace span,.judge-rule-trace b,.judge-proof-label span,.judge-proof-label small{font-size:13px;letter-spacing:.035em}
+.judge-live-meta b,.judge-pipeline small,.judge-result span,.judge-facts b,.judge-rule-trace p,.judge-trace-toggle,.revocation-verdict{font-size:14px;line-height:1.5}
+.judge-rule-trace{line-height:1.55}.judge-proof .judge-result strong{font-size:14px}.judge-proof .judge-result span{font-size:15px}.judge-proof .judge-result small{font-size:13px}
+.judge-foot .primary-cta,.judge-foot .secondary-cta{font-size:14px}
+.judge-contract-proof summary{font-size:12px;min-height:34px}.judge-contract-proof>div strong,.judge-contract-proof>div>span,.judge-contract-proof>div a{font-size:12px}.judge-contract-proof>div p{font-size:13px}
+
+/* Border glow discipline: current Judge surface, parity proof, awaited kill action only. */
+.judge-card:has(.judge-state-badge.running,.judge-state-badge.complete,.judge-state-badge.awaiting-owner-action){border-color:rgba(91,186,239,.35);box-shadow:inset 0 1px rgba(255,255,255,.06),0 35px 110px rgba(0,0,0,.62),0 0 0 1px rgba(91,186,239,.08)}
+.judge-contract-proof[open] summary{box-shadow:0 0 0 1px rgba(65,207,149,.16),0 0 22px rgba(65,207,149,.1)}
+.judge-card:has(.judge-state-badge.awaiting-owner-action) #judgeNext{border-color:#ff8392;box-shadow:inset 0 1px rgba(255,255,255,.2),0 0 0 1px rgba(239,91,107,.32),0 0 26px rgba(239,91,107,.18)}
+
+@keyframes strandSignal{0%{opacity:.1;clip-path:inset(0 100% 0 0)}60%{opacity:.75}100%{opacity:.28;clip-path:inset(0 0 0 0)}}
+@keyframes lightfall{0%,100%{transform:translateY(-8%) rotate(17deg);opacity:.1}45%{opacity:.32}60%{transform:translateY(45%) rotate(17deg);opacity:.12}}
+@keyframes glyphDrift{from{transform:translateY(-5px) rotate(-6deg) scale(1.1)}to{transform:translateY(5px) rotate(-6deg) scale(1.1)}}
+
+@media (max-width:1024px){
+  .core-layer-label{font-size:12px}.judge-body{perspective:none}.judge-context,.judge-execution,.judge-proof{transform:none}.policy-card.weak,.policy-card.strong{transform:none}
+}
+@media (max-width:767px){
+  :root{--font-body:15px;--font-body-large:16px;--font-card-title:19px}
+  .signature-core,.signature-core[data-tilt-active="true"]{--tilt-x:0deg!important;--tilt-y:0deg!important;transform:translateZ(0);transition:none}
+  .core-scene,.judge-core-scene,.signature-core,.vault-boundary,.twin-replay-grid,.evasion-convergence{transform-style:flat}
+  .core-layer-label{min-height:20px;padding:4px;font-size:12px}.core-rule-callout small{font-size:12px}.core-rule-callout strong{font-size:13px}
+  .core-endpoint strong{font-size:12px}.core-status-strip small{font-size:12px}.core-status-strip strong,.core-status-strip b{font-size:13px}
+  .core-wallet,.judge-wallet{transform:none}.vault-boundary{width:50px;height:50px}.vault-door{inset:4px}.vault-chamber{width:25px;height:25px;font-size:14px}.vault-seal{top:calc(100% + 5px);width:100px}.vault-seal:after{font-size:12px}
+  .cluster-intent:nth-child(n){transform:none}.contract-depth-path{flex-direction:column;gap:7px;text-align:center}.contract-depth-path i{transform:none}.contract-lightfall{opacity:.24}
+  .attack-visual:has(.attack-cluster:not(.hidden)) .attack-cluster{padding:14px}.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result{position:static;display:block;width:100%;margin-top:14px}.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result p{margin:7px 0}.attack-visual:has(.attack-cluster:not(.hidden)) .enforcement-result small{text-align:left}
+  .judge-modal{padding:5px;overflow:hidden}.judge-card{width:calc(100% - 10px);max-width:calc(100% - 10px);min-width:0}.judge-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 12px}.judge-head-title{min-width:0}.judge-head-actions{grid-column:1/-1;display:flex;align-items:center;gap:7px;width:100%;min-width:0;flex-wrap:wrap}.judge-head-actions #closeJudgeMode{position:absolute;top:9px;right:10px}.judge-contract-proof{max-width:calc(100% - 96px)}.judge-contract-proof summary{max-width:100%;overflow:hidden;text-overflow:ellipsis}.judge-state-badge{margin-left:auto}
+  .judge-body{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;overflow-x:hidden;transform-style:flat}.judge-context,.judge-execution,.judge-proof{min-width:0;max-width:100%;transform:none}.judge-proof{overflow:visible}.judge-copy p{overflow-wrap:anywhere}
+  .judge-core-scene{grid-template-columns:36px 10px minmax(150px,1fr) 10px 46px;width:100%;min-width:0}.judge-wallet .vault-seal{display:none}.judge-live-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.judge-live-meta>div:first-child{grid-column:1/-1}.judge-pipeline{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .judge-foot{display:flex;flex-direction:column-reverse;align-items:stretch;gap:8px;padding:9px 10px}.judge-restart-controls,.judge-navigation{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;margin:0}.judge-foot .primary-cta,.judge-foot .secondary-cta{width:100%;min-width:0;padding-inline:5px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+  .judge-copy p,.feature-intro p,.contract-enforcement-intro{font-size:15px}
+  .judge-live-meta small,.judge-pipeline b,.judge-result strong,.judge-result small,.judge-facts small,.judge-rule-trace span,.judge-rule-trace b{font-size:13px}
+  .judge-live-meta b,.judge-pipeline small,.judge-result span,.judge-facts b,.judge-rule-trace p,.judge-trace-toggle{font-size:14px}
+  .judge-contract-proof summary{font-size:12px;max-width:180px}.judge-contract-proof summary:after{font-size:12px}.judge-contract-proof>div p{font-size:13px}
+}
+@media (pointer:coarse){
+  .signature-core,.signature-core[data-tilt-active="true"]{--tilt-x:0deg!important;--tilt-y:0deg!important;transition:none}
+}
+@media (max-width:430px){
+  .hero h1{font-size:clamp(36px,10.5vw,44px)}.hero-actions .primary-cta{font-size:14px}.hero-trust{font-size:12px;gap:11px}
+  .core-scene{grid-template-columns:34px 8px minmax(190px,1fr) 8px 42px}.signature-core{max-width:245px}.core-layer-label{font-size:12px;max-width:115px}.label-risk{right:-3px}.label-limits{left:-3px}.core-rule-callout{bottom:-10px;width:86%}
+  .core-endpoint strong,.core-endpoint small,.core-wallet:after{display:none}.core-status-strip{margin-top:18px}.core-status-strip>div{min-height:58px}
+  .judge-core-scene{grid-template-columns:32px 8px minmax(150px,1fr) 8px 44px}.judge-signature-core{max-width:175px}.judge-proof{padding:12px}.judge-number{font-size:48px}.judge-copy p{font-size:15px}
+  .judge-contract-proof summary{font-size:0}.judge-contract-proof summary:after{content:"CONTRACT PARITY";font:700 12px var(--mono)}
+  .terminal-panel pre{font-size:12px}.contract-proof-strip strong.mono{font-size:12px}
+}
+@media (max-height:750px) and (min-width:768px){
+  .judge-copy p{font-size:14px}.judge-visual{min-height:300px}.judge-proof{font-size:14px}.judge-number{font-size:62px}
+}
+@media (prefers-reduced-motion:reduce){
+  .signature-core,.signature-core[data-tilt-active="true"],.vault-door,.specular-cta:before{transition:none!important;transform:translateZ(0)!important}
+  [data-flow="running"] .core-strands i,.contract-lightfall i,.glyph-matrix{animation:none!important}
+  .core-strands{opacity:.35}.contract-lightfall i{transform:rotate(17deg)!important}.glyph-matrix{display:none}
+  .specular-cta:before{background:rgba(211,237,252,.9)}
+}

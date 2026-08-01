@@ -51,9 +51,9 @@ The static interface uses a restrained navy/graphite financial-security system w
 
 Motion is dependency-free and only visualises real engine state: transaction flow, changed metrics, new ledger entries, risk transitions, pending countdowns, owner freeze, and newly selected forensic evidence. The manual Scenario 5 kill switch closes the Core and wallet gate only after the verified owner action reaches the engine. The hero is motionless while idle, all typography uses local system fonts, and reduced-motion mode produces the same exact results without choreography.
 
-The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Signature-pass screenshot evidence is stored in [`docs/screenshots/design-v2`](docs/screenshots/design-v2/).
+The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Final 2.5D/readability evidence is stored in [`docs/screenshots/design-v3`](docs/screenshots/design-v3/), with the earlier signature pass retained in [`docs/screenshots/design-v2`](docs/screenshots/design-v2/).
 
-The browser/presentation suite contains **52 passing tests**, preserving all 47 locked engine, Judge Mode, premium-shell, and signature tests and adding five contract-proof boundary checks. The isolated Hardhat suite adds **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, and visual-state hashes remain pinned.
+The browser/presentation suite contains **72 passing tests**, preserving all 52 locked engine, Judge Mode, premium-shell, signature, and contract-proof checks and adding 20 cinematic-depth, readability, reduced-motion, responsive, and truth-boundary assertions. The isolated Hardhat suite adds **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, visual-state mapping, and Solidity policy hashes remain pinned.
 
 ## Contract enforcement proof
 

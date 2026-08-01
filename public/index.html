@@ -44,7 +44,7 @@
         <h1 class="reveal-2">AI agents can spend in milliseconds.<br><span>Aegis makes disobedience financially impossible.</span></h1>
         <p class="hero-sub reveal-3">An independent financial control layer that evaluates every transaction intent, blocks policy evasion, revokes pending payments and preserves a complete forensic proof trail.</p>
         <div class="hero-actions reveal-4">
-          <button class="primary-cta" id="launchJudgeMode">Launch Live Attack Simulation <span>↗</span></button>
+          <button class="primary-cta specular-cta" id="launchJudgeMode">Launch Live Attack Simulation <span>↗</span></button>
           <a class="secondary-cta" href="#control-centre">Open Control Centre</a>
         </div>
         <div class="hero-trust reveal-5">
@@ -60,14 +60,15 @@
         <div class="core-scene">
           <div class="core-endpoint core-agent"><span>AI</span><strong>AUTONOMOUS<br>AGENT</strong><small>Transaction intent</small></div>
           <div class="core-rail rail-in" aria-hidden="true"><i></i><b></b></div>
-          <div class="signature-core" aria-label="Aegis Core policy layers">
+          <div class="signature-core" data-depth-level="3" aria-label="Aegis Core policy layers">
+            <div class="core-strands" aria-hidden="true"><i></i><i></i><i></i></div>
             <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="coreTitle coreDesc">
               <title id="coreTitle">Aegis Core</title><desc id="coreDesc">Four independent enforcement layers surrounding the Aegis shield.</desc>
-              <circle class="core-orbit core-orbit-risk" data-core-layer="risk" cx="200" cy="200" r="164" pathLength="100" />
-              <circle class="core-orbit core-orbit-limits" data-core-layer="limits" cx="200" cy="200" r="132" pathLength="100" />
-              <circle class="core-orbit core-orbit-intent" data-core-layer="intent" cx="200" cy="200" r="100" pathLength="100" />
-              <circle class="core-orbit core-orbit-identity" data-core-layer="identity" cx="200" cy="200" r="68" pathLength="100" />
-              <path class="core-shield" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
+              <circle class="core-orbit core-orbit-risk" data-core-layer="risk" data-depth-plane="1" cx="200" cy="200" r="164" pathLength="100" />
+              <circle class="core-orbit core-orbit-limits" data-core-layer="limits" data-depth-plane="2" cx="200" cy="200" r="132" pathLength="100" />
+              <circle class="core-orbit core-orbit-intent" data-core-layer="intent" data-depth-plane="3" cx="200" cy="200" r="100" pathLength="100" />
+              <circle class="core-orbit core-orbit-identity" data-core-layer="identity" data-depth-plane="4" cx="200" cy="200" r="68" pathLength="100" />
+              <path class="core-shield" data-depth-plane="5" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
               <path class="core-a" d="m178 226 22-61 22 61m-35-24h26" />
               <path class="core-gate-line" d="M139 200H72m189 0h67" />
             </svg>
@@ -79,7 +80,10 @@
             <div class="core-rule-callout"><small>DECISIVE RULE</small><strong id="heroIntentRule">AWAITING_TRANSACTION_INTENT</strong></div>
           </div>
           <div class="core-rail rail-out" aria-hidden="true"><i></i><b></b></div>
-          <div class="core-endpoint core-wallet"><span>₹</span><strong>PROTECTED<br>WALLET</strong><small>Simulated settlement</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div></div>
+          <div class="core-endpoint core-wallet" data-depth-level="3">
+            <div class="vault-boundary" aria-hidden="true"><span class="vault-chamber">₹</span><i class="vault-door"><b></b></i><em class="vault-seal">OPEN</em></div>
+            <strong>PROTECTED<br>WALLET</strong><small>Simulated settlement</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div>
+          </div>
           <div class="core-lock-seal" aria-hidden="true"><span>AUTHORITY<br>REVOKED</span></div>
         </div>
         <div class="core-status-strip" id="heroIntentCard">
@@ -314,7 +318,8 @@
                 <div class="panel-head"><h3>Attack Timeline</h3><div class="replay-buttons"><button id="replayPrev">←</button><button id="replayPlay">Play Replay</button><button id="replayNext">→</button></div></div>
                 <div class="timeline" id="forensicTimeline"></div>
               </section>
-              <section class="terminal-panel">
+              <section class="terminal-panel glyph-matrix-host">
+                <div class="glyph-matrix" aria-hidden="true"><span>0 1 A B PASS →</span><span>V4 PASS 1 0 ×</span><span>A B V5 FAIL →</span><span>1 0 PASS V5</span></div>
                 <div class="terminal-bar"><span></span><span></span><span></span><b>AEGIS PROOF LEDGER</b></div>
                 <pre id="proofTerminal">$ aegis verify --latest
 
@@ -349,24 +354,26 @@ Waiting for a policy decision...</pre>
 
     <section class="technical-proof section-shell" aria-labelledby="technicalProofTitle">
       <div class="technical-proof-copy"><span class="eyebrow">TECHNICAL PROOF</span><h2 id="technicalProofTitle">Enforcement you can inspect.</h2><p>Every demo decision comes from the same deterministic engine and is preserved as replayable evidence.</p></div>
-      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>47</strong><span>VERIFIED TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
+      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>72</strong><span>BROWSER / ENGINE TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
     </section>
 
-    <section class="contract-enforcement section-shell" id="contract-enforcement" aria-labelledby="contractEnforcementTitle">
+    <section class="contract-enforcement section-shell" id="contract-enforcement" data-depth-level="2" aria-labelledby="contractEnforcementTitle">
+      <div class="contract-lightfall" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="contract-enforcement-head">
         <div><span class="eyebrow">INDEPENDENT CONTRACT PROOF</span><h2 id="contractEnforcementTitle">Enforced twice. Explained once.</h2></div>
         <span class="contract-environment"><i></i><b data-contract-field="environment">LOCAL EVM</b> CONTRACT SANDBOX</span>
       </div>
       <p class="contract-enforcement-intro">The live product demonstration remains a deterministic browser simulation. The overlapping settlement controls are separately implemented and executed in an auditable Solidity policy wallet using Mock INR test tokens.</p>
+      <div class="contract-depth-path" aria-label="Enforcement path from risk analysis through policy-wallet controls to mock test funds"><span>RISK ENGINE</span><i>↓</i><span>POLICY WALLET CONTRACT</span><i>↓</i><span>MOCK / TEST FUNDS</span></div>
       <div class="enforcement-layers">
-        <article class="enforcement-layer risk-layer">
+        <article class="enforcement-layer risk-layer" data-depth-level="1">
           <div class="layer-number">LAYER 1</div>
           <h3>Aegis Risk Engine</h3>
           <p>Explains why an autonomous request should be allowed, held or blocked.</p>
           <ul><li>Behaviour monitoring</li><li>Task intent</li><li>Evasion Shield</li><li>Adaptive Risk Governor</li><li>Explainable decision evidence</li></ul>
         </article>
         <div class="enforcement-link" aria-hidden="true"><span></span><b>SAME ATTACK VECTORS</b><span></span></div>
-        <article class="enforcement-layer wallet-layer">
+        <article class="enforcement-layer wallet-layer" data-depth-level="2">
           <div class="layer-number">LAYER 2</div>
           <h3>Aegis Policy Wallet</h3>
           <p>Independently enforces who may request and whether test-token settlement may execute.</p>
@@ -419,29 +426,30 @@ Waiting for a policy decision...</pre>
         </div>
       </div>
       <div class="judge-body">
-        <aside class="judge-context">
+        <aside class="judge-context" data-depth-plane="back">
           <div class="judge-number" id="judgeNumber">01</div>
           <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p></div>
         </aside>
-        <section class="judge-execution" aria-label="Live decision pipeline">
+        <section class="judge-execution" data-depth-plane="middle" aria-label="Live decision pipeline">
           <div class="judge-visual" id="judgeVisual" data-flow="idle" data-risk="normal" data-fail-layer="none">
             <div class="judge-core-scene" aria-label="Agent transaction through the Aegis Core to the simulated wallet">
               <div class="judge-endpoint"><span>AI</span><small>AGENT</small></div>
               <div class="judge-rail judge-rail-in"><i></i></div>
-              <div class="signature-core judge-signature-core">
+              <div class="signature-core judge-signature-core" data-depth-level="3">
+                <div class="core-strands" aria-hidden="true"><i></i><i></i><i></i></div>
                 <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="judgeCoreTitle judgeCoreDesc">
                   <title id="judgeCoreTitle">Aegis Core decision state</title><desc id="judgeCoreDesc">Four policy rings independently validate the transaction.</desc>
-                  <circle class="core-orbit core-orbit-risk" data-core-layer="risk" cx="200" cy="200" r="164" pathLength="100" />
-                  <circle class="core-orbit core-orbit-limits" data-core-layer="limits" cx="200" cy="200" r="132" pathLength="100" />
-                  <circle class="core-orbit core-orbit-intent" data-core-layer="intent" cx="200" cy="200" r="100" pathLength="100" />
-                  <circle class="core-orbit core-orbit-identity" data-core-layer="identity" cx="200" cy="200" r="68" pathLength="100" />
-                  <path class="core-shield" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
+                  <circle class="core-orbit core-orbit-risk" data-core-layer="risk" data-depth-plane="1" cx="200" cy="200" r="164" pathLength="100" />
+                  <circle class="core-orbit core-orbit-limits" data-core-layer="limits" data-depth-plane="2" cx="200" cy="200" r="132" pathLength="100" />
+                  <circle class="core-orbit core-orbit-intent" data-core-layer="intent" data-depth-plane="3" cx="200" cy="200" r="100" pathLength="100" />
+                  <circle class="core-orbit core-orbit-identity" data-core-layer="identity" data-depth-plane="4" cx="200" cy="200" r="68" pathLength="100" />
+                  <path class="core-shield" data-depth-plane="5" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
                   <path class="core-a" d="m178 226 22-61 22 61m-35-24h26" />
                 </svg>
                 <div class="core-collision" aria-hidden="true"></div>
               </div>
               <div class="judge-rail judge-rail-out"><i></i></div>
-              <div class="judge-endpoint judge-wallet"><span>₹</span><small>SIMULATED WALLET</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div></div>
+              <div class="judge-endpoint judge-wallet" data-depth-level="3"><div class="vault-boundary" aria-hidden="true"><span class="vault-chamber">₹</span><i class="vault-door"><b></b></i><em class="vault-seal">OPEN</em></div><small>SIMULATED WALLET</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div></div>
               <div class="owner-kill-pulse" aria-hidden="true"></div>
               <div class="invalidated-seal" aria-hidden="true"><span>INVALIDATED</span><small>WALLET NOT REACHED</small></div>
             </div>
@@ -455,7 +463,7 @@ Waiting for a policy decision...</pre>
           </div>
           <ol class="judge-pipeline" id="judgePipeline" aria-label="Decision pipeline stages"></ol>
         </section>
-        <aside class="judge-proof" aria-label="Engine result and evidence">
+        <aside class="judge-proof" data-depth-plane="front" aria-label="Engine result and evidence">
           <div class="judge-proof-label"><span>ENGINE DECISION</span><small>CANONICAL OUTPUT</small></div>
           <div class="judge-result" id="judgeResult" role="status" aria-live="polite"><span>READY · Waiting for the presenter.</span></div>
           <div class="judge-facts" id="judgeFacts" aria-label="Scenario evidence"></div>

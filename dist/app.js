@@ -82,6 +82,14 @@ const displayDecision = decision => ({ APPROVE: 'APPROVED', HOLD: 'HOLD', REQUIR
 const decisionClass = decision => decision === 'APPROVE' ? 'approved' : decision === 'HOLD' || decision === 'REQUIRE_APPROVAL' ? 'pending' : 'blocked';
 const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const localCaptureMode = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  ? new URLSearchParams(window.location.search).get('capture')
+  : null;
+const localCaptureErrors = [];
+if (localCaptureMode) {
+  window.addEventListener('error', event => localCaptureErrors.push(event.message));
+  window.addEventListener('unhandledrejection', event => localCaptureErrors.push(String(event.reason)));
+}
 
 function setContractProofField(field, value) {
   $$(`[data-contract-field="${field}"]`).forEach(element => { element.textContent = value; });
@@ -407,7 +415,7 @@ function evasionClusterMarkup(model, { compact = false } = {}) {
     <div class="cluster-relations" aria-hidden="true"><i></i><i></i><i></i><i></i><b>RELATION WINDOW</b></div>
     <div class="cluster-verdict">
       <small>COORDINATED ATTEMPT</small><strong>${escapeHTML(formatINR(model.total))}</strong>
-      <span>${escapeHTML(`${model.windowSeconds}-SECOND WINDOW`)}</span>
+      <span>${escapeHTML(`${model.intents.length} RELATED REQUESTS · ${model.windowSeconds}-SECOND WINDOW`)}</span>
       <code>${escapeHTML(model.decisiveRule)}</code>
       <b>${escapeHTML(displayDecision(model.decision))} · FUNDS MOVED ${escapeHTML(formatINR(model.fundsMoved))}</b>
     </div>
@@ -1280,10 +1288,143 @@ function trapJudgeFocus(event) {
   }
 }
 
+function initDepthPresentation() {
+  const finePointer = window.matchMedia('(pointer: fine)');
+  const motionAllowed = () => !reducedMotion() && finePointer.matches && window.innerWidth >= 768;
+  const resetTilt = core => {
+    core.style.setProperty('--tilt-x', '0deg');
+    core.style.setProperty('--tilt-y', '0deg');
+    core.dataset.tiltActive = 'false';
+  };
+
+  $$('.signature-core').forEach(core => {
+    resetTilt(core);
+    core.addEventListener('pointermove', event => {
+      if (!motionAllowed()) return resetTilt(core);
+      const bounds = core.getBoundingClientRect();
+      const x = Math.max(-1, Math.min(1, ((event.clientX - bounds.left) / bounds.width - 0.5) * 2));
+      const y = Math.max(-1, Math.min(1, ((event.clientY - bounds.top) / bounds.height - 0.5) * 2));
+      core.style.setProperty('--tilt-x', `${(-y * 5).toFixed(2)}deg`);
+      core.style.setProperty('--tilt-y', `${(x * 5).toFixed(2)}deg`);
+      core.dataset.tiltActive = 'true';
+    });
+    core.addEventListener('pointerleave', () => resetTilt(core));
+  });
+
+  $$('.specular-cta').forEach(button => {
+    button.addEventListener('pointermove', event => {
+      if (!motionAllowed()) return;
+      const bounds = button.getBoundingClientRect();
+      button.style.setProperty('--specular-x', `${((event.clientX - bounds.left) / bounds.width * 100).toFixed(1)}%`);
+      button.style.setProperty('--specular-y', `${((event.clientY - bounds.top) / bounds.height * 100).toFixed(1)}%`);
+    });
+    button.addEventListener('pointerleave', () => {
+      button.style.removeProperty('--specular-x');
+      button.style.removeProperty('--specular-y');
+    });
+  });
+
+  const visualSurfaces = $$('#heroFlow, #judgeVisual, #contract-enforcement, .glyph-matrix-host');
+  if (!('IntersectionObserver' in window)) visualSurfaces.forEach(surface => { surface.dataset.visualActive = 'true'; });
+  else {
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => { entry.target.dataset.visualActive = String(entry.isIntersecting); });
+    }, { threshold: 0.08 });
+    visualSurfaces.forEach(surface => observer.observe(surface));
+  }
+}
+
+function recordLocalBrowserAudit() {
+  const critical = {
+    heroMessage: '.hero h1',
+    trustLabel: '.hero-trust span',
+    judgeResult: '#judgeResult span',
+    decisiveRule: '#judgeCurrentRule',
+    riskState: '#judgeRiskState',
+    policyVersion: '#judgePolicyVersion',
+    amount: '#judgeAmount',
+    fundsMoved: '#judgeFacts b',
+    contractStatus: '.contract-environment',
+    regulatory: 'footer .legal',
+  };
+  const styles = Object.fromEntries(Object.entries(critical).map(([name, selector]) => {
+    const element = $(selector);
+    if (!element) return [name, null];
+    const rect = element.getBoundingClientRect();
+    const computed = getComputedStyle(element);
+    return [name, {
+      fontSize: Number.parseFloat(computed.fontSize),
+      lineHeight: computed.lineHeight,
+      color: computed.color,
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    }];
+  }));
+  const audit = {
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    horizontalOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    modalHorizontalOverflow: $('#judgeCard').scrollWidth - $('#judgeCard').clientWidth,
+    criticalStyles: styles,
+    consoleErrors: [...localCaptureErrors],
+    judge: judgeMachine.snapshot(),
+    core: window.__AEGIS_DIAGNOSTICS__?.coreVisual() ?? null,
+  };
+  const output = document.createElement('script');
+  output.id = 'aegis-browser-audit';
+  output.type = 'application/json';
+  output.textContent = JSON.stringify(audit);
+  document.body.append(output);
+}
+
+function initLocalCapturePresentation() {
+  if (!localCaptureMode) return;
+  document.body.dataset.capture = localCaptureMode;
+  const later = (callback, delay = 40) => window.setTimeout(callback, delay);
+  const captureScroll = element => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, Math.max(0, element.offsetTop - 72));
+  };
+  if (localCaptureMode === 'core') return later(() => { runSafe(); document.body.classList.add('capture-core'); });
+  if (localCaptureMode === 'judge-approved') return later(() => { openJudgeMode(); executeJudgeScenario(); });
+  if (localCaptureMode === 'judge-blocked') return later(() => { openJudgeMode(); rebuildJudgeTo(1); executeJudgeScenario(); });
+  if (localCaptureMode === 'evasion') return later(() => {
+    switchView('attack');
+    runEvasion();
+    captureScroll($('#control-centre'));
+  });
+  if (['pending', 'kill', 'mobile-judge', 'audit-projector'].includes(localCaptureMode)) return later(() => {
+    openJudgeMode();
+    rebuildJudgeTo(4);
+    executeJudgeScenario();
+    if (localCaptureMode === 'kill') later(activateJudgeKillSwitch, 760);
+    if (localCaptureMode === 'audit-projector') later(recordLocalBrowserAudit, 900);
+    if (localCaptureMode === 'mobile-judge') later(recordLocalBrowserAudit, 900);
+  });
+  if (localCaptureMode === 'twin') return later(() => {
+    switchView('twin');
+    runTwin();
+    captureScroll($('#control-centre'));
+  });
+  if (localCaptureMode === 'contract') return later(() => captureScroll($('#contract-enforcement')));
+  if (localCaptureMode === 'forensics') return later(() => {
+    openJudgeMode();
+    rebuildJudgeTo(4);
+    executeJudgeScenario();
+    later(() => {
+      activateJudgeKillSwitch();
+      closeJudgeMode();
+      switchView('forensics');
+      renderForensics();
+      captureScroll($('#control-centre'));
+    }, 760);
+  });
+}
+
 function initInteractions() {
   createEngine();
   renderAll();
   loadContractProof();
+  initDepthPresentation();
   $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
   $$('.scenario-button, .attack-option').forEach(button => button.addEventListener('click', () => executeScenario(button.dataset.scenario)));
   $$('[data-freeze-button]').forEach(button => button.addEventListener('click', freezeAgent));
@@ -1352,6 +1493,7 @@ function initInteractions() {
     incidentStages: () => createIncidentStages(state.engine.getLedger()).map(stage => ({ id: stage.id, index: stage.index, available: stage.available })),
     twinReplay: () => state.twinResults ? createTwinReplayModel(state.twinResults) : null,
   });
+  initLocalCapturePresentation();
 }
 
 document.addEventListener('DOMContentLoaded', initInteractions);
