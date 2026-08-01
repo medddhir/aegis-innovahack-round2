@@ -1,221 +1,271 @@
-const INITIAL_EVENTS = [
-  { time: '09:42:16', title: 'Authorised cloud payment', detail: '₹850 → CloudGrid · Capsule CAP-8A72', status: 'APPROVED', kind: 'approved' },
-  { time: '09:42:24', title: 'Unknown recipient attempt', detail: '₹6,000 → 0xF4…91B · allowlist failed', status: 'BLOCKED', kind: 'blocked' },
-  { time: '09:42:31', title: 'Policy engine heartbeat', detail: 'PROCUREMENT-V4 · all controls operational', status: 'ACTIVE', kind: 'system' },
-];
-
-const FORENSIC_STEPS = [
-  { time: '09:42:16', title: 'Valid payment approved', detail: '₹850 → CloudGrid · task and recipient matched.' },
-  { time: '09:42:24', title: 'Unknown recipient blocked', detail: 'Recipient was not present in CAP-8A72 allowlist.' },
-  { time: '09:42:29', title: 'Split-payment sequence started', detail: 'Four requests arrived below the single-payment cap.' },
-  { time: '09:42:34', title: 'Evasion Shield triggered', detail: 'Requests clustered into ₹7,996 attempted value.' },
-  { time: '09:42:35', title: 'Agent restricted automatically', detail: 'Risk Governor tightened limits and required approval.' },
-  { time: '09:42:41', title: 'Owner activated kill switch', detail: 'Pending authority revoked; policy epoch incremented.' },
-  { time: '09:42:41', title: 'Pending intent invalidated', detail: 'Settlement revalidation failed. Funds moved: ₹0.' },
-];
+import {
+  AegisPolicyEngine,
+  DEFAULT_POLICY,
+  RULES,
+  runPolicyDigitalTwin,
+} from './policy-engine.js';
 
 const JUDGE_SCENARIOS = [
   {
     number: '01', feature: 'NORMAL OPERATION', title: 'Authorised payment',
     description: 'The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and active policy before approval.',
-    amount: '₹1,200 → CloudGrid', result: 'APPROVED · Task, recipient and amount are within policy.', resultClass: 'approved', action: 'safe'
+    amount: '₹1,200 → CloudGrid', action: 'safe',
   },
   {
     number: '02', feature: 'INDEPENDENT ENFORCEMENT', title: 'Overspending attempt',
     description: 'The agent requests ₹8,500 even though its per-transaction cap is ₹2,500. The policy lives outside the agent, so the request cannot bypass it.',
-    amount: '₹8,500 → CloudGrid', result: 'BLOCKED · Per-transaction cap exceeded by ₹6,000.', resultClass: 'blocked', action: 'overspend'
+    amount: '₹8,500 → CloudGrid', action: 'overspend',
   },
   {
     number: '03', feature: 'EVASION SHIELD', title: 'Threshold splitting attack',
     description: 'The compromised agent divides one large payment into four requests of ₹1,999. Aegis groups them as one coordinated sequence instead of approving them independently.',
-    amount: '4 × ₹1,999 → CloudGrid', result: 'BLOCKED · ₹7,996 coordinated evasion pattern detected.', resultClass: 'blocked', action: 'evasion'
+    amount: '4 × ₹1,999 → CloudGrid', action: 'evasion',
   },
   {
     number: '04', feature: 'ADAPTIVE RISK GOVERNOR', title: 'Permissions tighten automatically',
-    description: 'Repeated violations raise the behavioural risk score. Aegis moves the agent from Normal to Restricted and requires human approval for future requests.',
-    amount: 'NORMAL → RESTRICTED', result: 'AUTOMATIC RESPONSE · New recipients disabled and limits reduced.', resultClass: 'pending', action: 'risk'
+    description: 'Repeated violations raise the deterministic behavioural risk score. At the Restricted threshold, future valid requests require owner approval.',
+    amount: 'CALCULATED RISK TRANSITION', action: 'risk',
   },
   {
     number: '05', feature: 'IN-FLIGHT REVOCATION', title: 'Freeze before settlement',
-    description: 'A valid transaction enters a short settlement queue. The owner freezes the agent before final revalidation, invalidating the pending intent before any funds move.',
-    amount: '₹1,500 → ComputeHub', result: 'INVALIDATED · Agent frozen before final settlement.', resultClass: 'blocked', action: 'freezePending'
+    description: 'A valid or owner-approved transaction enters a settlement queue. The owner freezes the agent before final revalidation, invalidating the pending intent before funds move.',
+    amount: '₹1,500 → ComputeHub', action: 'freezePending',
   },
   {
-    number: '06', feature: 'FORENSIC PROOF LEDGER', title: 'Replay the complete attack',
-    description: 'Aegis preserves who requested each payment, which policy was evaluated, every signal detected and why the final decision was made.',
-    amount: 'POLICY PROOF · AGS-7FD2', result: 'VERIFIED · Funds moved during attack sequence: ₹0.', resultClass: 'approved', action: 'forensics'
-  }
+    number: '06', feature: 'FORENSIC PROOF LEDGER', title: 'Replay the recorded evidence',
+    description: 'Aegis reads the actual ledger entries produced by the preceding engine decisions, including rules, risk signals, owner action and final funds moved.',
+    amount: 'RECORDED POLICY EVIDENCE', action: 'forensics',
+  },
 ];
 
 const state = {
-  agentState: 'NORMAL',
-  risk: 12,
-  budgetTotal: 10000,
-  spent: 3200,
-  protected: 19996,
-  approved: 7,
-  blocked: 3,
-  pending: 0,
-  policy: 'PROCUREMENT-V4',
-  events: [...INITIAL_EVENTS],
+  engine: null,
+  logicalTime: 0,
+  intentSequence: 0,
   countdownId: null,
   pendingSeconds: 0,
+  pendingIntentId: null,
   replayIndex: 0,
   replayTimer: null,
   judgeIndex: 0,
-  capsule: { task: 'Purchase cloud-compute capacity', budget: 10000, cap: 2500, vendors: ['CloudGrid','ComputeHub'] }
+  eventCursor: 0,
+  twinResults: null,
+  twinTimers: [],
+  judgeActionTimer: null,
 };
 
+const DEMO_START = new Date('2026-08-01T09:42:31.000Z').getTime();
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const formatINR = value => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(value);
-const nowTime = () => new Date().toLocaleTimeString('en-GB', { hour12: false });
+const displayTime = value => new Date(value).toLocaleTimeString('en-GB', { hour12: false, timeZone: 'UTC' });
+const displayDecision = decision => ({ APPROVE: 'APPROVED', HOLD: 'HOLD', REQUIRE_APPROVAL: 'REQUIRE APPROVAL', BLOCK: 'BLOCKED', INVALIDATE: 'INVALIDATED', FREEZE: 'FROZEN' }[decision] ?? decision);
+const decisionClass = decision => decision === 'APPROVE' ? 'approved' : decision === 'HOLD' || decision === 'REQUIRE_APPROVAL' ? 'pending' : 'blocked';
+const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 
-function toast(message) {
-  const el = $('#toast');
-  el.textContent = message;
-  el.classList.add('show');
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => el.classList.remove('show'), 2600);
+function nextTimestamp(stepMs = 1_000) {
+  const timestamp = new Date(state.logicalTime).toISOString();
+  state.logicalTime += stepMs;
+  return timestamp;
 }
 
-function addEvent(title, detail, status, kind = 'system') {
-  state.events.unshift({ time: nowTime(), title, detail, status, kind });
-  if (state.events.length > 18) state.events.pop();
-  renderEvents();
-  renderForensics();
+function createEngine() {
+  state.logicalTime = DEMO_START;
+  state.intentSequence = 0;
+  state.engine = new AegisPolicyEngine({
+    policy: DEFAULT_POLICY,
+    clock: () => nextTimestamp(),
+  });
+}
+
+function makeIntent(tag, overrides = {}, stepMs = 1_000) {
+  state.intentSequence += 1;
+  const requestedAt = overrides.requestedAt ?? nextTimestamp(stepMs);
+  const suffix = String(state.intentSequence).padStart(3, '0');
+  return {
+    id: `AGS-${tag}-${suffix}`,
+    agentId: state.engine.policy.authorisedAgentId,
+    taskId: state.engine.policy.taskId,
+    amount: 1_200,
+    recipient: 'CloudGrid',
+    category: state.engine.policy.approvedCategory,
+    requestedAt,
+    expiresAt: state.engine.policy.expiresAt,
+    policyVersion: state.engine.policy.version,
+    nonce: `NONCE-${tag}-${suffix}`,
+    status: 'REQUESTED',
+    ...overrides,
+  };
+}
+
+function toast(message) {
+  const element = $('#toast');
+  element.textContent = message;
+  element.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => element.classList.remove('show'), 2_600);
+}
+
+function ledgerPresentation(event) {
+  const amount = event.intent ? `${formatINR(event.intent.amount)} → ${event.intent.recipient}` : event.policyLabel;
+  if (event.eventType === 'OWNER_ACTION' && event.decision === 'FREEZE') {
+    return { title: 'Owner activated kill switch', detail: event.reason, status: 'FROZEN', kind: 'blocked' };
+  }
+  if (event.eventType === 'POLICY_ACTIVATED') {
+    return { title: 'Budget Capsule activated', detail: event.reason, status: 'ACTIVE', kind: 'system' };
+  }
+  if (event.eventType === 'POLICY_MODIFICATION_ATTEMPT') {
+    return { title: 'Policy modification attempt blocked', detail: event.reason, status: 'BLOCKED', kind: 'blocked' };
+  }
+  if (event.decision === 'APPROVE') return { title: 'Transaction settled after revalidation', detail: `${amount} · ${event.reason}`, status: 'APPROVED', kind: 'approved' };
+  if (event.decision === 'HOLD') return { title: event.ownerAction ? 'Owner approved pending intent' : 'Transaction intent authorised', detail: `${amount} · ${event.reason}`, status: 'PENDING', kind: 'pending' };
+  if (event.decision === 'REQUIRE_APPROVAL') return { title: 'Risk Governor requires owner approval', detail: `${amount} · ${event.reason}`, status: 'APPROVAL', kind: 'pending' };
+  if (event.decision === 'INVALIDATE') return { title: 'Pending intent invalidated', detail: `${amount} · ${event.reason}`, status: 'INVALIDATED', kind: 'blocked' };
+  return { title: event.ruleChecked === RULES.EVASION_SHIELD ? 'Evasion Shield blocked coordinated intent' : 'Policy engine blocked intent', detail: `${amount} · ${event.reason}`, status: 'BLOCKED', kind: 'blocked' };
 }
 
 function renderEvents() {
+  const events = state.engine.getLedger().slice(state.eventCursor).slice(-18).reverse();
   const stream = $('#eventStream');
-  stream.innerHTML = state.events.map(event => `
-    <div class="event-item">
-      <span class="event-time">${event.time}</span>
-      <div class="event-main"><strong>${event.title}</strong><small>${event.detail}</small></div>
-      <span class="event-status ${event.kind}">${event.status}</span>
-    </div>`).join('');
-}
-
-function setAgentState(nextState, riskValue = state.risk) {
-  state.agentState = nextState;
-  state.risk = Math.max(0, Math.min(100, riskValue));
-  const cls = `state-${nextState.toLowerCase()}`;
-  const topState = $('#topAgentState');
-  topState.textContent = nextState;
-  topState.className = cls;
-  $('#stateValue').textContent = nextState;
-  $('#stateValue').className = cls;
-  $('#riskValue').textContent = state.risk;
-  $('#riskBar').style.width = `${state.risk}%`;
-  $('#riskBar').style.background = state.risk >= 80 ? 'var(--red)' : state.risk >= 55 ? 'var(--orange)' : state.risk >= 30 ? 'var(--amber)' : 'var(--green)';
-  $('#stateOrb span').style.borderColor = state.risk >= 80 ? 'rgba(255,79,102,.45)' : state.risk >= 55 ? 'rgba(255,122,69,.45)' : state.risk >= 30 ? 'rgba(255,184,77,.45)' : 'rgba(66,211,146,.28)';
-  updateRiskLadder();
+  if (events.length === 0) {
+    stream.innerHTML = '<div class="event-item"><span class="event-time">—</span><div class="event-main"><strong>Deterministic environment ready</strong><small>Run a scenario to record its policy evidence.</small></div><span class="event-status system">ACTIVE</span></div>';
+    return;
+  }
+  stream.innerHTML = events.map(event => {
+    const item = ledgerPresentation(event);
+    return `<div class="event-item">
+      <span class="event-time">${displayTime(event.timestamp)}</span>
+      <div class="event-main"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small></div>
+      <span class="event-status ${item.kind}">${escapeHTML(item.status)}</span>
+    </div>`;
+  }).join('');
 }
 
 function renderMetrics() {
-  $('#budgetRemaining').textContent = formatINR(Math.max(0, state.budgetTotal - state.spent));
-  $('#budgetBar').style.width = `${Math.min(100, (state.spent / state.budgetTotal) * 100)}%`;
-  $('#protectedValue').textContent = formatINR(state.protected);
-  $('#approvedCount').textContent = state.approved;
-  $('#blockedCount').textContent = state.blocked;
-  $('#pendingCount').textContent = state.pending;
+  const snapshot = state.engine.getSnapshot();
+  $('#budgetRemaining').textContent = formatINR(snapshot.budgetRemaining);
+  $('#budgetTotalDisplay').textContent = formatINR(snapshot.policy.totalTaskBudget);
+  $('#budgetBar').style.width = `${Math.min(100, (snapshot.taskSpent / snapshot.policy.totalTaskBudget) * 100)}%`;
+  $('#protectedValue').textContent = formatINR(snapshot.protectedValue);
+  $('#approvedCount').textContent = snapshot.approvedCount;
+  $('#blockedCount').textContent = snapshot.blockedCount;
+  $('#pendingCount').textContent = snapshot.pendingCount;
+  $('#topPolicy').textContent = snapshot.policyLabel;
+  $('#capsulePolicyVersion').textContent = `POLICY VERSION · ${snapshot.policyLabel}`;
+  $('#capsuleVendorCount').textContent = snapshot.policy.approvedRecipients.length;
+  renderRisk();
 }
 
-function updateRiskLadder() {
-  const order = ['NORMAL','CAUTION','RESTRICTED','QUARANTINED','FROZEN'];
-  const index = order.indexOf(state.agentState);
-  $$('.risk-step').forEach((step, i) => step.classList.toggle('active', i === index));
+function renderRisk() {
+  const { risk } = state.engine.getSnapshot();
+  const className = `state-${risk.state.toLowerCase()}`;
+  $('#topAgentState').textContent = risk.state;
+  $('#topAgentState').className = className;
+  $('#stateValue').textContent = risk.state;
+  $('#stateValue').className = className;
+  $('#riskValue').textContent = risk.score;
+  $('#riskBar').style.width = `${risk.score}%`;
+  $('#riskBar').style.background = risk.score >= 80 ? 'var(--red)' : risk.score >= 55 ? 'var(--orange)' : risk.score >= 30 ? 'var(--amber)' : 'var(--green)';
+  $('#stateOrb span').style.borderColor = risk.score >= 80 ? 'rgba(255,79,102,.45)' : risk.score >= 55 ? 'rgba(255,122,69,.45)' : risk.score >= 30 ? 'rgba(255,184,77,.45)' : 'rgba(66,211,146,.28)';
+  $$('.risk-step').forEach(step => step.classList.toggle('active', step.dataset.state === risk.state));
+
+  const velocity = risk.signals.transactionVelocity;
+  const values = [
+    [velocity >= 6 ? 'CRITICAL' : velocity >= 4 ? 'ELEVATED' : 'NORMAL', velocity >= 4 ? 'bad' : 'good'],
+    [String(risk.signals.newRecipientAttempts), risk.signals.newRecipientAttempts ? 'bad' : 'good'],
+    [String(risk.signals.retriesAfterRejection), risk.signals.retriesAfterRejection ? 'bad' : 'good'],
+    [risk.signals.splitPaymentBehaviour ? 'DETECTED' : 'NOT DETECTED', risk.signals.splitPaymentBehaviour ? 'bad' : 'good'],
+    [String(risk.signals.policyModificationAttempts), risk.signals.policyModificationAttempts ? 'warn' : 'good'],
+  ];
+  $$('#signalList > div').forEach((row, index) => {
+    const value = $('b', row);
+    value.textContent = values[index][0];
+    value.className = values[index][1];
+  });
+  $('#automaticResponse p').textContent = `${risk.state} (${risk.score}/100): ${risk.response}`;
+}
+
+function renderAll({ focusLatest = true } = {}) {
+  renderMetrics();
+  renderEvents();
+  if (focusLatest) state.replayIndex = Math.max(0, state.engine.getLedger().length - 1);
+  renderForensics();
+}
+
+function showAttackResult(result, { cluster = false, reason } = {}) {
+  $('#attackStatus').classList.add('hidden');
+  $('#attackCluster').classList.toggle('hidden', !cluster);
+  const panel = $('#enforcementResult');
+  panel.classList.remove('hidden');
+  $('strong', panel).textContent = displayDecision(result.decision);
+  $('p', panel).textContent = reason ?? result.reason;
+  $('small', panel).textContent = `Funds moved: ${formatINR(result.fundsMoved)} (simulated)`;
+}
+
+function afterDecision(result, options = {}) {
+  renderAll();
+  if (options.attackResult) showAttackResult(result, options);
+  toast(`${displayDecision(result.decision)} · ${result.ruleChecked}`);
+  return result;
 }
 
 function runSafe() {
-  if (state.agentState === 'FROZEN') {
-    blockFrozenAttempt('₹1,200 → CloudGrid');
-    return;
-  }
-  state.spent += 1200;
-  state.approved += 1;
-  addEvent('Authorised payment approved', '₹1,200 → CloudGrid · all policy checks passed', 'APPROVED', 'approved');
-  renderMetrics();
-  toast('Payment approved by Aegis');
+  const intent = makeIntent('SAFE', { amount: 1_200, recipient: 'CloudGrid' });
+  return afterDecision(state.engine.processIntent(intent));
 }
 
 function runOverspend() {
-  state.blocked += 1;
-  state.protected += 8500;
-  const nextRisk = Math.max(state.risk, 34);
-  setAgentState(nextRisk >= 30 ? 'CAUTION' : state.agentState, nextRisk);
-  addEvent('Overspending attempt blocked', '₹8,500 → CloudGrid · ₹2,500 cap exceeded', 'BLOCKED', 'blocked');
-  renderMetrics();
-  toast('Aegis blocked the oversized payment');
-  showAttackResult('BLOCKED', 'Per-transaction cap exceeded by ₹6,000.', false);
+  const intent = makeIntent('OVERSPEND', { amount: 8_500, recipient: 'CloudGrid' });
+  return afterDecision(state.engine.processIntent(intent), { attackResult: true });
 }
 
 function runUnknown() {
-  state.blocked += 1;
-  state.protected += 2000;
-  setAgentState(state.risk >= 55 ? 'RESTRICTED' : 'CAUTION', Math.max(state.risk, 42));
-  addEvent('Unknown recipient blocked', '₹2,000 → 0xF4…91B · counterparty not allowlisted', 'BLOCKED', 'blocked');
-  renderMetrics();
-  toast('Counterparty rejected by allowlist');
-  showAttackResult('BLOCKED', 'Recipient not present in active Budget Capsule.', false);
+  const intent = makeIntent('UNKNOWN', { amount: 2_000, recipient: '0xF4…91B' });
+  return afterDecision(state.engine.processIntent(intent), { attackResult: true });
 }
 
 function runEvasion() {
-  state.blocked += 4;
-  state.protected += 7996;
-  setAgentState('RESTRICTED', Math.max(state.risk, 76));
-  addEvent('Evasion Shield triggered', '4 × ₹1,999 clustered into ₹7,996 coordinated attempt', 'BLOCKED', 'blocked');
-  addEvent('Risk Governor tightened permissions', 'New recipients disabled · human approval required', 'RESTRICTED', 'system');
-  renderMetrics();
-  showAttackResult('BLOCKED', 'Coordinated limit-evasion pattern detected.', true);
-  updateRiskSignals(true);
-  toast('Evasion Shield detected threshold splitting');
+  const intents = Array.from({ length: 4 }, (_, index) => makeIntent('SPLIT', {
+    amount: 1_999,
+    recipient: 'CloudGrid',
+    requestedAt: nextTimestamp(3_000),
+  }));
+  const results = state.engine.processIntentBatch(intents, { incidentId: `SPLIT-${state.intentSequence}` });
+  const result = results.at(-1);
+  const total = intents.reduce((sum, intent) => sum + intent.amount, 0);
+  return afterDecision(result, {
+    attackResult: true,
+    cluster: true,
+    reason: `${intents.length} related requests were evaluated as one ${formatINR(total)} coordinated attempt. ${result.reason}`,
+  });
 }
 
-function showAttackResult(status, reason, cluster = false) {
-  $('#attackStatus').classList.add('hidden');
-  $('#attackCluster').classList.toggle('hidden', !cluster);
-  const result = $('#enforcementResult');
-  result.classList.remove('hidden');
-  $('strong', result).textContent = status;
-  $('p', result).textContent = reason;
+function runRapid() {
+  const intents = Array.from({ length: 8 }, () => makeIntent('RAPID', {
+    amount: 800,
+    requestedAt: nextTimestamp(500),
+  }));
+  const results = state.engine.processIntentBatch(intents, { incidentId: `RAPID-${state.intentSequence}` });
+  return afterDecision(results.at(-1), { attackResult: true });
 }
 
-function startPending(seconds = 10) {
-  clearPendingTimer();
-  if (state.agentState === 'FROZEN') {
-    blockFrozenAttempt('₹1,500 → ComputeHub');
-    return;
+function injectRisk() {
+  const currentRisk = state.engine.getSnapshot().risk;
+  if (['RESTRICTED', 'QUARANTINED'].includes(currentRisk.state)) {
+    const probe = makeIntent('RISK-PROBE', { amount: 900, recipient: 'ComputeHub' });
+    const result = state.engine.processIntent(probe);
+    renderAll();
+    toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+    return result;
   }
-  state.pending = 1;
-  state.pendingSeconds = seconds;
-  renderMetrics();
-  $('#pendingBanner').classList.remove('hidden');
-  $('#countdown').textContent = seconds;
-  $('#pendingTrack').style.width = '0%';
-  addEvent('Transaction intent authorised', '₹1,500 → ComputeHub · awaiting final revalidation', 'PENDING', 'pending');
-  let elapsed = 0;
-  requestAnimationFrame(() => $('#pendingTrack').style.width = '5%');
-  state.countdownId = setInterval(() => {
-    elapsed += 1;
-    state.pendingSeconds -= 1;
-    $('#countdown').textContent = Math.max(0, state.pendingSeconds);
-    $('#pendingTrack').style.width = `${Math.min(100, (elapsed / seconds) * 100)}%`;
-    if (state.pendingSeconds <= 0) settlePending();
-  }, 1000);
-  toast('Valid intent entered the settlement queue');
-}
-
-function settlePending() {
-  clearPendingTimer(false);
-  if (state.agentState === 'FROZEN') return;
-  state.pending = 0;
-  state.spent += 1500;
-  state.approved += 1;
-  $('#pendingBanner').classList.add('hidden');
-  addEvent('Pending intent settled', '₹1,500 → ComputeHub · final policy revalidation passed', 'APPROVED', 'approved');
-  renderMetrics();
-  toast('Transaction settled after final revalidation');
+  const first = makeIntent('RISK', { amount: 8_500, recipient: 'CloudGrid' });
+  const incidentId = `RISK-${state.intentSequence}`;
+  state.engine.processIntent(first, { incidentId });
+  const retry = makeIntent('RISK-RETRY', { amount: 900, recipient: 'CloudGrid' });
+  const result = state.engine.processIntent(retry, { incidentId });
+  renderAll();
+  toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+  return result;
 }
 
 function clearPendingTimer(hide = true) {
@@ -224,134 +274,193 @@ function clearPendingTimer(hide = true) {
   if (hide) $('#pendingBanner').classList.add('hidden');
 }
 
-function freezeAgent() {
-  const hadPending = state.pending > 0;
+function startPending(seconds) {
   clearPendingTimer();
-  state.pending = 0;
-  setAgentState('FROZEN', 100);
-  addEvent('Owner activated kill switch', 'Agent authority revoked · policy epoch incremented', 'FROZEN', 'blocked');
-  if (hadPending) {
-    state.blocked += 1;
-    state.protected += 1500;
-    addEvent('Pending intent invalidated', '₹1,500 → ComputeHub · no funds moved', 'INVALIDATED', 'blocked');
+  const intent = makeIntent('PENDING', { amount: 1_500, recipient: 'ComputeHub' });
+  let result = state.engine.authoriseIntent(intent);
+  if (result.decision === 'REQUIRE_APPROVAL') {
+    result = state.engine.approveIntent(result.intent.id, {
+      ownerId: state.engine.policy.ownerId,
+      timestamp: nextTimestamp(),
+    });
   }
-  renderMetrics();
-  toast(hadPending ? 'Agent frozen — pending payment invalidated' : 'Agent financial authority frozen');
-}
-
-function blockFrozenAttempt(detail) {
-  state.blocked += 1;
-  addEvent('Frozen agent request rejected', `${detail} · financial authority revoked`, 'BLOCKED', 'blocked');
-  renderMetrics();
-  toast('Request rejected: agent is frozen');
-}
-
-function updateRiskSignals(attacked = false) {
-  const rows = $$('#signalList > div');
-  if (!attacked) {
-    const values = ['NORMAL','0','0','NOT DETECTED','0'];
-    rows.forEach((row, i) => { const b = $('b', row); b.textContent = values[i]; b.className = 'good'; });
-    $('#automaticResponse p').textContent = 'No restrictions required. Agent operates within policy.';
-    return;
+  if (!result || result.decision !== 'HOLD') {
+    afterDecision(result, { attackResult: true });
+    return result;
   }
-  const values = [
-    ['CRITICAL','bad'],['4','bad'],['6','bad'],['DETECTED','bad'],['1','warn']
-  ];
-  rows.forEach((row, i) => { const b = $('b', row); b.textContent = values[i][0]; b.className = values[i][1]; });
-  $('#automaticResponse p').innerHTML = 'Per-transaction limit reduced by 60% · new recipients disabled · settlement delay raised · human approval required.';
+  state.pendingIntentId = result.intent.id;
+  state.pendingSeconds = seconds ?? Math.ceil(result.settlementDelayMs / 1_000);
+  $('#pendingBanner').classList.remove('hidden');
+  $('#countdown').textContent = state.pendingSeconds;
+  $('#pendingTrack').style.width = '0%';
+  $('.pending-info strong').textContent = `Intent #${result.intent.id}`;
+  $('.pending-info small').innerHTML = `${formatINR(result.intent.amount)} → ${result.intent.recipient} · final revalidation in <b id="countdown">${state.pendingSeconds}</b>s`;
+  let elapsed = 0;
+  requestAnimationFrame(() => { $('#pendingTrack').style.width = '5%'; });
+  renderAll();
+  state.countdownId = setInterval(() => {
+    elapsed += 1;
+    state.pendingSeconds -= 1;
+    $('#countdown').textContent = Math.max(0, state.pendingSeconds);
+    $('#pendingTrack').style.width = `${Math.min(100, (elapsed / (seconds ?? 10)) * 100)}%`;
+    if (state.pendingSeconds <= 0) settlePending();
+  }, 1_000);
+  toast('Intent entered the two-phase settlement queue');
+  return result;
 }
 
-function injectRisk() {
-  setAgentState('RESTRICTED', 78);
-  updateRiskSignals(true);
-  addEvent('Suspicious behaviour injected', 'Velocity, retry and recipient anomalies detected', 'CRITICAL', 'blocked');
-  addEvent('Adaptive restrictions applied', 'Limits reduced · approval threshold activated', 'RESTRICTED', 'system');
-  toast('Risk Governor tightened permissions');
+function settlePending() {
+  if (!state.pendingIntentId) return null;
+  clearPendingTimer(false);
+  const pendingId = state.pendingIntentId;
+  const pending = state.engine.getSnapshot().pendingIntents.find(intent => intent.id === pendingId);
+  state.pendingIntentId = null;
+  const result = pending
+    ? state.engine.settleIntent(pendingId)
+    : null;
+  $('#pendingBanner').classList.add('hidden');
+  if (result) afterDecision(result, { attackResult: true });
+  return result;
+}
+
+function freezeAgent() {
+  const result = state.engine.freezeAgent({
+    ownerId: state.engine.policy.ownerId,
+    timestamp: nextTimestamp(),
+  });
+  clearPendingTimer();
+  state.pendingIntentId = null;
+  renderAll();
+  const invalidatedEvent = result.invalidated.at(-1);
+  if (invalidatedEvent) {
+    showAttackResult({ ...invalidatedEvent, fundsMoved: invalidatedEvent.fundsMoved }, { reason: invalidatedEvent.reason });
+    toast('Agent frozen — pending intent invalidated before settlement');
+  } else {
+    toast('Owner froze all agent financial authority');
+  }
+  return invalidatedEvent ?? result.freezeEvent;
 }
 
 function activateCapsule() {
-  const budget = Number($('#capsuleBudget').value) || 10000;
-  const cap = Number($('#capsuleCap').value) || 2500;
-  const task = $('#capsuleTask').value.trim() || 'Purchase cloud-compute capacity';
+  const budget = Number($('#capsuleBudget').value);
+  const cap = Number($('#capsuleCap').value);
+  const task = $('#capsuleTask').value.trim();
   const vendors = $$('.chip.selected').map(chip => chip.textContent);
-  state.capsule = { task, budget, cap, vendors };
-  state.budgetTotal = budget;
-  state.spent = 0;
-  $('#capsuleTitle').textContent = task.replace(/^Purchase /i, '').replace(/\w/g, c => c.toUpperCase());
-  $('#capsuleSummary').textContent = `Procurement-07 may spend up to ${formatINR(budget)} for “${task}”, only through ${vendors.join(' and ') || 'approved counterparties'}, until the configured expiry.`;
-  $('#capsuleBudgetDisplay').textContent = formatINR(budget);
-  $('#capsuleCapDisplay').textContent = formatINR(cap);
-  renderMetrics();
-  addEvent('Budget Capsule activated', `${formatINR(budget)} · ${vendors.length} approved counterparties`, 'ACTIVE', 'system');
-  toast('Task-Bound Budget Capsule activated');
+  const expiryValue = $('#capsuleExpiry').value;
+  try {
+    const result = state.engine.activatePolicy({
+      task,
+      totalTaskBudget: budget,
+      dailyCumulativeCap: budget,
+      perTransactionCap: cap,
+      approvedRecipients: vendors,
+      expiresAt: new Date(`${expiryValue}:00Z`).toISOString(),
+    }, {
+      ownerId: state.engine.policy.ownerId,
+      timestamp: nextTimestamp(),
+      resetBudget: true,
+    });
+    $('#capsuleTitle').textContent = task.replace(/^Purchase /i, '').replace(/\b\w/g, character => character.toUpperCase());
+    $('#capsuleSummary').textContent = `${state.engine.policy.authorisedAgentId} may spend up to ${formatINR(budget)} for “${task}”, only through ${vendors.join(' and ')}, until the configured expiry.`;
+    $('#capsuleBudgetDisplay').textContent = formatINR(budget);
+    $('#capsuleCapDisplay').textContent = formatINR(cap);
+    renderAll();
+    toast(`${result.policy.id}-V${result.policy.version} activated by the owner`);
+    return result;
+  } catch (error) {
+    toast(error.message);
+    return { decision: 'BLOCK', reason: error.message };
+  }
 }
 
 function runTwin() {
+  state.twinTimers.forEach(timer => clearTimeout(timer));
+  state.twinTimers = [];
   const v1 = $('#v1Result');
   const v2 = $('#v2Result');
   v1.textContent = 'Testing…';
   v2.textContent = 'Testing…';
   $('#twinSummary').classList.add('hidden');
-  setTimeout(() => { v1.textContent = '4 of 6 attacks succeeded'; v1.style.color = 'var(--red)'; }, 650);
-  setTimeout(() => { v2.textContent = '0 of 6 attacks succeeded'; v2.style.color = 'var(--green)'; }, 1050);
-  setTimeout(() => {
-    $('#twinSummary').classList.remove('hidden');
-    addEvent('Policy Digital Twin completed', 'V2 blocked all six simulated attack scenarios', 'VERIFIED', 'approved');
-    toast('Policy V2 passed the attack simulation');
-  }, 1350);
+  state.twinResults = runPolicyDigitalTwin();
+  const { legacy, hardened } = state.twinResults;
+  state.twinTimers.push(setTimeout(() => {
+    v1.textContent = `${legacy.attacksSucceeded} of ${legacy.attacks.length} attacks succeeded`;
+    v1.style.color = legacy.attacksSucceeded ? 'var(--red)' : 'var(--green)';
+  }, 450));
+  state.twinTimers.push(setTimeout(() => {
+    v2.textContent = `${hardened.attacksSucceeded} of ${hardened.attacks.length} attacks succeeded`;
+    v2.style.color = hardened.attacksSucceeded ? 'var(--red)' : 'var(--green)';
+  }, 750));
+  state.twinTimers.push(setTimeout(() => {
+    const summary = $('#twinSummary');
+    summary.classList.remove('hidden');
+    $('strong', summary).textContent = `V2 contained ${hardened.attacksContained} of ${hardened.attacks.length} attacks using the canonical engine.`;
+    $('small', summary).textContent = `V1 moved ${formatINR(legacy.attacks.reduce((sum, attack) => sum + attack.fundsMoved, 0))}; V2 moved ${formatINR(hardened.attacks.reduce((sum, attack) => sum + attack.fundsMoved, 0))} in the attack suite.`;
+    toast('Both policy configurations completed the same six engine-driven attacks');
+  }, 1_000));
+  return state.twinResults;
 }
 
-function runRapid() {
-  state.blocked += 8;
-  state.protected += 6400;
-  setAgentState('RESTRICTED', 83);
-  addEvent('Rapid-fire transaction burst blocked', '8 requests in 4 seconds · velocity threshold exceeded', 'BLOCKED', 'blocked');
-  renderMetrics();
-  showAttackResult('BLOCKED', 'Abnormal transaction velocity detected.', false);
-  toast('Rapid-fire attack contained');
+function eventTitle(event) {
+  return ledgerPresentation(event).title;
 }
 
 function renderForensics() {
+  const ledger = state.engine.getLedger();
   const timeline = $('#forensicTimeline');
-  timeline.innerHTML = FORENSIC_STEPS.map((step, i) => `
-    <div class="timeline-item ${i === state.replayIndex ? 'active' : ''}" data-replay-index="${i}">
-      <span class="timeline-time">${step.time}</span>
+  if (ledger.length === 0) {
+    timeline.innerHTML = '<div class="timeline-item active"><span class="timeline-time">—</span><div class="timeline-point"><span></span></div><div class="timeline-content"><strong>No recorded events</strong><small>Run a scenario to create replayable evidence.</small></div></div>';
+    $('#proofTerminal').textContent = '$ aegis verify --latest\n\nNo recorded policy event.\nReset state is deterministic and uses simulated funds only.';
+    return;
+  }
+  state.replayIndex = Math.max(0, Math.min(ledger.length - 1, state.replayIndex));
+  const visible = ledger.slice(-18);
+  const offset = ledger.length - visible.length;
+  timeline.innerHTML = visible.map((event, index) => {
+    const ledgerIndex = offset + index;
+    return `<div class="timeline-item ${ledgerIndex === state.replayIndex ? 'active' : ''}" data-replay-index="${ledgerIndex}">
+      <span class="timeline-time">${displayTime(event.timestamp)}</span>
       <div class="timeline-point"><span></span></div>
-      <div class="timeline-content"><strong>${step.title}</strong><small>${step.detail}</small></div>
-    </div>`).join('');
-  renderProofTerminal();
+      <div class="timeline-content"><strong>${escapeHTML(eventTitle(event))}</strong><small>${escapeHTML(event.reason)}</small></div>
+    </div>`;
+  }).join('');
+  renderProofTerminal(ledger[state.replayIndex]);
 }
 
-function renderProofTerminal() {
-  const step = FORENSIC_STEPS[state.replayIndex];
-  const terminal = $('#proofTerminal');
-  const decision = state.replayIndex < 1 ? 'APPROVED' : state.replayIndex < 5 ? 'BLOCKED' : 'REVOKED';
-  terminal.textContent = `$ aegis verify --event ${String(state.replayIndex + 1).padStart(2,'0')}\n\nAGENT          Procurement-07\nOWNER          TurboPay Technologies Pvt. Ltd.\nPOLICY         PROCUREMENT-V4\nPOLICY HASH    AGS-7FD2-91C8\nEVENT          ${step.title}\nTIMESTAMP      ${step.time}\nDECISION       ${decision}\nRULE           ${state.replayIndex === 3 ? 'CUMULATIVE_WINDOW_LIMIT' : state.replayIndex === 6 ? 'POLICY_EPOCH_REVOKED' : 'TASK_AND_RECIPIENT_POLICY'}\nRISK STATE     ${state.replayIndex >= 4 ? 'CRITICAL' : 'NORMAL'}\nFUNDS MOVED    ${state.replayIndex === 0 ? '₹850 (simulated)' : '₹0'}\n\n✓ Decision trace verified\n✓ Policy version verified\n✓ Owner action verified`;
+function renderProofTerminal(event) {
+  const rules = event.rulesEvaluated.map(rule => `${rule.passed ? 'PASS' : 'FAIL'} ${rule.rule}: ${rule.reason}`).join('\n                ');
+  const signals = Object.entries(event.riskSignals).map(([key, value]) => `${key}=${value}`).join(' · ');
+  const intent = event.intent;
+  $('#proofTerminal').textContent = `$ aegis verify --event ${event.id}\n\nINTENT         ${intent?.id ?? 'N/A'}\nAGENT          ${event.agent}\nOWNER          ${event.owner}\nTASK           ${event.activeTask.id} · ${event.activeTask.name}\nPOLICY         ${event.policyLabel} (active version ${event.policyVersion})\nEVENT          ${event.eventType}\nTIMESTAMP      ${event.timestamp}\nDECISION       ${event.decision}\nRULE           ${event.ruleChecked}\nRULE TRACE     ${rules || 'No transaction rules required'}\nRISK STATE     ${event.riskState} (${event.riskScore}/100)\nRISK SIGNALS   ${signals}\nOWNER ACTION   ${event.ownerAction ?? 'NONE'}\nFINAL STATUS   ${event.finalSettlementStatus}\nFUNDS MOVED    ${formatINR(event.fundsMoved)} (simulated)\n\n✓ Decision trace recorded\n✓ Policy version recorded\n✓ Final settlement evidence recorded`;
 }
 
 function stepReplay(delta) {
-  state.replayIndex = Math.max(0, Math.min(FORENSIC_STEPS.length - 1, state.replayIndex + delta));
+  const length = state.engine.getLedger().length;
+  if (!length) return;
+  state.replayIndex = Math.max(0, Math.min(length - 1, state.replayIndex + delta));
   renderForensics();
 }
 
 function playReplay() {
+  const length = state.engine.getLedger().length;
+  if (!length) return;
   clearInterval(state.replayTimer);
   state.replayIndex = 0;
   renderForensics();
   $('#replayPlay').textContent = 'Playing…';
   state.replayTimer = setInterval(() => {
-    if (state.replayIndex >= FORENSIC_STEPS.length - 1) {
+    if (state.replayIndex >= length - 1) {
       clearInterval(state.replayTimer);
       $('#replayPlay').textContent = 'Play Replay';
       return;
     }
     state.replayIndex += 1;
     renderForensics();
-  }, 850);
+  }, 650);
 }
 
 function switchView(view) {
-  $$('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
+  $$('.nav-item').forEach(button => button.classList.toggle('active', button.dataset.view === view));
   $$('.view-panel').forEach(panel => panel.classList.toggle('active', panel.dataset.panel === view));
   const labels = { overview: 'OVERVIEW', capsules: 'BUDGET CAPSULES', risk: 'RISK GOVERNOR', twin: 'POLICY TWIN', attack: 'ATTACK LAB', forensics: 'FORENSICS' };
   const titles = { overview: 'Autonomous Agent Command Centre', capsules: 'Purpose-Locked Financial Authority', risk: 'Behaviour-Adaptive Financial Defence', twin: 'Pre-Deployment Policy Simulation', attack: 'Adversarial Transaction Testing', forensics: 'Evidence-Backed Incident Replay' };
@@ -362,35 +471,55 @@ function switchView(view) {
 function resetEnvironment() {
   clearPendingTimer();
   clearInterval(state.replayTimer);
+  state.twinTimers.forEach(timer => clearTimeout(timer));
+  clearTimeout(state.judgeActionTimer);
+  createEngine();
   Object.assign(state, {
-    agentState: 'NORMAL', risk: 12, budgetTotal: 10000, spent: 3200, protected: 19996,
-    approved: 7, blocked: 3, pending: 0, policy: 'PROCUREMENT-V4', events: [...INITIAL_EVENTS], replayIndex: 0
+    pendingSeconds: 0,
+    pendingIntentId: null,
+    countdownId: null,
+    replayIndex: 0,
+    replayTimer: null,
+    judgeIndex: 0,
+    eventCursor: 0,
+    twinResults: null,
+    twinTimers: [],
+    judgeActionTimer: null,
   });
-  setAgentState('NORMAL', 12);
-  renderMetrics();
-  renderEvents();
-  updateRiskSignals(false);
   $('#pendingBanner').classList.add('hidden');
+  $('#pendingTrack').style.width = '0%';
+  $('#countdown').textContent = '10';
   $('#attackStatus').classList.remove('hidden');
   $('#attackCluster').classList.add('hidden');
   $('#enforcementResult').classList.add('hidden');
-  $('#v1Result').textContent = 'Not tested'; $('#v1Result').style.color = '';
-  $('#v2Result').textContent = 'Not tested'; $('#v2Result').style.color = '';
+  $('#v1Result').textContent = 'Not tested';
+  $('#v1Result').style.color = '';
+  $('#v2Result').textContent = 'Not tested';
+  $('#v2Result').style.color = '';
   $('#twinSummary').classList.add('hidden');
-  renderForensics();
+  $('#replayPlay').textContent = 'Play Replay';
+  $('#capsuleTask').value = DEFAULT_POLICY.task;
+  $('#capsuleBudget').value = DEFAULT_POLICY.totalTaskBudget;
+  $('#capsuleCap').value = DEFAULT_POLICY.perTransactionCap;
+  $('#capsuleExpiry').value = '2026-08-02T18:00';
+  $$('.chip').forEach(chip => chip.classList.toggle('selected', DEFAULT_POLICY.approvedRecipients.includes(chip.textContent)));
+  $('#capsuleTitle').textContent = 'Cloud Infrastructure Procurement';
+  $('#capsuleSummary').textContent = 'Procurement-07 may spend up to ₹10,000 on cloud infrastructure, only through CloudGrid and ComputeHub, until 18:00.';
+  $('#capsuleBudgetDisplay').textContent = '₹10,000';
+  $('#capsuleCapDisplay').textContent = '₹2,500';
+  renderAll();
   switchView('overview');
-  toast('Demo environment restored');
+  toast('Demo environment restored to its deterministic baseline');
 }
 
 function executeScenario(name) {
-  switch (name) {
-    case 'safe': runSafe(); break;
-    case 'overspend': runOverspend(); break;
-    case 'unknown': runUnknown(); break;
-    case 'evasion': runEvasion(); break;
-    case 'rapid': runRapid(); break;
-    case 'pending': startPending(); break;
-  }
+  if (name === 'safe') return runSafe();
+  if (name === 'overspend') return runOverspend();
+  if (name === 'unknown') return runUnknown();
+  if (name === 'evasion') return runEvasion();
+  if (name === 'rapid') return runRapid();
+  if (name === 'pending') return startPending();
+  return null;
 }
 
 function openJudgeMode() {
@@ -413,16 +542,20 @@ function updateJudgeModal() {
   $('#judgeTitle').textContent = scenario.title;
   $('#judgeDescription').textContent = scenario.description;
   $('#judgeAmount').textContent = scenario.amount;
-  const result = $('#judgeResult');
-  result.className = 'judge-result';
-  result.innerHTML = '<span>Ready to run</span>';
+  $('#judgeResult').className = 'judge-result';
+  $('#judgeResult').innerHTML = '<span>Ready to run through the canonical engine</span>';
   $('#judgeNext').textContent = 'Run Scenario';
+}
+
+function renderJudgeResult(result, customText) {
+  const panel = $('#judgeResult');
+  panel.className = `judge-result ${decisionClass(result.decision)}`;
+  panel.innerHTML = `<span>${escapeHTML(customText ?? `${displayDecision(result.decision)} · ${result.reason}`)}</span>`;
 }
 
 function runJudgeScenario() {
   const scenario = JUDGE_SCENARIOS[state.judgeIndex];
-  const result = $('#judgeResult');
-  if ($('#judgeNext').textContent === 'Next Scenario') {
+  if ($('#judgeNext').textContent === 'Next Scenario' || $('#judgeNext').textContent === 'Open Forensic Proof') {
     if (state.judgeIndex < JUDGE_SCENARIOS.length - 1) {
       state.judgeIndex += 1;
       updateJudgeModal();
@@ -434,20 +567,35 @@ function runJudgeScenario() {
     return;
   }
 
-  if (scenario.action === 'safe') runSafe();
-  if (scenario.action === 'overspend') runOverspend();
-  if (scenario.action === 'evasion') runEvasion();
-  if (scenario.action === 'risk') injectRisk();
+  let result;
+  if (scenario.action === 'safe') result = runSafe();
+  if (scenario.action === 'overspend') result = runOverspend();
+  if (scenario.action === 'evasion') result = runEvasion();
+  if (scenario.action === 'risk') {
+    result = injectRisk();
+    renderJudgeResult(result, `${result.riskState} · Calculated risk ${result.riskScore}/100. ${state.engine.getSnapshot().risk.response}`);
+  }
   if (scenario.action === 'freezePending') {
-    startPending(8);
-    setTimeout(() => freezeAgent(), 1400);
+    result = startPending(8);
+    renderJudgeResult(result);
+    if (result?.decision === 'HOLD') {
+      state.judgeActionTimer = setTimeout(() => {
+        const invalidated = freezeAgent();
+        renderJudgeResult({ ...invalidated, decision: invalidated.decision }, `${displayDecision(invalidated.decision)} · ${invalidated.reason}`);
+      }, 1_400);
+    }
   }
   if (scenario.action === 'forensics') {
-    state.replayIndex = FORENSIC_STEPS.length - 1;
+    const ledger = state.engine.getLedger();
+    state.replayIndex = Math.max(0, ledger.length - 1);
     renderForensics();
+    const fundsMoved = ledger
+      .filter(event => ['BLOCK', 'INVALIDATE', 'FREEZE'].includes(event.decision))
+      .reduce((sum, event) => sum + event.fundsMoved, 0);
+    result = ledger.at(-1) ?? { decision: 'BLOCK', reason: 'No evidence recorded.' };
+    renderJudgeResult(result, `EVIDENCE RECORDED · ${ledger.length} engine events · prohibited funds moved ${formatINR(fundsMoved)}.`);
   }
-  result.className = `judge-result ${scenario.resultClass}`;
-  result.innerHTML = `<span>${scenario.result}</span>`;
+  if (!['risk', 'freezePending', 'forensics'].includes(scenario.action)) renderJudgeResult(result);
   $('#judgeNext').textContent = state.judgeIndex === JUDGE_SCENARIOS.length - 1 ? 'Open Forensic Proof' : 'Next Scenario';
 }
 
@@ -459,17 +607,13 @@ function previousJudgeScenario() {
 }
 
 function initInteractions() {
-  renderEvents();
-  renderMetrics();
-  renderForensics();
-  updateRiskLadder();
-
-  $$('.nav-item').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
-  $$('.scenario-button, .attack-option').forEach(btn => btn.addEventListener('click', () => executeScenario(btn.dataset.scenario)));
-  $$('[data-freeze-button]').forEach(btn => btn.addEventListener('click', freezeAgent));
+  createEngine();
+  renderAll();
+  $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
+  $$('.scenario-button, .attack-option').forEach(button => button.addEventListener('click', () => executeScenario(button.dataset.scenario)));
+  $$('[data-freeze-button]').forEach(button => button.addEventListener('click', freezeAgent));
   $$('.chip').forEach(chip => chip.addEventListener('click', () => chip.classList.toggle('selected')));
-
-  $('#clearEvents').addEventListener('click', () => { state.events = []; renderEvents(); });
+  $('#clearEvents').addEventListener('click', () => { state.eventCursor = state.engine.getLedger().length; renderEvents(); });
   $('#resetEnvironment').addEventListener('click', resetEnvironment);
   $('#activateCapsule').addEventListener('click', activateCapsule);
   $('#injectRisk').addEventListener('click', injectRisk);
@@ -477,15 +621,23 @@ function initInteractions() {
   $('#replayPrev').addEventListener('click', () => stepReplay(-1));
   $('#replayNext').addEventListener('click', () => stepReplay(1));
   $('#replayPlay').addEventListener('click', playReplay);
-
+  $('#forensicTimeline').addEventListener('click', event => {
+    const item = event.target.closest('[data-replay-index]');
+    if (item) {
+      state.replayIndex = Number(item.dataset.replayIndex);
+      renderForensics();
+    }
+  });
   $('#launchJudgeMode').addEventListener('click', openJudgeMode);
   $('#launchJudgeModeBottom').addEventListener('click', openJudgeMode);
   $('#closeJudgeMode').addEventListener('click', closeJudgeMode);
   $('#judgeNext').addEventListener('click', runJudgeScenario);
   $('#judgePrev').addEventListener('click', previousJudgeScenario);
-  $('#judgeReset').addEventListener('click', () => { resetEnvironment(); state.judgeIndex = 0; updateJudgeModal(); });
+  $('#judgeReset').addEventListener('click', () => { resetEnvironment(); openJudgeMode(); });
   $('.judge-backdrop').addEventListener('click', closeJudgeMode);
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !$('#judgeModal').classList.contains('hidden')) closeJudgeMode(); });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !$('#judgeModal').classList.contains('hidden')) closeJudgeMode();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', initInteractions);

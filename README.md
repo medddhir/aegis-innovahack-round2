@@ -29,11 +29,14 @@ Aegis places an independent deterministic enforcement layer between the agent an
 ## Run locally
 
 ```bash
+npm test
 npm run build
 npm run start
 ```
 
 Open `http://localhost:4173`.
+
+The browser UI and the automated tests both import the same deterministic engine from `public/policy-engine.js`. Control Centre, Judge Mode, Attack Lab, Risk Governor, Policy Digital Twin, settlement, and Forensics do not maintain separate outcome tables.
 
 ## Team
 

@@ -75,8 +75,8 @@
           <small>Settles only if revalidated</small>
         </div>
         <div class="hero-intent-card" id="heroIntentCard">
-          <div><span class="intent-pulse"></span> Intent #AGS-1042</div>
-          <strong>₹8,500 → Unknown recipient</strong>
+          <div><span class="intent-pulse"></span> Example intent #AGS-1042</div>
+          <strong>₹8,500 → CloudGrid</strong>
           <small>PER-TRANSACTION CAP EXCEEDED</small>
           <b>BLOCKED</b>
         </div>
@@ -149,7 +149,7 @@
               <article class="metric-card">
                 <div class="metric-label">Budget Remaining</div>
                 <div class="big-number" id="budgetRemaining">₹6,800</div>
-                <small>of ₹10,000 task allocation</small>
+                <small>of <span id="budgetTotalDisplay">₹10,000</span> task allocation</small>
                 <div class="mini-progress"><span id="budgetBar" style="width:32%"></span></div>
               </article>
               <article class="metric-card">
@@ -205,8 +205,8 @@
                 <div class="capsule-emblem"><span>A</span></div>
                 <h4 id="capsuleTitle">Cloud Infrastructure Procurement</h4>
                 <p id="capsuleSummary">Procurement-07 may spend up to ₹10,000 on cloud infrastructure, only through CloudGrid and ComputeHub, until 18:00.</p>
-                <div class="capsule-stats"><div><small>BUDGET</small><strong id="capsuleBudgetDisplay">₹10,000</strong></div><div><small>PER TX</small><strong id="capsuleCapDisplay">₹2,500</strong></div><div><small>VENDORS</small><strong>2</strong></div></div>
-                <div class="policy-hash">POLICY HASH · AGS-7FD2-91C8</div>
+                <div class="capsule-stats"><div><small>BUDGET</small><strong id="capsuleBudgetDisplay">₹10,000</strong></div><div><small>PER TX</small><strong id="capsuleCapDisplay">₹2,500</strong></div><div><small>VENDORS</small><strong id="capsuleVendorCount">2</strong></div></div>
+                <div class="policy-hash" id="capsulePolicyVersion">POLICY VERSION · PROCUREMENT-V4</div>
               </section>
             </div>
           </div>
@@ -216,11 +216,11 @@
             <div class="risk-layout">
               <section class="panel risk-state-panel">
                 <div class="risk-ladder" id="riskLadder">
-                  <div class="risk-step active" data-state="NORMAL"><span></span><b>NORMAL</b><small>Full authorised autonomy</small></div>
-                  <div class="risk-step" data-state="CAUTION"><span></span><b>CAUTION</b><small>Heightened monitoring</small></div>
-                  <div class="risk-step" data-state="RESTRICTED"><span></span><b>RESTRICTED</b><small>Limits tightened automatically</small></div>
-                  <div class="risk-step" data-state="QUARANTINED"><span></span><b>QUARANTINED</b><small>Real funds isolated</small></div>
-                  <div class="risk-step" data-state="FROZEN"><span></span><b>FROZEN</b><small>All authority revoked</small></div>
+                  <div class="risk-step active" data-state="NORMAL"><span></span><b>NORMAL</b><small>0–29 · standard 10s settlement</small></div>
+                  <div class="risk-step" data-state="CAUTION"><span></span><b>CAUTION</b><small>30–54 · logging + minimum 15s delay</small></div>
+                  <div class="risk-step" data-state="RESTRICTED"><span></span><b>RESTRICTED</b><small>55–74 · owner approval + 30s delay</small></div>
+                  <div class="risk-step" data-state="QUARANTINED"><span></span><b>QUARANTINED</b><small>75–94 · settlement disabled</small></div>
+                  <div class="risk-step" data-state="FROZEN"><span></span><b>FROZEN</b><small>95–100 · all authority revoked</small></div>
                 </div>
               </section>
               <section class="panel signal-panel">
@@ -257,7 +257,7 @@
                 <div class="simulation-result"><span>ATTACK OUTCOME</span><strong id="v2Result">Not tested</strong></div>
               </article>
             </div>
-            <div class="twin-summary hidden" id="twinSummary"><span>POLICY IMPROVEMENT</span><strong>V2 blocked 100% of the simulated attack suite.</strong><small>V1 allowed four policy-evasion events because it evaluated requests independently.</small></div>
+            <div class="twin-summary hidden" id="twinSummary"><span>POLICY COMPARISON</span><strong>Run both configurations through the canonical engine.</strong><small>Results are calculated from recorded attack-suite settlements.</small></div>
           </div>
 
           <div class="view-panel" data-panel="attack">
@@ -278,7 +278,7 @@
                   <div class="cluster-bracket"></div>
                   <div class="cluster-result"><b>₹7,996</b><span>Combined attempted value</span><small>Pattern: THRESHOLD_SPLITTING · Window: 11s</small></div>
                 </div>
-                <div class="enforcement-result hidden" id="enforcementResult"><span>AEGIS DECISION</span><strong>BLOCKED</strong><p>Coordinated limit-evasion pattern detected.</p><small>Funds moved: ₹0</small></div>
+                <div class="enforcement-result hidden" id="enforcementResult"><span>AEGIS DECISION</span><strong>DECISION</strong><p>Canonical engine result appears here.</p><small>Funds moved: read from ledger</small></div>
               </section>
             </div>
           </div>
@@ -354,6 +354,6 @@ Waiting for a policy decision...</pre>
     </div>
   </div>
 
-  <script src="./app.js" defer></script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
