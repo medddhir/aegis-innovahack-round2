@@ -1,27 +1,37 @@
 # 90-Second Judge Demo Flow
 
+Open **Judge Mode**. It always resets to the deterministic baseline and starts at `READY · SCENARIO 1 OF 6`. Each scenario moves through `READY → RUNNING → COMPLETE`; Scenario 5 pauses at `AWAITING_OWNER_ACTION`. While the engine is running, Previous and Next are disabled and repeated clicks cannot submit another intent.
+
 ## 1. Normal operation
 Run **Authorised payment**.
 
-Expected: `₹1,200 → CloudGrid` is approved because the vendor, amount and task are permitted.
+Expected: `₹1,200 → CloudGrid` passes Phase 1, passes final revalidation, and settles simulated funds. Expand **View rule trace** to show the engine-returned `rulesEvaluated` entries.
 
 ## 2. Independent limit enforcement
 Run **Overspending attempt**.
 
-Expected: `₹8,500` is blocked against the `₹2,500` transaction cap.
+Expected: `₹8,500` is blocked against the `₹2,500` transaction cap. Judge Mode shows the exact `₹6,000` excess, first failed rule, and `₹0` moved.
 
 ## 3. Evasion Shield
 Run **Threshold splitting attack**.
 
-Expected: four requests of `₹1,999` are clustered as one `₹7,996` attempt and blocked.
+Expected: four requests of `₹1,999` inside the recorded 11-second sequence are grouped as one `₹7,996` coordinated attempt and blocked.
 
 ## 4. Adaptive Risk Governor
-Show the engine-calculated transition from `NORMAL` through `CAUTION` to `RESTRICTED` at 55–74, where otherwise valid intents require owner approval and use a 30-second settlement delay.
+Show the engine-calculated transition from the prior state to `RESTRICTED`, including the exact signals added, calculated score, and automatic response. This panel reuses the actual risk evidence produced by the engine in the attack sequence.
 
 ## 5. In-flight revocation
-Start the pending `₹1,500 → ComputeHub` payment. If the prior attack has already placed the agent in `RESTRICTED`, the canonical engine records owner approval before Phase 1. Press **Freeze Agent** before final settlement.
+Run the pending `₹1,500 → ComputeHub` payment. If the prior attack has placed the agent in `RESTRICTED`, the canonical engine records verified owner approval before the intent enters `PENDING_SETTLEMENT`. Wait for the primary button to become **ACTIVATE KILL SWITCH**, then click it manually before the countdown expires.
 
-Expected: the intent is invalidated and `₹0` moves.
+Expected: the verified owner freeze advances the policy version, the pending intent becomes `INVALIDATED`, the wallet is not reached, and `₹0` moves. Judge Mode never auto-freezes. If the countdown is allowed to expire, it displays the engine's real final settlement result instead. **Restart Scenario** rebuilds the deterministic prerequisite sequence.
 
 ## 6. Forensic proof
-Open **Forensics** and replay the engine-recorded sequence. Show the ordered rules, policy version, risk signals, owner freeze, final status, and funds-moved result.
+Run Scenario 6, then open **Forensics**. The scenario shows the selected ledger event ID, intent, policy version, decisive rule, owner action, final status, and funds moved. Attack Replay uses the same recorded event.
+
+## Reset and failure safety
+
+- **Restart Demo** clears Judge-owned timers, balances, budgets, policy state, risk state, pending intents, ledger evidence, and scenario evidence before returning to Scenario 1.
+- Closing with the close button, backdrop, or Escape clears all Judge-owned timeouts and intervals, restores background scrolling, and returns focus to the launcher.
+- Reopening Judge Mode starts from the same clean baseline.
+- An unexpected presentation error enters `ERROR`, preserves engine and ledger evidence, and leaves **Restart Scenario** available.
+- Motion only visualises returned engine state. `prefers-reduced-motion: reduce` removes the transitions without changing decisions or controls.

@@ -2,6 +2,7 @@
 set -euo pipefail
 node --check public/app.js
 node --check public/policy-engine.js
+node --check public/judge-mode.js
 npm test
 npm run build
 python3 - <<'PY'
@@ -11,6 +12,7 @@ import re
 html = Path('dist/index.html').read_text(encoding='utf-8')
 js = Path('dist/app.js').read_text(encoding='utf-8')
 engine = Path('dist/policy-engine.js').read_text(encoding='utf-8')
+judge = Path('dist/judge-mode.js').read_text(encoding='utf-8')
 css = Path('dist/styles.css').read_text(encoding='utf-8')
 class Parser(HTMLParser):
     def __init__(self):
@@ -27,6 +29,8 @@ assert len(p.ids)==len(ids), 'Duplicate DOM IDs detected'
 assert css.count('{')==css.count('}'), 'Unbalanced CSS braces'
 assert 'type="module" src="./app.js"' in html, 'Browser app must load as an ES module'
 assert "from './policy-engine.js'" in js, 'Browser app must import the canonical policy engine'
+assert "from './judge-mode.js'" in js, 'Browser app must import the Judge Mode state machine'
 assert 'export class AegisPolicyEngine' in engine, 'Built canonical policy engine is missing'
+assert 'export class JudgeModeStateMachine' in judge, 'Built Judge Mode state machine is missing'
 print(f'Verified {len(ids)} DOM IDs, {len(refs)} JS ID references, canonical engine import, and balanced CSS.')
 PY

@@ -341,16 +341,40 @@ Waiting for a policy decision...</pre>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <div class="judge-modal hidden" id="judgeModal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle">
+  <div class="judge-modal hidden" id="judgeModal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle" aria-describedby="judgeDescription">
     <div class="judge-backdrop"></div>
-    <div class="judge-card">
-      <div class="judge-head"><div><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div><button id="closeJudgeMode" aria-label="Close judge mode">×</button></div>
-      <div class="judge-body">
-        <div class="judge-number" id="judgeNumber">01</div>
-        <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p><div class="judge-result" id="judgeResult"><span>Ready to run</span></div></div>
-        <div class="judge-visual" id="judgeVisual"><div class="judge-flow"><span>AGENT</span><i></i><b>AEGIS</b><i></i><span>WALLET</span></div><strong id="judgeAmount">₹1,200 → CloudGrid</strong></div>
+    <div class="judge-card" id="judgeCard" tabindex="-1">
+      <div class="judge-head">
+        <div class="judge-head-title"><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div>
+        <div class="judge-head-actions"><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button></div>
       </div>
-      <div class="judge-foot"><button class="secondary-cta" id="judgeReset">Restart Demo</button><div><button class="secondary-cta" id="judgePrev">Previous</button><button class="primary-cta compact" id="judgeNext">Run Scenario</button></div></div>
+      <div class="judge-body">
+        <aside class="judge-context">
+          <div class="judge-number" id="judgeNumber">01</div>
+          <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p></div>
+          <div class="judge-facts" id="judgeFacts" aria-label="Scenario evidence"></div>
+        </aside>
+        <section class="judge-execution" aria-label="Live decision pipeline">
+          <div class="judge-visual" id="judgeVisual" data-flow="idle">
+            <div class="judge-flow" aria-label="Agent to Aegis to simulated wallet flow"><span>AGENT</span><i></i><b>AEGIS</b><i></i><span>SIMULATED WALLET</span></div>
+            <strong id="judgeAmount">₹1,200 → CloudGrid</strong>
+            <div class="judge-live-meta">
+              <div><small>CURRENT RULE</small><b id="judgeCurrentRule">NOT STARTED</b></div>
+              <div><small>POLICY</small><b id="judgePolicyVersion">PROCUREMENT-V4</b></div>
+              <div><small>RISK</small><b id="judgeRiskState">NORMAL · 12/100</b></div>
+            </div>
+            <div class="judge-scenario-visual" id="judgeScenarioVisual"><span class="hidden" id="judgeSettlementCountdown">0</span></div>
+          </div>
+          <ol class="judge-pipeline" id="judgePipeline" aria-label="Decision pipeline stages"></ol>
+          <div class="judge-result" id="judgeResult" role="status" aria-live="polite"><span>READY · Waiting for the presenter.</span></div>
+          <button class="judge-trace-toggle hidden" id="judgeTraceToggle" aria-expanded="false" aria-controls="judgeRuleTrace">View rule trace</button>
+          <div class="judge-rule-trace hidden" id="judgeRuleTrace"></div>
+        </section>
+      </div>
+      <div class="judge-foot">
+        <div class="judge-restart-controls"><button class="secondary-cta" id="judgeReset">Restart Demo</button><button class="secondary-cta" id="judgeRestart">Restart Scenario</button></div>
+        <div class="judge-navigation"><button class="secondary-cta" id="judgePrev" disabled>Previous</button><button class="primary-cta compact" id="judgeNext">RUN SCENARIO</button></div>
+      </div>
     </div>
   </div>
 

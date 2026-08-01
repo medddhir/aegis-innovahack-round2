@@ -6,6 +6,6 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "python3 -m http.server 4173 -d dist",
-    "test": "node tests/policy-engine.test.js"
+    "test": "node tests/run-tests.js"
   }
 }

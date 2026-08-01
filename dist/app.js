@@ -4,6 +4,13 @@ import {
   RULES,
   runPolicyDigitalTwin,
 } from './policy-engine.js';
+import {
+  JUDGE_MODE_STATES,
+  JudgeModeStateMachine,
+  deriveDecisionPipeline,
+  extractLedgerEvidence,
+  extractRuleTrace,
+} from './judge-mode.js';
 
 const JUDGE_SCENARIOS = [
   {
@@ -47,12 +54,17 @@ const state = {
   pendingIntentId: null,
   replayIndex: 0,
   replayTimer: null,
-  judgeIndex: 0,
   eventCursor: 0,
   twinResults: null,
   twinTimers: [],
-  judgeActionTimer: null,
+  judgeEvidence: new Map(),
+  judgeView: null,
+  judgePreviousFocus: null,
+  renderedEventIds: new Set(),
+  animationFrames: new Map(),
 };
+
+const judgeMachine = new JudgeModeStateMachine({ scenarioCount: JUDGE_SCENARIOS.length });
 
 const DEMO_START = new Date('2026-08-01T09:42:31.000Z').getTime();
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -62,6 +74,44 @@ const displayTime = value => new Date(value).toLocaleTimeString('en-GB', { hour1
 const displayDecision = decision => ({ APPROVE: 'APPROVED', HOLD: 'HOLD', REQUIRE_APPROVAL: 'REQUIRE APPROVAL', BLOCK: 'BLOCKED', INVALIDATE: 'INVALIDATED', FREEZE: 'FROZEN' }[decision] ?? decision);
 const decisionClass = decision => decision === 'APPROVE' ? 'approved' : decision === 'HOLD' || decision === 'REQUIRE_APPROVAL' ? 'pending' : 'blocked';
 const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function cancelMetricAnimations() {
+  for (const frame of state.animationFrames.values()) cancelAnimationFrame(frame);
+  state.animationFrames.clear();
+}
+
+function animateMetric(element, nextValue, formatter = value => String(Math.round(value))) {
+  const previousValue = Number(element.dataset.metricValue);
+  const target = Number(nextValue);
+  const existingFrame = state.animationFrames.get(element);
+  if (existingFrame) cancelAnimationFrame(existingFrame);
+  element.dataset.metricValue = String(target);
+  if (!Number.isFinite(previousValue) || previousValue === target || reducedMotion()) {
+    element.textContent = formatter(target);
+    return;
+  }
+  const startedAt = performance.now();
+  const duration = 360;
+  const step = now => {
+    const progress = Math.min(1, (now - startedAt) / duration);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    element.textContent = formatter(previousValue + (target - previousValue) * eased);
+    if (progress < 1) {
+      state.animationFrames.set(element, requestAnimationFrame(step));
+    } else {
+      state.animationFrames.delete(element);
+      element.textContent = formatter(target);
+    }
+  };
+  state.animationFrames.set(element, requestAnimationFrame(step));
+}
+
+function pulseOnce(element, className) {
+  element.classList.remove(className);
+  void element.offsetWidth;
+  element.classList.add(className);
+}
 
 function nextTimestamp(stepMs = 1_000) {
   const timestamp = new Date(state.logicalTime).toISOString();
@@ -133,23 +183,25 @@ function renderEvents() {
   }
   stream.innerHTML = events.map(event => {
     const item = ledgerPresentation(event);
-    return `<div class="event-item">
+    const isNew = !state.renderedEventIds.has(event.id);
+    return `<div class="event-item${isNew ? ' is-new' : ''}" data-event-id="${event.id}">
       <span class="event-time">${displayTime(event.timestamp)}</span>
       <div class="event-main"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small></div>
       <span class="event-status ${item.kind}">${escapeHTML(item.status)}</span>
     </div>`;
   }).join('');
+  events.forEach(event => state.renderedEventIds.add(event.id));
 }
 
 function renderMetrics() {
   const snapshot = state.engine.getSnapshot();
-  $('#budgetRemaining').textContent = formatINR(snapshot.budgetRemaining);
+  animateMetric($('#budgetRemaining'), snapshot.budgetRemaining, formatINR);
   $('#budgetTotalDisplay').textContent = formatINR(snapshot.policy.totalTaskBudget);
   $('#budgetBar').style.width = `${Math.min(100, (snapshot.taskSpent / snapshot.policy.totalTaskBudget) * 100)}%`;
-  $('#protectedValue').textContent = formatINR(snapshot.protectedValue);
-  $('#approvedCount').textContent = snapshot.approvedCount;
-  $('#blockedCount').textContent = snapshot.blockedCount;
-  $('#pendingCount').textContent = snapshot.pendingCount;
+  animateMetric($('#protectedValue'), snapshot.protectedValue, formatINR);
+  animateMetric($('#approvedCount'), snapshot.approvedCount);
+  animateMetric($('#blockedCount'), snapshot.blockedCount);
+  animateMetric($('#pendingCount'), snapshot.pendingCount);
   $('#topPolicy').textContent = snapshot.policyLabel;
   $('#capsulePolicyVersion').textContent = `POLICY VERSION · ${snapshot.policyLabel}`;
   $('#capsuleVendorCount').textContent = snapshot.policy.approvedRecipients.length;
@@ -159,15 +211,18 @@ function renderMetrics() {
 function renderRisk() {
   const { risk } = state.engine.getSnapshot();
   const className = `state-${risk.state.toLowerCase()}`;
+  const priorState = $('#stateValue').dataset.riskState;
   $('#topAgentState').textContent = risk.state;
   $('#topAgentState').className = className;
   $('#stateValue').textContent = risk.state;
   $('#stateValue').className = className;
-  $('#riskValue').textContent = risk.score;
+  $('#stateValue').dataset.riskState = risk.state;
+  animateMetric($('#riskValue'), risk.score);
   $('#riskBar').style.width = `${risk.score}%`;
   $('#riskBar').style.background = risk.score >= 80 ? 'var(--red)' : risk.score >= 55 ? 'var(--orange)' : risk.score >= 30 ? 'var(--amber)' : 'var(--green)';
   $('#stateOrb span').style.borderColor = risk.score >= 80 ? 'rgba(255,79,102,.45)' : risk.score >= 55 ? 'rgba(255,122,69,.45)' : risk.score >= 30 ? 'rgba(255,184,77,.45)' : 'rgba(66,211,146,.28)';
   $$('.risk-step').forEach(step => step.classList.toggle('active', step.dataset.state === risk.state));
+  if (priorState && priorState !== risk.state) pulseOnce($('#stateOrb'), 'state-transition');
 
   const velocity = risk.signals.transactionVelocity;
   const values = [
@@ -209,14 +264,18 @@ function afterDecision(result, options = {}) {
   return result;
 }
 
-function runSafe() {
+function runSafe({ present = true } = {}) {
   const intent = makeIntent('SAFE', { amount: 1_200, recipient: 'CloudGrid' });
-  return afterDecision(state.engine.processIntent(intent));
+  const result = state.engine.processIntent(intent);
+  if (present) afterDecision(result);
+  return result;
 }
 
-function runOverspend() {
+function runOverspend({ present = true } = {}) {
   const intent = makeIntent('OVERSPEND', { amount: 8_500, recipient: 'CloudGrid' });
-  return afterDecision(state.engine.processIntent(intent), { attackResult: true });
+  const result = state.engine.processIntent(intent);
+  if (present) afterDecision(result, { attackResult: true });
+  return result;
 }
 
 function runUnknown() {
@@ -224,20 +283,26 @@ function runUnknown() {
   return afterDecision(state.engine.processIntent(intent), { attackResult: true });
 }
 
-function runEvasion() {
-  const intents = Array.from({ length: 4 }, (_, index) => makeIntent('SPLIT', {
+function runEvasion({ present = true } = {}) {
+  const start = state.logicalTime;
+  const offsets = [0, 3_000, 7_000, 11_000];
+  const intents = offsets.map((offset, index) => makeIntent('SPLIT', {
     amount: 1_999,
     recipient: 'CloudGrid',
-    requestedAt: nextTimestamp(3_000),
+    requestedAt: new Date(start + offset).toISOString(),
   }));
+  state.logicalTime = start + 12_000;
   const results = state.engine.processIntentBatch(intents, { incidentId: `SPLIT-${state.intentSequence}` });
   const result = results.at(-1);
   const total = intents.reduce((sum, intent) => sum + intent.amount, 0);
-  return afterDecision(result, {
-    attackResult: true,
-    cluster: true,
-    reason: `${intents.length} related requests were evaluated as one ${formatINR(total)} coordinated attempt. ${result.reason}`,
-  });
+  if (present) {
+    afterDecision(result, {
+      attackResult: true,
+      cluster: true,
+      reason: `${intents.length} related requests were evaluated as one ${formatINR(total)} coordinated attempt. ${result.reason}`,
+    });
+  }
+  return result;
 }
 
 function runRapid() {
@@ -249,13 +314,15 @@ function runRapid() {
   return afterDecision(results.at(-1), { attackResult: true });
 }
 
-function injectRisk() {
+function injectRisk({ present = true } = {}) {
   const currentRisk = state.engine.getSnapshot().risk;
   if (['RESTRICTED', 'QUARANTINED'].includes(currentRisk.state)) {
     const probe = makeIntent('RISK-PROBE', { amount: 900, recipient: 'ComputeHub' });
     const result = state.engine.processIntent(probe);
-    renderAll();
-    toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+    if (present) {
+      renderAll();
+      toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+    }
     return result;
   }
   const first = makeIntent('RISK', { amount: 8_500, recipient: 'CloudGrid' });
@@ -263,8 +330,10 @@ function injectRisk() {
   state.engine.processIntent(first, { incidentId });
   const retry = makeIntent('RISK-RETRY', { amount: 900, recipient: 'CloudGrid' });
   const result = state.engine.processIntent(retry, { incidentId });
-  renderAll();
-  toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+  if (present) {
+    renderAll();
+    toast(`Risk Governor calculated ${result.riskState} at ${result.riskScore}/100`);
+  }
   return result;
 }
 
@@ -274,7 +343,7 @@ function clearPendingTimer(hide = true) {
   if (hide) $('#pendingBanner').classList.add('hidden');
 }
 
-function startPending(seconds) {
+function startPending(seconds, { managedByJudge = false } = {}) {
   clearPendingTimer();
   const intent = makeIntent('PENDING', { amount: 1_500, recipient: 'ComputeHub' });
   let result = state.engine.authoriseIntent(intent);
@@ -290,6 +359,11 @@ function startPending(seconds) {
   }
   state.pendingIntentId = result.intent.id;
   state.pendingSeconds = seconds ?? Math.ceil(result.settlementDelayMs / 1_000);
+  if (managedByJudge) {
+    $('#pendingBanner').classList.add('hidden');
+    renderAll();
+    return result;
+  }
   $('#pendingBanner').classList.remove('hidden');
   $('#countdown').textContent = state.pendingSeconds;
   $('#pendingTrack').style.width = '0%';
@@ -309,7 +383,7 @@ function startPending(seconds) {
   return result;
 }
 
-function settlePending() {
+function settlePending({ present = true } = {}) {
   if (!state.pendingIntentId) return null;
   clearPendingTimer(false);
   const pendingId = state.pendingIntentId;
@@ -319,11 +393,12 @@ function settlePending() {
     ? state.engine.settleIntent(pendingId)
     : null;
   $('#pendingBanner').classList.add('hidden');
-  if (result) afterDecision(result, { attackResult: true });
+  if (result && present) afterDecision(result, { attackResult: true });
+  if (result && !present) renderAll();
   return result;
 }
 
-function freezeAgent() {
+function performOwnerFreeze({ present = true } = {}) {
   const result = state.engine.freezeAgent({
     ownerId: state.engine.policy.ownerId,
     timestamp: nextTimestamp(),
@@ -332,13 +407,18 @@ function freezeAgent() {
   state.pendingIntentId = null;
   renderAll();
   const invalidatedEvent = result.invalidated.at(-1);
-  if (invalidatedEvent) {
+  if (invalidatedEvent && present) {
     showAttackResult({ ...invalidatedEvent, fundsMoved: invalidatedEvent.fundsMoved }, { reason: invalidatedEvent.reason });
     toast('Agent frozen — pending intent invalidated before settlement');
-  } else {
+  } else if (present) {
     toast('Owner froze all agent financial authority');
   }
-  return invalidatedEvent ?? result.freezeEvent;
+  pulseOnce($('#control-centre'), 'freeze-pulse');
+  return { result, outcome: invalidatedEvent ?? result.freezeEvent };
+}
+
+function freezeAgent() {
+  return performOwnerFreeze().outcome;
 }
 
 function activateCapsule() {
@@ -431,7 +511,11 @@ function renderProofTerminal(event) {
   const rules = event.rulesEvaluated.map(rule => `${rule.passed ? 'PASS' : 'FAIL'} ${rule.rule}: ${rule.reason}`).join('\n                ');
   const signals = Object.entries(event.riskSignals).map(([key, value]) => `${key}=${value}`).join(' · ');
   const intent = event.intent;
-  $('#proofTerminal').textContent = `$ aegis verify --event ${event.id}\n\nINTENT         ${intent?.id ?? 'N/A'}\nAGENT          ${event.agent}\nOWNER          ${event.owner}\nTASK           ${event.activeTask.id} · ${event.activeTask.name}\nPOLICY         ${event.policyLabel} (active version ${event.policyVersion})\nEVENT          ${event.eventType}\nTIMESTAMP      ${event.timestamp}\nDECISION       ${event.decision}\nRULE           ${event.ruleChecked}\nRULE TRACE     ${rules || 'No transaction rules required'}\nRISK STATE     ${event.riskState} (${event.riskScore}/100)\nRISK SIGNALS   ${signals}\nOWNER ACTION   ${event.ownerAction ?? 'NONE'}\nFINAL STATUS   ${event.finalSettlementStatus}\nFUNDS MOVED    ${formatINR(event.fundsMoved)} (simulated)\n\n✓ Decision trace recorded\n✓ Policy version recorded\n✓ Final settlement evidence recorded`;
+  const terminal = $('#proofTerminal');
+  const changed = terminal.dataset.eventId !== event.id;
+  terminal.dataset.eventId = event.id;
+  terminal.textContent = `$ aegis verify --event ${event.id}\n\nINTENT         ${intent?.id ?? 'N/A'}\nAGENT          ${event.agent}\nOWNER          ${event.owner}\nTASK           ${event.activeTask.id} · ${event.activeTask.name}\nPOLICY         ${event.policyLabel} (active version ${event.policyVersion})\nEVENT          ${event.eventType}\nTIMESTAMP      ${event.timestamp}\nDECISION       ${event.decision}\nRULE           ${event.ruleChecked}\nRULE TRACE     ${rules || 'No transaction rules required'}\nRISK STATE     ${event.riskState} (${event.riskScore}/100)\nRISK SIGNALS   ${signals}\nOWNER ACTION   ${event.ownerAction ?? 'NONE'}\nFINAL STATUS   ${event.finalSettlementStatus}\nFUNDS MOVED    ${formatINR(event.fundsMoved)} (simulated)\n\n✓ Decision trace recorded\n✓ Policy version recorded\n✓ Final settlement evidence recorded`;
+  if (changed) pulseOnce(terminal, 'terminal-reveal');
 }
 
 function stepReplay(delta) {
@@ -468,11 +552,13 @@ function switchView(view) {
   $('#controlTitle').textContent = titles[view];
 }
 
-function resetEnvironment() {
+function resetEnvironment({ notify = true, preserveView = false, resetJudge = true } = {}) {
   clearPendingTimer();
   clearInterval(state.replayTimer);
   state.twinTimers.forEach(timer => clearTimeout(timer));
-  clearTimeout(state.judgeActionTimer);
+  if (resetJudge) judgeMachine.reset({ preserveOpen: false });
+  else judgeMachine.clearAsync();
+  cancelMetricAnimations();
   createEngine();
   Object.assign(state, {
     pendingSeconds: 0,
@@ -480,11 +566,12 @@ function resetEnvironment() {
     countdownId: null,
     replayIndex: 0,
     replayTimer: null,
-    judgeIndex: 0,
     eventCursor: 0,
     twinResults: null,
     twinTimers: [],
-    judgeActionTimer: null,
+    judgeEvidence: new Map(),
+    judgeView: null,
+    renderedEventIds: new Set(),
   });
   $('#pendingBanner').classList.add('hidden');
   $('#pendingTrack').style.width = '0%';
@@ -507,9 +594,15 @@ function resetEnvironment() {
   $('#capsuleSummary').textContent = 'Procurement-07 may spend up to ₹10,000 on cloud infrastructure, only through CloudGrid and ComputeHub, until 18:00.';
   $('#capsuleBudgetDisplay').textContent = '₹10,000';
   $('#capsuleCapDisplay').textContent = '₹2,500';
+  $('#proofTerminal').dataset.eventId = '';
   renderAll();
-  switchView('overview');
-  toast('Demo environment restored to its deterministic baseline');
+  if (resetJudge && !$('#judgeModal').classList.contains('hidden')) {
+    $('#judgeModal').classList.add('hidden');
+    document.body.classList.remove('judge-open');
+    setPageInert(false);
+  }
+  if (!preserveView) switchView('overview');
+  if (notify) toast('Demo environment restored to its deterministic baseline');
 }
 
 function executeScenario(name) {
@@ -522,87 +615,501 @@ function executeScenario(name) {
   return null;
 }
 
-function openJudgeMode() {
-  state.judgeIndex = 0;
-  updateJudgeModal();
-  $('#judgeModal').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+const judgeDelay = milliseconds => reducedMotion() ? 0 : milliseconds;
+
+function setPageInert(inert) {
+  $$('body > header, body > main, body > footer').forEach(element => {
+    element.inert = inert;
+    if (inert) element.setAttribute('aria-hidden', 'true');
+    else element.removeAttribute('aria-hidden');
+  });
 }
 
-function closeJudgeMode() {
-  $('#judgeModal').classList.add('hidden');
-  document.body.style.overflow = '';
+function authorisationEventFor(result) {
+  if (!result?.intent?.id) return null;
+  return state.engine.getLedger().find(event => event.intent?.id === result.intent.id && event.eventType === 'AUTHORISATION') ?? null;
+}
+
+function normaliseLedgerResult(event) {
+  return {
+    decision: event.decision,
+    intent: event.intent,
+    ruleChecked: event.ruleChecked,
+    rulePassed: !event.rulesEvaluated.some(rule => !rule.passed),
+    reason: event.reason,
+    activePolicyVersion: event.policyVersion,
+    riskState: event.riskState,
+    riskScore: event.riskScore,
+    fundsMoved: event.fundsMoved,
+    timestamp: event.timestamp,
+    rulesEvaluated: event.rulesEvaluated,
+    ledgerEvent: event,
+  };
+}
+
+function judgeFlowFor(result) {
+  if (result.decision === 'APPROVE') return 'approved';
+  if (result.decision === 'HOLD' || result.decision === 'REQUIRE_APPROVAL') return 'pending';
+  if (result.decision === 'INVALIDATE') return 'invalidated';
+  return 'blocked';
+}
+
+function makeJudgeView(result, {
+  title = displayDecision(result.decision),
+  detail = result.reason,
+  facts = [],
+  visual = '',
+  pipeline = null,
+  authorisationEvent = authorisationEventFor(result),
+} = {}) {
+  return {
+    result,
+    title,
+    detail,
+    facts,
+    visual,
+    pipeline: pipeline ?? deriveDecisionPipeline(result, authorisationEvent),
+    trace: extractRuleTrace(result),
+    flow: judgeFlowFor(result),
+    currentRule: result.ruleChecked,
+    policyVersion: result.activePolicyVersion ?? result.ledgerEvent?.policyVersion,
+    riskState: result.riskState,
+    riskScore: result.riskScore,
+  };
+}
+
+function renderJudgeFacts(facts = []) {
+  $('#judgeFacts').innerHTML = facts.map(({ label, value, tone = '' }) => `<div class="${escapeHTML(tone)}"><small>${escapeHTML(label)}</small><b>${escapeHTML(value)}</b></div>`).join('');
+}
+
+function renderJudgePipeline(pipeline = [], activeStage = null) {
+  const icons = { passed: '✓', failed: '■', hold: 'Ⅱ', idle: '○', active: '→' };
+  $('#judgePipeline').innerHTML = pipeline.map((stage, index) => {
+    let status = stage.status;
+    if (activeStage !== null) {
+      if (index === activeStage) status = 'active';
+      if (index > activeStage) status = 'idle';
+    }
+    return `<li class="${status}" aria-label="${escapeHTML(`${stage.label}: ${status}`)}"><i aria-hidden="true">${icons[status]}</i><div><b>${escapeHTML(stage.label)}</b><small>${escapeHTML(stage.detail)}</small></div></li>`;
+  }).join('');
+}
+
+function renderJudgeTrace(trace = []) {
+  const toggle = $('#judgeTraceToggle');
+  const panel = $('#judgeRuleTrace');
+  toggle.classList.toggle('hidden', trace.length === 0);
+  panel.innerHTML = trace.map((rule, index) => `<div class="${rule.passed ? 'passed' : 'failed'}"><span>${String(index + 1).padStart(2, '0')}</span><b>${rule.passed ? 'PASS' : 'FAIL'} · ${escapeHTML(rule.rule)}</b><p>${escapeHTML(rule.reason)}</p></div>`).join('');
+}
+
+function renderJudgeView(view, { activeStage = null, statusText = null } = {}) {
+  state.judgeView = view;
+  $('#judgeVisual').dataset.flow = activeStage === null ? view.flow : 'running';
+  $('#judgeCurrentRule').textContent = view.currentRule ?? 'NOT APPLICABLE';
+  $('#judgePolicyVersion').textContent = view.policyVersion ? `PROCUREMENT-V${view.policyVersion}` : state.engine.getSnapshot().policyLabel;
+  $('#judgeRiskState').textContent = `${view.riskState ?? 'NORMAL'} · ${view.riskScore ?? 0}/100`;
+  $('#judgeScenarioVisual').innerHTML = view.visual;
+  renderJudgeFacts(view.facts);
+  renderJudgePipeline(view.pipeline, activeStage);
+  renderJudgeTrace(view.trace);
+  const result = $('#judgeResult');
+  result.className = `judge-result ${activeStage !== null ? 'running' : decisionClass(view.result.decision)}`;
+  result.innerHTML = `<strong>${escapeHTML(statusText ?? view.title)}</strong><span>${escapeHTML(view.detail)}</span><small>FUNDS MOVED · ${escapeHTML(formatINR(view.result.fundsMoved))} · SIMULATED ONLY</small>`;
+}
+
+function renderJudgeControls() {
+  const snapshot = judgeMachine.snapshot();
+  const scenario = JUDGE_SCENARIOS[snapshot.scenarioIndex];
+  const badge = $('#judgeStateBadge');
+  const readableState = snapshot.status === JUDGE_MODE_STATES.AWAITING_OWNER_ACTION ? 'AWAITING OWNER' : snapshot.status;
+  badge.textContent = readableState;
+  badge.className = `judge-state-badge ${snapshot.status.toLowerCase().replaceAll('_', '-')}`;
+  $('#judgeCard').setAttribute('aria-busy', String(snapshot.status === JUDGE_MODE_STATES.RUNNING));
+  $('#judgePrev').disabled = !snapshot.canPrevious;
+  $('#judgeNext').disabled = snapshot.status === JUDGE_MODE_STATES.RUNNING;
+  $('#judgeRestart').disabled = snapshot.status === JUDGE_MODE_STATES.RUNNING;
+  $('#judgeRestart').classList.toggle('hidden', snapshot.scenarioIndex !== 4 && snapshot.status !== JUDGE_MODE_STATES.ERROR);
+
+  if (snapshot.status === JUDGE_MODE_STATES.READY) $('#judgeNext').textContent = 'RUN SCENARIO';
+  if (snapshot.status === JUDGE_MODE_STATES.RUNNING) $('#judgeNext').textContent = 'EVALUATING…';
+  if (snapshot.status === JUDGE_MODE_STATES.AWAITING_OWNER_ACTION) $('#judgeNext').textContent = 'ACTIVATE KILL SWITCH';
+  if (snapshot.status === JUDGE_MODE_STATES.ERROR) $('#judgeNext').textContent = 'RESTART SCENARIO';
+  if (snapshot.status === JUDGE_MODE_STATES.COMPLETE) $('#judgeNext').textContent = snapshot.scenarioIndex === JUDGE_SCENARIOS.length - 1 ? 'OPEN FORENSIC PROOF' : 'NEXT SCENARIO';
+  $('#judgeNext').setAttribute('aria-label', `${$('#judgeNext').textContent}: ${scenario.title}`);
 }
 
 function updateJudgeModal() {
-  const scenario = JUDGE_SCENARIOS[state.judgeIndex];
-  $('#judgeProgress').textContent = `SCENARIO ${state.judgeIndex + 1} OF ${JUDGE_SCENARIOS.length}`;
+  const snapshot = judgeMachine.snapshot();
+  const scenario = JUDGE_SCENARIOS[snapshot.scenarioIndex];
+  $('#judgeProgress').textContent = `SCENARIO ${snapshot.scenarioIndex + 1} OF ${JUDGE_SCENARIOS.length}`;
   $('#judgeNumber').textContent = scenario.number;
   $('#judgeFeature').textContent = scenario.feature;
   $('#judgeTitle').textContent = scenario.title;
   $('#judgeDescription').textContent = scenario.description;
   $('#judgeAmount').textContent = scenario.amount;
+  $('#judgeVisual').dataset.flow = 'idle';
+  $('#judgeCurrentRule').textContent = 'NOT STARTED';
+  const baseline = state.engine.getSnapshot();
+  $('#judgePolicyVersion').textContent = baseline.policyLabel;
+  $('#judgeRiskState').textContent = `${baseline.risk.state} · ${baseline.risk.score}/100`;
+  $('#judgeScenarioVisual').innerHTML = '';
+  $('#judgeFacts').innerHTML = '';
+  renderJudgePipeline([
+    { label: 'INTENT RECEIVED', status: 'idle', detail: 'Waiting to start' },
+    { label: 'POLICY EVALUATION', status: 'idle', detail: 'Not reached' },
+    { label: 'AUTHORISATION', status: 'idle', detail: 'Not reached' },
+    { label: 'FINAL REVALIDATION', status: 'idle', detail: 'Not reached' },
+  ]);
   $('#judgeResult').className = 'judge-result';
-  $('#judgeResult').innerHTML = '<span>Ready to run through the canonical engine</span>';
-  $('#judgeNext').textContent = 'Run Scenario';
+  $('#judgeResult').innerHTML = '<strong>READY</strong><span>Waiting for the presenter to run the actual engine scenario.</span><small>ALL AMOUNTS ARE SIMULATED</small>';
+  $('#judgeTraceToggle').classList.add('hidden');
+  $('#judgeTraceToggle').setAttribute('aria-expanded', 'false');
+  $('#judgeRuleTrace').classList.add('hidden');
+  $('#judgeRuleTrace').innerHTML = '';
+  state.judgeView = null;
+  renderJudgeControls();
 }
 
-function renderJudgeResult(result, customText) {
-  const panel = $('#judgeResult');
-  panel.className = `judge-result ${decisionClass(result.decision)}`;
-  panel.innerHTML = `<span>${escapeHTML(customText ?? `${displayDecision(result.decision)} · ${result.reason}`)}</span>`;
-}
-
-function runJudgeScenario() {
-  const scenario = JUDGE_SCENARIOS[state.judgeIndex];
-  if ($('#judgeNext').textContent === 'Next Scenario' || $('#judgeNext').textContent === 'Open Forensic Proof') {
-    if (state.judgeIndex < JUDGE_SCENARIOS.length - 1) {
-      state.judgeIndex += 1;
-      updateJudgeModal();
-    } else {
-      closeJudgeMode();
-      switchView('forensics');
-      $('#control-centre').scrollIntoView({ behavior: 'smooth' });
+function guardJudgeCallback(callback, token) {
+  return () => {
+    try {
+      callback();
+    } catch (error) {
+      showJudgeError(error, token);
     }
+  };
+}
+
+function playJudgeResult(view, token, { awaitingOwner = false } = {}) {
+  state.judgeView = view;
+  renderJudgeView(view, { activeStage: 0, statusText: 'INTENT RECEIVED' });
+  renderJudgeControls();
+  judgeMachine.schedule(guardJudgeCallback(() => renderJudgeView(view, { activeStage: 1, statusText: `EVALUATING · ${view.currentRule}` }), token), judgeDelay(160), token);
+  judgeMachine.schedule(guardJudgeCallback(() => {
+    renderJudgeView(view);
+    if (awaitingOwner) beginJudgeOwnerWindow(view, token);
+    else judgeMachine.complete(token);
+    renderJudgeControls();
+  }, token), judgeDelay(420), token);
+}
+
+function recordEvasionEvidence(beforeRisk, ledgerStart, result) {
+  const afterRisk = state.engine.getSnapshot().risk;
+  const events = state.engine.getLedger().slice(ledgerStart);
+  const intents = events.filter(event => event.intent?.id.includes('SPLIT')).map(event => event.intent);
+  const uniqueIntents = [...new Map(intents.map(intent => [intent.id, intent])).values()];
+  state.judgeEvidence.set(2, { result, beforeRisk, afterRisk, events, intents: uniqueIntents });
+  return state.judgeEvidence.get(2);
+}
+
+function scenarioOneView(result) {
+  const authorisation = authorisationEventFor(result);
+  return makeJudgeView(result, {
+    title: 'SETTLED AFTER FINAL REVALIDATION',
+    facts: [
+      { label: 'APPROVED RECIPIENT', value: result.intent.recipient, tone: 'passed' },
+      { label: 'REQUEST / CAP', value: `${formatINR(result.intent.amount)} / ${formatINR(state.engine.policy.perTransactionCap)}` },
+      { label: 'PHASE 1', value: authorisation?.finalSettlementStatus ?? 'PENDING_SETTLEMENT', tone: 'hold' },
+      { label: 'PHASE 2', value: result.intent.status, tone: 'passed' },
+    ],
+    visual: '<div class="judge-payment-path passed"><span>ALLOWLIST MATCH</span><i>→</i><span>CAP RESPECTED</span><i>→</i><span>SETTLED</span></div>',
+    authorisationEvent: authorisation,
+  });
+}
+
+function scenarioTwoView(result) {
+  const cap = state.engine.policy.perTransactionCap;
+  return makeJudgeView(result, {
+    title: 'BLOCKED AT AEGIS',
+    facts: [
+      { label: 'REQUESTED', value: formatINR(result.intent.amount) },
+      { label: 'CURRENT CAP', value: formatINR(cap) },
+      { label: 'EXACT EXCESS', value: formatINR(result.intent.amount - cap), tone: 'failed' },
+      { label: 'FIRST FAILING RULE', value: result.rulesEvaluated.find(rule => !rule.passed)?.rule ?? result.ruleChecked, tone: 'failed' },
+    ],
+    visual: `<div class="judge-limit"><span>${escapeHTML(formatINR(result.intent.amount))} REQUEST</span><i>−</i><span>${escapeHTML(formatINR(cap))} CAP</span><b>= ${escapeHTML(formatINR(result.intent.amount - cap))} EXCESS</b></div>`,
+  });
+}
+
+function scenarioThreeView(result, evidence) {
+  const attempted = evidence.intents.reduce((sum, intent) => sum + intent.amount, 0);
+  const start = new Date(evidence.intents.at(0).requestedAt).getTime();
+  const end = new Date(evidence.intents.at(-1).requestedAt).getTime();
+  const observedSeconds = Math.round((end - start) / 1_000);
+  return makeJudgeView(result, {
+    title: 'COORDINATED ATTACK BLOCKED',
+    facts: [
+      { label: 'INDIVIDUAL INTENTS', value: evidence.intents.map(intent => formatINR(intent.amount)).join(' · ') },
+      { label: 'GROUPED VALUE', value: formatINR(attempted), tone: 'failed' },
+      { label: 'OBSERVED WINDOW', value: `${observedSeconds}s / ${Math.round(state.engine.policy.evasionWindowMs / 1_000)}s detection window` },
+      { label: 'ENGINE RESULT', value: 'ONE COORDINATED ATTACK', tone: 'failed' },
+    ],
+    visual: `<div class="judge-split-group">${evidence.intents.map(intent => `<span>${escapeHTML(formatINR(intent.amount))}</span>`).join('')}<b>GROUPED → ${escapeHTML(formatINR(attempted))}</b></div>`,
+  });
+}
+
+function scenarioFourView(evidence) {
+  if (!evidence) throw new Error('Risk evidence is unavailable. Restart this scenario to rebuild the deterministic sequence.');
+  const before = evidence.beforeRisk;
+  const after = evidence.afterRisk;
+  const signals = Object.entries(after.signals)
+    .map(([key, value]) => ({ key, before: before.signals[key], after: value }))
+    .filter(signal => signal.before !== signal.after);
+  const result = evidence.result;
+  return makeJudgeView(result, {
+    title: `${before.state} → ${after.state}`,
+    detail: after.response,
+    facts: [
+      { label: 'ORIGINAL STATE', value: `${before.state} · ${before.score}/100` },
+      { label: 'SIGNALS ADDED', value: signals.map(signal => `${signal.key}: ${signal.before}→${signal.after}`).join(' · '), tone: 'hold' },
+      { label: 'CALCULATED SCORE', value: `${after.score}/100`, tone: 'failed' },
+      { label: 'AUTOMATIC RESTRICTIONS', value: after.response, tone: 'failed' },
+    ],
+    visual: `<div class="judge-risk-transition"><span>${escapeHTML(before.state)}<small>${before.score}/100</small></span><i>→</i><b>${escapeHTML(after.state)}<small>${after.score}/100</small></b></div>`,
+  });
+}
+
+function scenarioFivePendingView(result) {
+  const seconds = Math.ceil(result.settlementDelayMs / 1_000);
+  return makeJudgeView(result, {
+    title: 'PENDING SETTLEMENT · OWNER CONTROL AVAILABLE',
+    detail: 'Phase 1 passed. Activate the owner kill switch before final revalidation, or allow the real engine settlement to occur.',
+    facts: [
+      { label: 'PHASE 1', value: 'AUTHORISED', tone: 'passed' },
+      { label: 'FINAL STATUS', value: result.intent.status, tone: 'hold' },
+      { label: 'POLICY VERSION', value: `PROCUREMENT-V${result.activePolicyVersion}` },
+      { label: 'FUNDS MOVED', value: formatINR(result.fundsMoved), tone: 'hold' },
+    ],
+    visual: `<div class="judge-countdown"><small>FINAL REVALIDATION IN</small><b id="judgeSettlementCountdown">${seconds}</b><span>SECONDS · OWNER WINDOW OPEN</span></div>`,
+    authorisationEvent: result.ledgerEvent,
+  });
+}
+
+function scenarioSixView(evidence) {
+  if (!evidence) throw new Error('No ledger evidence is available. Restart the demo and run a policy scenario first.');
+  const result = normaliseLedgerResult(evidence.event);
+  return makeJudgeView(result, {
+    title: 'ORDERED ENGINE EVIDENCE READY',
+    detail: evidence.reason,
+    facts: [
+      { label: 'LEDGER EVENTS', value: String(evidence.ledgerEventCount) },
+      { label: 'SELECTED EVENT / INTENT', value: `${evidence.selectedEventId} / ${evidence.intentId}` },
+      { label: 'POLICY / RULE', value: `${evidence.policyLabel} / ${evidence.rule}` },
+      { label: 'OWNER ACTION / FINAL', value: `${evidence.ownerAction} / ${evidence.finalStatus} / ${formatINR(evidence.fundsMoved)}` },
+    ],
+    visual: `<pre class="judge-terminal">$ aegis verify --event ${escapeHTML(evidence.selectedEventId)}\nDECISION  ${escapeHTML(evidence.decision)}\nRULE      ${escapeHTML(evidence.rule)}\nSTATUS    ${escapeHTML(evidence.finalStatus)}\nFUNDS     ${escapeHTML(formatINR(evidence.fundsMoved))} (SIMULATED)</pre>`,
+  });
+}
+
+function beginJudgeOwnerWindow(view, token) {
+  if (!judgeMachine.awaitOwnerAction(token)) return;
+  state.pendingSeconds = Math.ceil(view.result.settlementDelayMs / 1_000);
+  renderJudgeControls();
+  judgeMachine.every(guardJudgeCallback(() => {
+    state.pendingSeconds -= 1;
+    const countdown = $('#judgeSettlementCountdown');
+    if (countdown) countdown.textContent = Math.max(0, state.pendingSeconds);
+    if (state.pendingSeconds <= 0) settleJudgePending(token);
+  }, token), 1_000, token);
+}
+
+function settleJudgePending(token) {
+  if (!judgeMachine.resumeFromOwnerAction(token)) return;
+  judgeMachine.clearAsync();
+  const result = settlePending({ present: false });
+  if (!result) return showJudgeError(new Error('The pending intent was no longer available for final revalidation.'), token);
+  const view = makeJudgeView(result, {
+    title: 'SETTLED · OWNER DID NOT FREEZE',
+    detail: result.reason,
+    facts: [
+      { label: 'OWNER ACTION', value: 'NO FREEZE BEFORE EXPIRY' },
+      { label: 'FINAL REVALIDATION', value: result.rulePassed ? 'PASSED' : 'FAILED', tone: result.rulePassed ? 'passed' : 'failed' },
+      { label: 'FINAL STATUS', value: result.intent.status, tone: result.decision === 'APPROVE' ? 'passed' : 'failed' },
+      { label: 'FUNDS MOVED', value: `${formatINR(result.fundsMoved)} · SIMULATED`, tone: result.fundsMoved ? 'passed' : 'failed' },
+    ],
+    authorisationEvent: state.judgeEvidence.get(4)?.pending?.ledgerEvent,
+  });
+  renderJudgeView(view);
+  judgeMachine.complete(token);
+  renderJudgeControls();
+}
+
+function activateJudgeKillSwitch() {
+  const snapshot = judgeMachine.snapshot();
+  if (snapshot.status !== JUDGE_MODE_STATES.AWAITING_OWNER_ACTION || snapshot.scenarioIndex !== 4) return;
+  const token = snapshot.runToken;
+  if (!judgeMachine.resumeFromOwnerAction(token)) return;
+  judgeMachine.clearAsync();
+  renderJudgeControls();
+  try {
+    const oldVersion = state.engine.policy.version;
+    const { outcome } = performOwnerFreeze({ present: false });
+    const result = normaliseLedgerResult(outcome);
+    const newVersion = state.engine.policy.version;
+    const view = makeJudgeView(result, {
+      title: 'INVALIDATED BEFORE THE WALLET',
+      facts: [
+        { label: 'OWNER ACTION', value: 'KILL SWITCH · VERIFIED OWNER', tone: 'failed' },
+        { label: 'POLICY VERSION', value: `V${oldVersion} → V${newVersion}`, tone: 'failed' },
+        { label: 'FINAL STATUS', value: outcome.finalSettlementStatus, tone: 'failed' },
+        { label: 'FUNDS MOVED', value: `${formatINR(outcome.fundsMoved)} · SIMULATED`, tone: 'passed' },
+      ],
+      visual: '<div class="judge-revocation"><span>PHASE 1 AUTHORISED</span><i>→</i><b>OWNER FREEZE</b><i>⊣</i><span>WALLET NOT REACHED</span></div>',
+      authorisationEvent: state.judgeEvidence.get(4)?.pending?.ledgerEvent,
+    });
+    renderJudgeView(view);
+    pulseOnce($('#judgeCard'), 'freeze-pulse');
+    judgeMachine.complete(token);
+    renderJudgeControls();
+  } catch (error) {
+    showJudgeError(error, token);
+  }
+}
+
+function executeJudgeScenario() {
+  const snapshot = judgeMachine.snapshot();
+  if (snapshot.status !== JUDGE_MODE_STATES.READY) return;
+  const token = judgeMachine.start();
+  if (!token) return;
+  renderJudgeControls();
+  $('#judgeVisual').dataset.flow = 'running';
+  $('#judgeResult').className = 'judge-result running';
+  $('#judgeResult').innerHTML = '<strong>RUNNING</strong><span>The canonical engine is evaluating the transaction intent.</span><small>NO RESULT IS DISPLAYED UNTIL THE ENGINE RETURNS</small>';
+  try {
+    let view;
+    if (snapshot.scenarioIndex === 0) view = scenarioOneView(runSafe({ present: false }));
+    if (snapshot.scenarioIndex === 1) view = scenarioTwoView(runOverspend({ present: false }));
+    if (snapshot.scenarioIndex === 2) {
+      const beforeRisk = state.engine.getSnapshot().risk;
+      const ledgerStart = state.engine.getLedger().length;
+      const result = runEvasion({ present: false });
+      view = scenarioThreeView(result, recordEvasionEvidence(beforeRisk, ledgerStart, result));
+    }
+    if (snapshot.scenarioIndex === 3) view = scenarioFourView(state.judgeEvidence.get(2));
+    if (snapshot.scenarioIndex === 4) {
+      const result = startPending(undefined, { managedByJudge: true });
+      if (result?.decision !== 'HOLD') throw new Error(result?.reason ?? 'The engine did not create a pending settlement intent.');
+      state.judgeEvidence.set(4, { pending: result });
+      view = scenarioFivePendingView(result);
+      playJudgeResult(view, token, { awaitingOwner: true });
+      return;
+    }
+    if (snapshot.scenarioIndex === 5) {
+      const evidence = extractLedgerEvidence(state.engine.getLedger());
+      view = scenarioSixView(evidence);
+      state.replayIndex = state.engine.getLedger().length - 1;
+      renderForensics();
+    }
+    if (!view) throw new Error('Judge Mode could not resolve the selected scenario.');
+    renderAll();
+    playJudgeResult(view, token);
+  } catch (error) {
+    showJudgeError(error, token);
+  }
+}
+
+function showJudgeError(error, token = judgeMachine.snapshot().runToken) {
+  judgeMachine.fail(error, token);
+  $('#judgeVisual').dataset.flow = 'blocked';
+  $('#judgeResult').className = 'judge-result blocked';
+  $('#judgeResult').innerHTML = `<strong>SAFE UI ERROR</strong><span>${escapeHTML(error instanceof Error ? error.message : String(error))}</span><small>ENGINE AND LEDGER EVIDENCE WERE PRESERVED</small>`;
+  renderJudgeControls();
+}
+
+function rebuildJudgeTo(targetIndex) {
+  resetEnvironment({ notify: false, preserveView: true, resetJudge: false });
+  if (targetIndex > 0) runSafe({ present: false });
+  if (targetIndex > 1) runOverspend({ present: false });
+  if (targetIndex > 2) {
+    const beforeRisk = state.engine.getSnapshot().risk;
+    const ledgerStart = state.engine.getLedger().length;
+    const result = runEvasion({ present: false });
+    recordEvasionEvidence(beforeRisk, ledgerStart, result);
+  }
+  renderAll();
+  judgeMachine.prepareScenario(targetIndex);
+  updateJudgeModal();
+}
+
+function restartJudgeScenario() {
+  const index = judgeMachine.snapshot().scenarioIndex;
+  if (index === 5 && state.engine.getLedger().length) {
+    judgeMachine.prepareScenario(index);
+    updateJudgeModal();
     return;
   }
-
-  let result;
-  if (scenario.action === 'safe') result = runSafe();
-  if (scenario.action === 'overspend') result = runOverspend();
-  if (scenario.action === 'evasion') result = runEvasion();
-  if (scenario.action === 'risk') {
-    result = injectRisk();
-    renderJudgeResult(result, `${result.riskState} · Calculated risk ${result.riskScore}/100. ${state.engine.getSnapshot().risk.response}`);
-  }
-  if (scenario.action === 'freezePending') {
-    result = startPending(8);
-    renderJudgeResult(result);
-    if (result?.decision === 'HOLD') {
-      state.judgeActionTimer = setTimeout(() => {
-        const invalidated = freezeAgent();
-        renderJudgeResult({ ...invalidated, decision: invalidated.decision }, `${displayDecision(invalidated.decision)} · ${invalidated.reason}`);
-      }, 1_400);
-    }
-  }
-  if (scenario.action === 'forensics') {
-    const ledger = state.engine.getLedger();
-    state.replayIndex = Math.max(0, ledger.length - 1);
-    renderForensics();
-    const fundsMoved = ledger
-      .filter(event => ['BLOCK', 'INVALIDATE', 'FREEZE'].includes(event.decision))
-      .reduce((sum, event) => sum + event.fundsMoved, 0);
-    result = ledger.at(-1) ?? { decision: 'BLOCK', reason: 'No evidence recorded.' };
-    renderJudgeResult(result, `EVIDENCE RECORDED · ${ledger.length} engine events · prohibited funds moved ${formatINR(fundsMoved)}.`);
-  }
-  if (!['risk', 'freezePending', 'forensics'].includes(scenario.action)) renderJudgeResult(result);
-  $('#judgeNext').textContent = state.judgeIndex === JUDGE_SCENARIOS.length - 1 ? 'Open Forensic Proof' : 'Next Scenario';
+  rebuildJudgeTo(index);
 }
 
 function previousJudgeScenario() {
-  if (state.judgeIndex > 0) {
-    state.judgeIndex -= 1;
-    updateJudgeModal();
+  const target = judgeMachine.snapshot().scenarioIndex - 1;
+  if (target < 0 || !judgeMachine.snapshot().canPrevious) return;
+  rebuildJudgeTo(target);
+}
+
+function runJudgePrimaryAction() {
+  const snapshot = judgeMachine.snapshot();
+  if (snapshot.status === JUDGE_MODE_STATES.READY) return executeJudgeScenario();
+  if (snapshot.status === JUDGE_MODE_STATES.AWAITING_OWNER_ACTION) return activateJudgeKillSwitch();
+  if (snapshot.status === JUDGE_MODE_STATES.ERROR) return restartJudgeScenario();
+  if (snapshot.status !== JUDGE_MODE_STATES.COMPLETE) return;
+  if (snapshot.scenarioIndex === JUDGE_SCENARIOS.length - 1) {
+    closeJudgeMode();
+    switchView('forensics');
+    $('#control-centre').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth' });
+    return;
+  }
+  judgeMachine.next();
+  updateJudgeModal();
+}
+
+function openJudgeMode() {
+  state.judgePreviousFocus = document.activeElement;
+  resetEnvironment({ notify: false, preserveView: true, resetJudge: false });
+  judgeMachine.open();
+  updateJudgeModal();
+  $('#judgeModal').classList.remove('hidden');
+  document.body.classList.add('judge-open');
+  setPageInert(true);
+  requestAnimationFrame(() => $('#judgeCard').focus());
+}
+
+function closeJudgeMode() {
+  judgeMachine.close();
+  clearPendingTimer();
+  state.pendingIntentId = null;
+  $('#judgeModal').classList.add('hidden');
+  document.body.classList.remove('judge-open');
+  setPageInert(false);
+  if (state.judgePreviousFocus?.isConnected) state.judgePreviousFocus.focus();
+}
+
+function resetJudgeDemo() {
+  resetEnvironment({ notify: false, preserveView: true, resetJudge: false });
+  judgeMachine.reset({ preserveOpen: true });
+  updateJudgeModal();
+  toast('Judge Mode restored to its deterministic baseline');
+}
+
+function toggleJudgeTrace() {
+  const toggle = $('#judgeTraceToggle');
+  const expanded = toggle.getAttribute('aria-expanded') === 'true';
+  toggle.setAttribute('aria-expanded', String(!expanded));
+  toggle.textContent = expanded ? 'View rule trace' : 'Hide rule trace';
+  $('#judgeRuleTrace').classList.toggle('hidden', expanded);
+}
+
+function trapJudgeFocus(event) {
+  if (event.key !== 'Tab' || $('#judgeModal').classList.contains('hidden')) return;
+  const focusable = $$('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])', $('#judgeCard')).filter(element => !element.classList.contains('hidden'));
+  if (!focusable.length) return;
+  const first = focusable.at(0);
+  const last = focusable.at(-1);
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
   }
 }
 
@@ -614,7 +1121,7 @@ function initInteractions() {
   $$('[data-freeze-button]').forEach(button => button.addEventListener('click', freezeAgent));
   $$('.chip').forEach(chip => chip.addEventListener('click', () => chip.classList.toggle('selected')));
   $('#clearEvents').addEventListener('click', () => { state.eventCursor = state.engine.getLedger().length; renderEvents(); });
-  $('#resetEnvironment').addEventListener('click', resetEnvironment);
+  $('#resetEnvironment').addEventListener('click', () => resetEnvironment());
   $('#activateCapsule').addEventListener('click', activateCapsule);
   $('#injectRisk').addEventListener('click', injectRisk);
   $('#runTwin').addEventListener('click', runTwin);
@@ -631,12 +1138,21 @@ function initInteractions() {
   $('#launchJudgeMode').addEventListener('click', openJudgeMode);
   $('#launchJudgeModeBottom').addEventListener('click', openJudgeMode);
   $('#closeJudgeMode').addEventListener('click', closeJudgeMode);
-  $('#judgeNext').addEventListener('click', runJudgeScenario);
+  $('#judgeNext').addEventListener('click', runJudgePrimaryAction);
   $('#judgePrev').addEventListener('click', previousJudgeScenario);
-  $('#judgeReset').addEventListener('click', () => { resetEnvironment(); openJudgeMode(); });
+  $('#judgeReset').addEventListener('click', resetJudgeDemo);
+  $('#judgeRestart').addEventListener('click', restartJudgeScenario);
+  $('#judgeTraceToggle').addEventListener('click', toggleJudgeTrace);
   $('.judge-backdrop').addEventListener('click', closeJudgeMode);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && !$('#judgeModal').classList.contains('hidden')) closeJudgeMode();
+    else trapJudgeFocus(event);
+  });
+  window.__AEGIS_DIAGNOSTICS__ = Object.freeze({
+    judge: () => judgeMachine.snapshot(),
+    engine: () => state.engine.getSnapshot(),
+    ledger: () => state.engine.getLedger(),
+    displayedRuleTrace: () => state.judgeView?.trace.map(rule => ({ ...rule })) ?? [],
   });
 }
 
