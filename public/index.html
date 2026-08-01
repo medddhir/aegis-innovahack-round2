@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070b" />
+  <meta name="description" content="Aegis is an independent financial guardrail and kill-switch prototype for autonomous AI agents." />
+  <title>Aegis — Financial Guardrails for Autonomous Agents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="grid-noise" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Aegis home">
+      <span class="brand-mark" aria-hidden="true"><span></span></span>
+      <span>AEGIS</span>
+    </a>
+    <nav class="header-nav" aria-label="Primary navigation">
+      <a href="#system">System</a>
+      <a href="#control-centre">Control Centre</a>
+      <a href="#proof">Proof</a>
+    </nav>
+    <div class="header-actions">
+      <span class="prototype-pill">SIMULATED INR</span>
+      <button class="freeze-mini" data-freeze-button aria-label="Freeze agent">Freeze Agent</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero section-shell">
+      <div class="hero-copy">
+        <div class="eyebrow reveal-1"><span class="status-dot"></span> INNOVAHACK ROUND 2 · FINTECH</div>
+        <h1 class="reveal-2">AI agents can spend in milliseconds.<br><span>Aegis makes disobedience financially impossible.</span></h1>
+        <p class="hero-sub reveal-3">An independent financial control layer that evaluates every transaction intent, blocks policy evasion, revokes pending payments and preserves a complete forensic proof trail.</p>
+        <div class="hero-actions reveal-4">
+          <button class="primary-cta" id="launchJudgeMode">Launch Live Attack Simulation <span>↗</span></button>
+          <a class="secondary-cta" href="#control-centre">Open Control Centre</a>
+        </div>
+        <div class="hero-trust reveal-5">
+          <span>✓ No real funds</span>
+          <span>✓ Deterministic enforcement</span>
+          <span>✓ Owner-controlled freeze</span>
+        </div>
+      </div>
+
+      <div class="hero-system reveal-3" aria-label="Agent transaction flow">
+        <div class="system-stage agent-node">
+          <span class="node-icon">AI</span>
+          <strong>Autonomous Agent</strong>
+          <small>Requests payment</small>
+        </div>
+        <div class="beam beam-one"><span></span></div>
+        <div class="system-stage aegis-node">
+          <div class="aegis-core">
+            <span class="shield-glyph">A</span>
+            <div class="core-ring ring-a"></div>
+            <div class="core-ring ring-b"></div>
+          </div>
+          <strong>AEGIS POLICY LAYER</strong>
+          <small>Independently enforces rules</small>
+          <div class="policy-flashes" aria-hidden="true">
+            <i>IDENTITY</i><i>LIMITS</i><i>INTENT</i><i>RISK</i>
+          </div>
+        </div>
+        <div class="beam beam-two"><span></span></div>
+        <div class="system-stage wallet-node">
+          <span class="node-icon wallet-icon">₹</span>
+          <strong>Protected Wallet</strong>
+          <small>Settles only if revalidated</small>
+        </div>
+        <div class="hero-intent-card" id="heroIntentCard">
+          <div><span class="intent-pulse"></span> Intent #AGS-1042</div>
+          <strong>₹8,500 → Unknown recipient</strong>
+          <small>PER-TRANSACTION CAP EXCEEDED</small>
+          <b>BLOCKED</b>
+        </div>
+      </div>
+    </section>
+
+    <section class="narrative-band" id="system">
+      <p>The agent may be autonomous.</p>
+      <h2>The money never is.</h2>
+      <div class="narrative-line"></div>
+    </section>
+
+    <section class="architecture section-shell">
+      <div class="section-heading">
+        <span class="eyebrow">THE CONTROL PRINCIPLE</span>
+        <h2>The agent requests. Aegis decides.</h2>
+        <p>The agent never receives unrestricted settlement authority. Every request passes through an external, deterministic policy engine.</p>
+      </div>
+      <div class="decision-grid">
+        <article class="decision-card approve"><span>01</span><h3>Approve</h3><p>Intent matches its task, recipient, amount and active policy.</p></article>
+        <article class="decision-card hold"><span>02</span><h3>Hold</h3><p>Valid intent enters a settlement queue for final revalidation.</p></article>
+        <article class="decision-card block"><span>03</span><h3>Block</h3><p>A policy violation stops at the enforcement layer, not inside the agent.</p></article>
+        <article class="decision-card freeze"><span>04</span><h3>Freeze</h3><p>The owner revokes future and unsettled transaction authority instantly.</p></article>
+      </div>
+    </section>
+
+    <section class="control-wrap" id="control-centre">
+      <div class="control-shell">
+        <aside class="sidebar">
+          <div class="sidebar-head">
+            <span class="brand-mark small"><span></span></span>
+            <div><strong>AEGIS</strong><small>CONTROL CENTRE</small></div>
+          </div>
+          <nav id="sidebarNav" aria-label="Control centre sections">
+            <button class="nav-item active" data-view="overview"><span>01</span>Overview</button>
+            <button class="nav-item" data-view="capsules"><span>02</span>Budget Capsules</button>
+            <button class="nav-item" data-view="risk"><span>03</span>Risk Governor</button>
+            <button class="nav-item" data-view="twin"><span>04</span>Policy Twin</button>
+            <button class="nav-item" data-view="attack"><span>05</span>Attack Lab</button>
+            <button class="nav-item" data-view="forensics"><span>06</span>Forensics</button>
+          </nav>
+          <div class="sidebar-foot">
+            <span class="sim-dot"></span>
+            <div><strong>Test Environment</strong><small>No real funds</small></div>
+          </div>
+        </aside>
+
+        <div class="control-main">
+          <div class="control-topbar">
+            <div>
+              <span class="breadcrumb">AEGIS / <b id="currentViewLabel">OVERVIEW</b></span>
+              <h2 id="controlTitle">Autonomous Agent Command Centre</h2>
+            </div>
+            <div class="agent-strip">
+              <div><small>AGENT</small><strong>Procurement-07</strong></div>
+              <div><small>STATE</small><strong id="topAgentState" class="state-normal">NORMAL</strong></div>
+              <div><small>POLICY</small><strong id="topPolicy">PROCUREMENT-V4</strong></div>
+              <button class="kill-switch" data-freeze-button><span class="kill-icon">⏻</span> Freeze Agent</button>
+            </div>
+          </div>
+
+          <div class="view-panel active" data-panel="overview">
+            <div class="metric-grid">
+              <article class="metric-card state-card">
+                <div class="metric-label">Agent State</div>
+                <div class="state-orb" id="stateOrb"><span></span><b id="stateValue">NORMAL</b></div>
+                <div class="risk-row"><span>Behaviour risk</span><strong><em id="riskValue">12</em>/100</strong></div>
+                <div class="risk-bar"><span id="riskBar"></span></div>
+              </article>
+              <article class="metric-card">
+                <div class="metric-label">Budget Remaining</div>
+                <div class="big-number" id="budgetRemaining">₹6,800</div>
+                <small>of ₹10,000 task allocation</small>
+                <div class="mini-progress"><span id="budgetBar" style="width:32%"></span></div>
+              </article>
+              <article class="metric-card">
+                <div class="metric-label">Policy Decisions</div>
+                <div class="decision-numbers"><div><b id="approvedCount">7</b><span>Approved</span></div><div><b id="blockedCount">3</b><span>Blocked</span></div><div><b id="pendingCount">0</b><span>Pending</span></div></div>
+              </article>
+              <article class="metric-card protected-card">
+                <div class="metric-label">Protected Value</div>
+                <div class="big-number protected" id="protectedValue">₹19,996</div>
+                <small>prevented from unauthorised movement</small>
+                <div class="shield-line">INDEPENDENT ENFORCEMENT ACTIVE</div>
+              </article>
+            </div>
+
+            <div class="overview-grid">
+              <section class="panel live-panel">
+                <div class="panel-head"><div><span class="live-dot"></span><h3>Live Intent Stream</h3></div><button class="text-button" id="clearEvents">Clear</button></div>
+                <div class="event-stream" id="eventStream" aria-live="polite"></div>
+              </section>
+
+              <section class="panel action-panel">
+                <div class="panel-head"><h3>Run a Scenario</h3><span class="panel-tag">DETERMINISTIC</span></div>
+                <div class="scenario-stack">
+                  <button class="scenario-button safe" data-scenario="safe"><span>01</span><div><strong>Authorised payment</strong><small>₹1,200 to allowlisted CloudGrid</small></div><i>Run</i></button>
+                  <button class="scenario-button danger" data-scenario="overspend"><span>02</span><div><strong>Overspending attempt</strong><small>₹8,500 against a ₹2,500 cap</small></div><i>Run</i></button>
+                  <button class="scenario-button danger" data-scenario="evasion"><span>03</span><div><strong>Split-payment evasion</strong><small>4 × ₹1,999 within eleven seconds</small></div><i>Run</i></button>
+                  <button class="scenario-button hold" data-scenario="pending"><span>04</span><div><strong>In-flight revocation</strong><small>Queue a valid intent, then freeze</small></div><i>Run</i></button>
+                </div>
+              </section>
+            </div>
+
+            <div class="pending-banner hidden" id="pendingBanner">
+              <div class="pending-info"><span class="pending-spinner"></span><div><strong>Intent #AGS-PENDING</strong><small>₹1,500 → ComputeHub · final revalidation in <b id="countdown">10</b>s</small></div></div>
+              <div class="pending-track"><span id="pendingTrack"></span></div>
+              <button class="revoke-button" data-freeze-button>Freeze before settlement</button>
+            </div>
+          </div>
+
+          <div class="view-panel" data-panel="capsules">
+            <div class="feature-intro"><span class="feature-index">FEATURE 01</span><h3>Task-Bound Budget Capsules</h3><p>Money is granted to one agent for one task, within one purpose, for one period. It cannot be reused elsewhere.</p></div>
+            <div class="capsule-layout">
+              <section class="panel capsule-builder">
+                <div class="step-indicator"><span class="active">1</span><i></i><span>2</span><i></i><span>3</span><i></i><span>4</span></div>
+                <label>Authorised task<input id="capsuleTask" value="Purchase cloud-compute capacity" /></label>
+                <div class="field-row"><label>Total budget<input id="capsuleBudget" type="number" value="10000" /></label><label>Per transaction<input id="capsuleCap" type="number" value="2500" /></label></div>
+                <label>Approved counterparties<div class="chip-select"><button class="chip selected">CloudGrid</button><button class="chip selected">ComputeHub</button><button class="chip">DataForge</button><button class="chip">AdNova</button></div></label>
+                <label>Capsule expiry<input id="capsuleExpiry" type="datetime-local" value="2026-08-02T18:00" /></label>
+                <button class="activate-button" id="activateCapsule">Activate Budget Capsule</button>
+              </section>
+              <section class="capsule-card" id="capsuleCard">
+                <div class="capsule-glow"></div>
+                <div class="capsule-top"><span>ACTIVE CAPSULE</span><b>CAP-8A72</b></div>
+                <div class="capsule-emblem"><span>A</span></div>
+                <h4 id="capsuleTitle">Cloud Infrastructure Procurement</h4>
+                <p id="capsuleSummary">Procurement-07 may spend up to ₹10,000 on cloud infrastructure, only through CloudGrid and ComputeHub, until 18:00.</p>
+                <div class="capsule-stats"><div><small>BUDGET</small><strong id="capsuleBudgetDisplay">₹10,000</strong></div><div><small>PER TX</small><strong id="capsuleCapDisplay">₹2,500</strong></div><div><small>VENDORS</small><strong>2</strong></div></div>
+                <div class="policy-hash">POLICY HASH · AGS-7FD2-91C8</div>
+              </section>
+            </div>
+          </div>
+
+          <div class="view-panel" data-panel="risk">
+            <div class="feature-intro"><span class="feature-index">FEATURE 02</span><h3>Adaptive Risk Governor</h3><p>Aegis tightens the agent’s permissions as behaviour becomes suspicious—before the owner can even react.</p></div>
+            <div class="risk-layout">
+              <section class="panel risk-state-panel">
+                <div class="risk-ladder" id="riskLadder">
+                  <div class="risk-step active" data-state="NORMAL"><span></span><b>NORMAL</b><small>Full authorised autonomy</small></div>
+                  <div class="risk-step" data-state="CAUTION"><span></span><b>CAUTION</b><small>Heightened monitoring</small></div>
+                  <div class="risk-step" data-state="RESTRICTED"><span></span><b>RESTRICTED</b><small>Limits tightened automatically</small></div>
+                  <div class="risk-step" data-state="QUARANTINED"><span></span><b>QUARANTINED</b><small>Real funds isolated</small></div>
+                  <div class="risk-step" data-state="FROZEN"><span></span><b>FROZEN</b><small>All authority revoked</small></div>
+                </div>
+              </section>
+              <section class="panel signal-panel">
+                <div class="panel-head"><h3>Behaviour Signals</h3><button class="text-button" id="injectRisk">Inject suspicious behaviour</button></div>
+                <div class="signal-list" id="signalList">
+                  <div><span>Transaction velocity</span><b class="good">NORMAL</b></div>
+                  <div><span>New recipient attempts</span><b class="good">0</b></div>
+                  <div><span>Blocked retries</span><b class="good">0</b></div>
+                  <div><span>Threshold splitting</span><b class="good">NOT DETECTED</b></div>
+                  <div><span>Policy modification attempts</span><b class="good">0</b></div>
+                </div>
+                <div class="automatic-response" id="automaticResponse">
+                  <span>AUTOMATIC RESPONSE</span>
+                  <p>No restrictions required. Agent operates within policy.</p>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="view-panel" data-panel="twin">
+            <div class="feature-intro"><span class="feature-index">FEATURE 03</span><h3>Policy Digital Twin</h3><p>Test a policy against the same attacks before putting it in front of real financial activity.</p></div>
+            <div class="twin-grid">
+              <article class="policy-card weak">
+                <div class="policy-version"><span>POLICY V1</span><b>LEGACY</b></div>
+                <h4>Basic Static Limits</h4>
+                <ul><li>₹2,000 per payment</li><li>₹10,000 daily maximum</li><li>Three approved vendors</li><li class="off">No evasion detection</li><li class="off">No in-flight revocation</li></ul>
+                <div class="simulation-result"><span>ATTACK OUTCOME</span><strong id="v1Result">Not tested</strong></div>
+              </article>
+              <div class="twin-control"><span>THE SAME<br>ATTACK SUITE</span><button id="runTwin">Run 6 Attacks</button><small>Overspend · Unknown recipient · Split payment · Rapid fire · Retry · Pending intent</small></div>
+              <article class="policy-card strong">
+                <div class="policy-version"><span>POLICY V2</span><b>AEGIS</b></div>
+                <h4>Adaptive Enforcement</h4>
+                <ul><li>₹2,000 per payment</li><li>₹10,000 daily maximum</li><li>Three approved vendors</li><li>Evasion Shield enabled</li><li>In-flight revocation enabled</li></ul>
+                <div class="simulation-result"><span>ATTACK OUTCOME</span><strong id="v2Result">Not tested</strong></div>
+              </article>
+            </div>
+            <div class="twin-summary hidden" id="twinSummary"><span>POLICY IMPROVEMENT</span><strong>V2 blocked 100% of the simulated attack suite.</strong><small>V1 allowed four policy-evasion events because it evaluated requests independently.</small></div>
+          </div>
+
+          <div class="view-panel" data-panel="attack">
+            <div class="feature-intro"><span class="feature-index">FEATURE 04 & 05</span><h3>Evasion Shield + Two-Phase Settlement</h3><p>Attack the agent’s financial permissions directly. Aegis treats coordinated requests as one threat and revalidates every intent before settlement.</p></div>
+            <div class="attack-grid">
+              <section class="panel attack-controls">
+                <div class="panel-head"><h3>Attack Scenarios</h3><span class="panel-tag danger-tag">RED TEAM</span></div>
+                <button class="attack-option" data-scenario="overspend"><b>Oversized Payment</b><span>Attempt ₹8,500 against ₹2,500 limit</span></button>
+                <button class="attack-option" data-scenario="unknown"><b>Unknown Counterparty</b><span>Attempt payment outside allowlist</span></button>
+                <button class="attack-option" data-scenario="evasion"><b>Threshold Splitting</b><span>4 × ₹1,999 inside 11 seconds</span></button>
+                <button class="attack-option" data-scenario="rapid"><b>Rapid-Fire Spend</b><span>8 requests inside 4 seconds</span></button>
+                <button class="attack-option" data-scenario="pending"><b>In-Flight Revocation</b><span>Queue valid payment and freeze</span></button>
+              </section>
+              <section class="panel attack-visual">
+                <div class="attack-status" id="attackStatus"><span class="attack-radar"></span><strong>AWAITING ATTACK</strong><small>Select a scenario to test enforcement.</small></div>
+                <div class="attack-cluster hidden" id="attackCluster">
+                  <div class="cluster-payments"><span>₹1,999</span><span>₹1,999</span><span>₹1,999</span><span>₹1,999</span></div>
+                  <div class="cluster-bracket"></div>
+                  <div class="cluster-result"><b>₹7,996</b><span>Combined attempted value</span><small>Pattern: THRESHOLD_SPLITTING · Window: 11s</small></div>
+                </div>
+                <div class="enforcement-result hidden" id="enforcementResult"><span>AEGIS DECISION</span><strong>BLOCKED</strong><p>Coordinated limit-evasion pattern detected.</p><small>Funds moved: ₹0</small></div>
+              </section>
+            </div>
+          </div>
+
+          <div class="view-panel" data-panel="forensics" id="proof">
+            <div class="feature-intro"><span class="feature-index">FEATURE 06</span><h3>Forensic Proof Ledger & Attack Replay</h3><p>Every decision is traceable to the exact agent, policy version, risk signal and owner action that produced it.</p></div>
+            <div class="forensic-layout">
+              <section class="panel replay-panel">
+                <div class="panel-head"><h3>Attack Timeline</h3><div class="replay-buttons"><button id="replayPrev">←</button><button id="replayPlay">Play Replay</button><button id="replayNext">→</button></div></div>
+                <div class="timeline" id="forensicTimeline"></div>
+              </section>
+              <section class="terminal-panel">
+                <div class="terminal-bar"><span></span><span></span><span></span><b>AEGIS PROOF LEDGER</b></div>
+                <pre id="proofTerminal">$ aegis verify --latest
+
+Waiting for a policy decision...</pre>
+              </section>
+            </div>
+          </div>
+
+          <div class="control-footer">
+            <button class="reset-button" id="resetEnvironment">↻ Reset Demo Environment</button>
+            <span>All balances and transactions are simulated. No real funds move through this prototype.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-proof section-shell">
+      <div class="section-heading center">
+        <span class="eyebrow">WHY AEGIS IS DIFFERENT</span>
+        <h2>It does not trust the agent to obey.</h2>
+        <p>Controls live outside the agent, so a buggy, compromised or overzealous system cannot simply ignore them.</p>
+      </div>
+      <div class="proof-grid">
+        <article><span>01</span><h3>Task-bound money</h3><p>Funds are limited to an explicit purpose, approved vendors and expiry.</p></article>
+        <article><span>02</span><h3>Adaptive defence</h3><p>Permissions tighten automatically as behaviour becomes suspicious.</p></article>
+        <article><span>03</span><h3>Evasion awareness</h3><p>Related transactions are evaluated as a coordinated sequence, not isolated requests.</p></article>
+        <article><span>04</span><h3>In-flight control</h3><p>Pending intents are revalidated and can be revoked before settlement.</p></article>
+        <article><span>05</span><h3>Policy simulation</h3><p>Teams can prove a control works before enforcing it.</p></article>
+        <article><span>06</span><h3>Forensic proof</h3><p>Every approval, block and freeze is evidence-backed and replayable.</p></article>
+      </div>
+    </section>
+
+    <section class="final-cta section-shell">
+      <div>
+        <span class="eyebrow">LIVE PROTOTYPE</span>
+        <h2>The agent can request the money.<br>Aegis retains control.</h2>
+        <p>Built fresh for InnovaHack Chapter 1 — Round 2 by Medhir Lokhande and Hrushikesh Lokhande.</p>
+      </div>
+      <button class="primary-cta" id="launchJudgeModeBottom">Launch Judge Mode <span>↗</span></button>
+    </section>
+  </main>
+
+  <footer>
+    <div class="brand"><span class="brand-mark small"><span></span></span><span>AEGIS</span></div>
+    <p>A prototype by TurboPay Technologies Pvt. Ltd.</p>
+    <p class="legal">This prototype uses simulated/test funds. Any real-money deployment would require applicable regulatory approvals and integration with licensed financial or payment partners.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="judge-modal hidden" id="judgeModal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle">
+    <div class="judge-backdrop"></div>
+    <div class="judge-card">
+      <div class="judge-head"><div><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div><button id="closeJudgeMode" aria-label="Close judge mode">×</button></div>
+      <div class="judge-body">
+        <div class="judge-number" id="judgeNumber">01</div>
+        <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p><div class="judge-result" id="judgeResult"><span>Ready to run</span></div></div>
+        <div class="judge-visual" id="judgeVisual"><div class="judge-flow"><span>AGENT</span><i></i><b>AEGIS</b><i></i><span>WALLET</span></div><strong id="judgeAmount">₹1,200 → CloudGrid</strong></div>
+      </div>
+      <div class="judge-foot"><button class="secondary-cta" id="judgeReset">Restart Demo</button><div><button class="secondary-cta" id="judgePrev">Previous</button><button class="primary-cta compact" id="judgeNext">Run Scenario</button></div></div>
+    </div>
+  </div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
