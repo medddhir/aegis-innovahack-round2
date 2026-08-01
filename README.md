@@ -1,6 +1,6 @@
 # Aegis
 
-**Financial guardrails for autonomous AI agents.**
+**An independent financial firewall for autonomous AI agents.**
 
 Aegis is an independent financial control and kill-switch prototype built for InnovaHack Chapter 1 — Round 2, FinTech track.
 
@@ -40,6 +40,14 @@ The browser UI and the automated tests both import the same deterministic engine
 
 Judge Mode is a presentation state machine (`READY`, `RUNNING`, `AWAITING_OWNER_ACTION`, `COMPLETE`, `ERROR`) layered over that engine. It disables conflicting controls during execution, owns and clears its timers, renders the returned decision pipeline and rule trace, and requires a manual verified-owner kill-switch action for in-flight revocation. Closing, resetting, or reopening restores a deterministic and accessible demo state; reduced-motion mode changes only the animation.
 
+## Competition visual system
+
+The static interface uses a restrained navy/graphite financial-security system with semantic emerald, amber, orange, crimson, and cyan state roles. Motion is dependency-free and only visualises real engine state: transaction flow, changed metrics, new ledger entries, risk transitions, pending countdowns, owner freeze, and newly selected forensic evidence. The hero is motionless while the engine is idle, all typography uses local system fonts, and reduced-motion mode produces the same exact results without animated transitions.
+
+The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Screenshot evidence is stored in [`docs/screenshots/design-v1`](docs/screenshots/design-v1/).
+
+The test suite currently contains **32 passing tests**: the original 27 enforcement and Judge Mode tests plus five visual-contract tests.
+
 ## Team
 
 - **Medhir Lokhande** — Team Leader; product, architecture, implementation, deployment, pitch, and demo
@@ -47,4 +55,4 @@ Judge Mode is a presentation state machine (`READY`, `RUNNING`, `AWAITING_OWNER_
 
 ## Regulatory and safety boundary
 
-This prototype uses simulated/test funds. Any production deployment involving real-money movement, custody, or operation of a payment system would require applicable regulatory approvals, security review, and integration with licensed financial or payment partners.
+This prototype uses simulated/test funds. Any production deployment involving real-money movement, custody or operation of a payment system would require applicable regulatory approvals and integration with licensed financial or payment partners.

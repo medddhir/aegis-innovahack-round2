@@ -3,15 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#05070b" />
-  <meta name="description" content="Aegis is an independent financial guardrail and kill-switch prototype for autonomous AI agents." />
-  <title>Aegis — Financial Guardrails for Autonomous Agents</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#071019" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Aegis is an independent financial firewall for autonomous AI agents. Deterministic enforcement with simulated INR only." />
+  <meta property="og:title" content="Aegis — Independent Financial Firewall" />
+  <meta property="og:description" content="Deterministic spending controls for autonomous AI agents. Simulated INR. No real funds." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://aegis-innovahack.vercel.app" />
+  <meta name="twitter:card" content="summary" />
+  <title>Aegis — Independent Financial Firewall</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
+  <a class="skip-link" href="#top">Skip to main content</a>
   <div class="ambient ambient-one" aria-hidden="true"></div>
   <div class="ambient ambient-two" aria-hidden="true"></div>
   <div class="grid-noise" aria-hidden="true"></div>
@@ -43,13 +48,15 @@
           <a class="secondary-cta" href="#control-centre">Open Control Centre</a>
         </div>
         <div class="hero-trust reveal-5">
+          <span>✓ Simulated INR</span>
           <span>✓ No real funds</span>
           <span>✓ Deterministic enforcement</span>
           <span>✓ Owner-controlled freeze</span>
         </div>
       </div>
 
-      <div class="hero-system reveal-3" aria-label="Agent transaction flow">
+      <div class="hero-system reveal-3" id="heroFlow" data-flow="idle" aria-label="Transaction path: autonomous agent, Aegis policy layer, protected wallet">
+        <div class="system-kicker"><span class="live-dot"></span> INDEPENDENT POLICY PATH <b>TEST ENVIRONMENT</b></div>
         <div class="system-stage agent-node">
           <span class="node-icon">AI</span>
           <strong>Autonomous Agent</strong>
@@ -75,10 +82,10 @@
           <small>Settles only if revalidated</small>
         </div>
         <div class="hero-intent-card" id="heroIntentCard">
-          <div><span class="intent-pulse"></span> Example intent #AGS-1042</div>
-          <strong>₹8,500 → CloudGrid</strong>
-          <small>PER-TRANSACTION CAP EXCEEDED</small>
-          <b>BLOCKED</b>
+          <div><span class="intent-pulse"></span> ENGINE STATUS</div>
+          <strong id="heroIntentAmount">₹0 simulated</strong>
+          <small id="heroIntentRule">AWAITING TRANSACTION INTENT</small>
+          <b id="heroIntentStatus">READY</b>
         </div>
       </div>
     </section>
@@ -131,9 +138,11 @@
               <h2 id="controlTitle">Autonomous Agent Command Centre</h2>
             </div>
             <div class="agent-strip">
-              <div><small>AGENT</small><strong>Procurement-07</strong></div>
-              <div><small>STATE</small><strong id="topAgentState" class="state-normal">NORMAL</strong></div>
-              <div><small>POLICY</small><strong id="topPolicy">PROCUREMENT-V4</strong></div>
+              <div><small>CURRENT AGENT</small><strong>Procurement-07</strong></div>
+              <div><small>RISK STATE</small><strong id="topAgentState" class="state-normal">NORMAL</strong></div>
+              <div><small>POLICY VERSION</small><strong id="topPolicy">PROCUREMENT-V4</strong></div>
+              <div class="agent-strip-budget"><small>REMAINING BUDGET</small><strong id="topBudget">₹6,800</strong></div>
+              <div class="agent-strip-pending"><small>PENDING INTENTS</small><strong id="topPending">0</strong></div>
               <button class="kill-switch" data-freeze-button><span class="kill-icon">⏻</span> Freeze Agent</button>
             </div>
           </div>
@@ -159,8 +168,14 @@
               <article class="metric-card protected-card">
                 <div class="metric-label">Protected Value</div>
                 <div class="big-number protected" id="protectedValue">₹19,996</div>
-                <small>prevented from unauthorised movement</small>
+                <small>SIMULATED VALUE PREVENTED FROM UNAUTHORISED MOVEMENT</small>
                 <div class="shield-line">INDEPENDENT ENFORCEMENT ACTIVE</div>
+              </article>
+              <article class="metric-card pending-card">
+                <div class="metric-label">Pending Intents</div>
+                <div class="big-number" id="pendingOverview">0</div>
+                <small>awaiting final revalidation</small>
+                <div class="pending-line">TWO-PHASE SETTLEMENT</div>
               </article>
             </div>
 
@@ -215,6 +230,7 @@
             <div class="feature-intro"><span class="feature-index">FEATURE 02</span><h3>Adaptive Risk Governor</h3><p>Aegis tightens the agent’s permissions as behaviour becomes suspicious—before the owner can even react.</p></div>
             <div class="risk-layout">
               <section class="panel risk-state-panel">
+                <div class="risk-current-summary"><span>CURRENT GOVERNOR STATE</span><strong id="riskScreenState">NORMAL</strong><b id="riskScreenScore">12 / 100</b><small id="riskScreenReason">Standard controls active. Behaviour remains within policy.</small></div>
                 <div class="risk-ladder" id="riskLadder">
                   <div class="risk-step active" data-state="NORMAL"><span></span><b>NORMAL</b><small>0–29 · standard 10s settlement</small></div>
                   <div class="risk-step" data-state="CAUTION"><span></span><b>CAUTION</b><small>30–54 · logging + minimum 15s delay</small></div>
@@ -279,6 +295,7 @@
                   <div class="cluster-result"><b>₹7,996</b><span>Combined attempted value</span><small>Pattern: THRESHOLD_SPLITTING · Window: 11s</small></div>
                 </div>
                 <div class="enforcement-result hidden" id="enforcementResult"><span>AEGIS DECISION</span><strong>DECISION</strong><p>Canonical engine result appears here.</p><small>Funds moved: read from ledger</small></div>
+                <div class="settlement-pipeline" aria-label="Two-phase settlement path"><span>INTENT</span><i></i><span>AUTHORISED</span><i></i><span>PENDING</span><i></i><span>FINAL REVALIDATION</span><i></i><span>SETTLED / INVALIDATED</span></div>
               </section>
             </div>
           </div>
@@ -323,6 +340,11 @@ Waiting for a policy decision...</pre>
       </div>
     </section>
 
+    <section class="technical-proof section-shell" aria-labelledby="technicalProofTitle">
+      <div class="technical-proof-copy"><span class="eyebrow">TECHNICAL PROOF</span><h2 id="technicalProofTitle">Enforcement you can inspect.</h2><p>Every demo decision comes from the same deterministic engine and is preserved as replayable evidence.</p></div>
+      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>32</strong><span>VERIFIED TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
+    </section>
+
     <section class="final-cta section-shell">
       <div>
         <span class="eyebrow">LIVE PROTOTYPE</span>
@@ -336,7 +358,7 @@ Waiting for a policy decision...</pre>
   <footer>
     <div class="brand"><span class="brand-mark small"><span></span></span><span>AEGIS</span></div>
     <p>A prototype by TurboPay Technologies Pvt. Ltd.</p>
-    <p class="legal">This prototype uses simulated/test funds. Any real-money deployment would require applicable regulatory approvals and integration with licensed financial or payment partners.</p>
+    <p class="legal">This prototype uses simulated/test funds. Any production deployment involving real-money movement, custody or operation of a payment system would require applicable regulatory approvals and integration with licensed financial or payment partners.</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -346,7 +368,7 @@ Waiting for a policy decision...</pre>
     <div class="judge-card" id="judgeCard" tabindex="-1">
       <div class="judge-head">
         <div class="judge-head-title"><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div>
-        <div class="judge-head-actions"><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button></div>
+        <div class="judge-head-actions"><span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button></div>
       </div>
       <div class="judge-body">
         <aside class="judge-context">

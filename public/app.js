@@ -159,7 +159,7 @@ function toast(message) {
 function ledgerPresentation(event) {
   const amount = event.intent ? `${formatINR(event.intent.amount)} → ${event.intent.recipient}` : event.policyLabel;
   if (event.eventType === 'OWNER_ACTION' && event.decision === 'FREEZE') {
-    return { title: 'Owner activated kill switch', detail: event.reason, status: 'FROZEN', kind: 'blocked' };
+    return { title: 'Owner activated kill switch', detail: event.reason, status: 'FROZEN', kind: 'frozen' };
   }
   if (event.eventType === 'POLICY_ACTIVATED') {
     return { title: 'Budget Capsule activated', detail: event.reason, status: 'ACTIVE', kind: 'system' };
@@ -169,7 +169,7 @@ function ledgerPresentation(event) {
   }
   if (event.decision === 'APPROVE') return { title: 'Transaction settled after revalidation', detail: `${amount} · ${event.reason}`, status: 'APPROVED', kind: 'approved' };
   if (event.decision === 'HOLD') return { title: event.ownerAction ? 'Owner approved pending intent' : 'Transaction intent authorised', detail: `${amount} · ${event.reason}`, status: 'PENDING', kind: 'pending' };
-  if (event.decision === 'REQUIRE_APPROVAL') return { title: 'Risk Governor requires owner approval', detail: `${amount} · ${event.reason}`, status: 'APPROVAL', kind: 'pending' };
+  if (event.decision === 'REQUIRE_APPROVAL') return { title: 'Risk Governor requires owner approval', detail: `${amount} · ${event.reason}`, status: 'PENDING', kind: 'pending' };
   if (event.decision === 'INVALIDATE') return { title: 'Pending intent invalidated', detail: `${amount} · ${event.reason}`, status: 'INVALIDATED', kind: 'blocked' };
   return { title: event.ruleChecked === RULES.EVASION_SHIELD ? 'Evasion Shield blocked coordinated intent' : 'Policy engine blocked intent', detail: `${amount} · ${event.reason}`, status: 'BLOCKED', kind: 'blocked' };
 }
@@ -184,9 +184,12 @@ function renderEvents() {
   stream.innerHTML = events.map(event => {
     const item = ledgerPresentation(event);
     const isNew = !state.renderedEventIds.has(event.id);
+    const intentEvidence = event.intent
+      ? `<span>${escapeHTML(formatINR(event.intent.amount))}</span><span>${escapeHTML(event.intent.recipient)}</span>`
+      : '<span>POLICY EVENT</span>';
     return `<div class="event-item${isNew ? ' is-new' : ''}" data-event-id="${event.id}">
       <span class="event-time">${displayTime(event.timestamp)}</span>
-      <div class="event-main"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small></div>
+      <div class="event-main"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.detail)}</small><div class="event-evidence">${intentEvidence}<span>${escapeHTML(event.ruleChecked)}</span></div></div>
       <span class="event-status ${item.kind}">${escapeHTML(item.status)}</span>
     </div>`;
   }).join('');
@@ -202,6 +205,9 @@ function renderMetrics() {
   animateMetric($('#approvedCount'), snapshot.approvedCount);
   animateMetric($('#blockedCount'), snapshot.blockedCount);
   animateMetric($('#pendingCount'), snapshot.pendingCount);
+  animateMetric($('#pendingOverview'), snapshot.pendingCount);
+  $('#topBudget').textContent = formatINR(snapshot.budgetRemaining);
+  $('#topPending').textContent = String(snapshot.pendingCount);
   $('#topPolicy').textContent = snapshot.policyLabel;
   $('#capsulePolicyVersion').textContent = `POLICY VERSION · ${snapshot.policyLabel}`;
   $('#capsuleVendorCount').textContent = snapshot.policy.approvedRecipients.length;
@@ -214,6 +220,10 @@ function renderRisk() {
   const priorState = $('#stateValue').dataset.riskState;
   $('#topAgentState').textContent = risk.state;
   $('#topAgentState').className = className;
+  $('#riskScreenState').textContent = risk.state;
+  $('#riskScreenState').className = className;
+  $('#riskScreenScore').textContent = `${risk.score} / 100`;
+  $('#riskScreenReason').textContent = risk.response;
   $('#stateValue').textContent = risk.state;
   $('#stateValue').className = className;
   $('#stateValue').dataset.riskState = risk.state;
@@ -252,13 +262,36 @@ function showAttackResult(result, { cluster = false, reason } = {}) {
   $('#attackCluster').classList.toggle('hidden', !cluster);
   const panel = $('#enforcementResult');
   panel.classList.remove('hidden');
+  panel.closest('.attack-visual').dataset.outcome = decisionClass(result.decision);
   $('strong', panel).textContent = displayDecision(result.decision);
   $('p', panel).textContent = reason ?? result.reason;
   $('small', panel).textContent = `Funds moved: ${formatINR(result.fundsMoved)} (simulated)`;
 }
 
+function setHeroFlow(result = null) {
+  const flow = $('#heroFlow');
+  const status = $('#heroIntentStatus');
+  const rule = $('#heroIntentRule');
+  const amount = $('#heroIntentAmount');
+  if (!result) {
+    flow.dataset.flow = 'idle';
+    status.textContent = 'READY';
+    rule.textContent = 'AWAITING TRANSACTION INTENT';
+    amount.textContent = '₹0 simulated';
+    return;
+  }
+  const flowState = result.decision === 'APPROVE' ? 'approved'
+    : result.decision === 'HOLD' || result.decision === 'REQUIRE_APPROVAL' ? 'pending'
+      : result.decision === 'INVALIDATE' ? 'invalidated' : 'blocked';
+  flow.dataset.flow = flowState;
+  status.textContent = displayDecision(result.decision);
+  rule.textContent = result.ruleChecked;
+  amount.textContent = result.intent ? `${formatINR(result.intent.amount)} → ${result.intent.recipient}` : 'Owner policy action';
+}
+
 function afterDecision(result, options = {}) {
   renderAll();
+  setHeroFlow(result);
   if (options.attackResult) showAttackResult(result, options);
   toast(`${displayDecision(result.decision)} · ${result.ruleChecked}`);
   return result;
@@ -365,6 +398,7 @@ function startPending(seconds, { managedByJudge = false } = {}) {
     return result;
   }
   $('#pendingBanner').classList.remove('hidden');
+  setHeroFlow(result);
   $('#countdown').textContent = state.pendingSeconds;
   $('#pendingTrack').style.width = '0%';
   $('.pending-info strong').textContent = `Intent #${result.intent.id}`;
@@ -407,6 +441,7 @@ function performOwnerFreeze({ present = true } = {}) {
   state.pendingIntentId = null;
   renderAll();
   const invalidatedEvent = result.invalidated.at(-1);
+  setHeroFlow(invalidatedEvent ?? result.freezeEvent);
   if (invalidatedEvent && present) {
     showAttackResult({ ...invalidatedEvent, fundsMoved: invalidatedEvent.fundsMoved }, { reason: invalidatedEvent.reason });
     toast('Agent frozen — pending intent invalidated before settlement');
@@ -595,6 +630,7 @@ function resetEnvironment({ notify = true, preserveView = false, resetJudge = tr
   $('#capsuleBudgetDisplay').textContent = '₹10,000';
   $('#capsuleCapDisplay').textContent = '₹2,500';
   $('#proofTerminal').dataset.eventId = '';
+  setHeroFlow();
   renderAll();
   if (resetJudge && !$('#judgeModal').classList.contains('hidden')) {
     $('#judgeModal').classList.add('hidden');
@@ -1070,7 +1106,7 @@ function openJudgeMode() {
   $('#judgeModal').classList.remove('hidden');
   document.body.classList.add('judge-open');
   setPageInert(true);
-  requestAnimationFrame(() => $('#judgeCard').focus());
+  $('#judgeCard').focus({ preventScroll: true });
 }
 
 function closeJudgeMode() {
@@ -1135,6 +1171,17 @@ function initInteractions() {
       renderForensics();
     }
   });
+  const narrative = $('.narrative-band');
+  narrative.classList.add('reveal-statement');
+  if (reducedMotion() || !('IntersectionObserver' in window)) narrative.classList.add('is-revealed');
+  else {
+    const observer = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      narrative.classList.add('is-revealed');
+      observer.disconnect();
+    }, { threshold: 0.35 });
+    observer.observe(narrative);
+  }
   $('#launchJudgeMode').addEventListener('click', openJudgeMode);
   $('#launchJudgeModeBottom').addEventListener('click', openJudgeMode);
   $('#closeJudgeMode').addEventListener('click', closeJudgeMode);
@@ -1153,6 +1200,9 @@ function initInteractions() {
     engine: () => state.engine.getSnapshot(),
     ledger: () => state.engine.getLedger(),
     displayedRuleTrace: () => state.judgeView?.trace.map(rule => ({ ...rule })) ?? [],
+    activeView: () => $('.nav-item.active')?.dataset.view ?? null,
+    selectedForensicEvent: () => $('#proofTerminal').dataset.eventId || null,
+    heroFlow: () => $('#heroFlow').dataset.flow,
   });
 }
 

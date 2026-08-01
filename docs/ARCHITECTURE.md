@@ -67,6 +67,12 @@ The owner-controlled freeze is stronger and immediate: it advances the policy ve
 
 The Forensic Proof Ledger is written by the engine, not by the display layer. Attack Replay reads those recorded events. Reset reconstructs the original policy/runtime state, clears nonces, pending and approval queues, timers, ledger events, Digital Twin output, attack output, and Judge Mode progress. The demo clock and identifiers restart from a fixed epoch so an identical scenario produces identical evidence after reset.
 
+## Presentation boundary
+
+`public/app.js` is a projection layer over engine snapshots, decisions, `rulesEvaluated`, and ledger events. It may format INR, select the current panel, animate a returned state, and coordinate Judge Mode presentation; it may not calculate approval, risk, settlement, or evidence independently. `public/judge-mode.js` owns only the demo lifecycle and timer cleanup. `public/styles.css` maps returned states to visual treatment without delaying or changing them.
+
+The live intent stream and forensic terminal read recorded ledger entries. Metric transitions terminate at the engine snapshot value, and reduced-motion mode writes that value directly. Browser diagnostics are read-only and exist to verify visible state against the engine during local tests.
+
 ## Locked innovations
 
 1. Task-Bound Budget Capsules
