@@ -1,0 +1,9 @@
+node_modules/
+artifacts/
+cache/
+.hardhat-config/
+.hardhat-data/
+.hardhat-cache/
+test-results.json
+attack-report.json
+parity-results.json

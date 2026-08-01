@@ -17,6 +17,23 @@ Autonomous agent
 
 The agent never receives unrestricted settlement authority. It may request a payment; Aegis owns the final approve, hold, block, invalidate, or freeze decision.
 
+## Independent settlement layer
+
+`contracts/src/AegisPolicyWallet.sol` closes the contract-layer proof gap without replacing or modifying the canonical browser engine. It is a second implementation at the narrower settlement boundary:
+
+```text
+Browser risk layer                          Local-EVM settlement layer
+behaviour + explanation                     Solidity role enforcement
+task/category + Evasion Shield      ->       task hash + allowlist
+Adaptive Risk Governor                      transaction/cumulative reservations
+Judge and forensic evidence                 nonce + delayed execution
+owner freeze                                frozen state + policy-version invalidation
+```
+
+The contract's owner creates policy and controls recipients, freeze, restore, cancellation, and policy changes. The authorised agent can only request. A valid request reserves Mock INR test tokens and enters `PENDING`; execution revalidates current authority immediately before transfer. Freeze and restore each advance `policyVersion`, so old pending intents stay stale permanently and their nonces cannot be reused.
+
+The two implementations share eight machine-readable attack vectors for overlapping rules. `contracts/scripts/check-vector-parity.js` executes both sides and compares normalized outcomes, amounts, and rule categories. Behavioural split clustering intentionally remains a browser risk responsibility; the wallet independently enforces aggregate reservations and budgets.
+
 ## Canonical engine
 
 `public/policy-engine.js` is the single source of enforcement truth. It is a dependency-free ES module used directly by the browser and by `tests/policy-engine.test.js`.
@@ -84,4 +101,6 @@ The live intent stream and forensic terminal read recorded ledger entries. Metri
 
 ## Prototype boundary
 
-The system is a deterministic financial-control demonstration using simulated balances, recipients, policies, and transaction intents. A production real-money version would require security review, applicable regulatory approvals, and integrations with licensed financial or payment partners.
+The browser system is a deterministic financial-control demonstration using simulated balances, recipients, policies, and transaction intents. The Solidity proof uses only a compact Mock INR test token and a local deterministic EVM. There is no public contract deployment, private key, mainnet transaction, custody, bank integration, stablecoin, or real-money flow.
+
+The local contract is not a production security audit. A real-money version would require independent audit and threat modelling, applicable regulatory approvals, and integrations with licensed financial or payment partners. See [CONTRACT_ENFORCEMENT.md](CONTRACT_ENFORCEMENT.md) for controls and limitations.

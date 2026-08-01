@@ -83,6 +83,32 @@ const decisionClass = decision => decision === 'APPROVE' ? 'approved' : decision
 const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+function setContractProofField(field, value) {
+  $$(`[data-contract-field="${field}"]`).forEach(element => { element.textContent = value; });
+}
+
+async function loadContractProof() {
+  try {
+    const response = await fetch('./contract-proof.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Contract proof unavailable (${response.status}).`);
+    const proof = await response.json();
+    if (proof.environment !== 'LOCAL_EVM' || proof.realFundsMoved !== false) throw new Error('Contract proof boundary is invalid.');
+    const bytecodeHash = String(proof.hashes?.deploymentBytecode ?? '').replace(/^sha256:/, '');
+    setContractProofField('tests', `${proof.contractTests.passed}/${proof.contractTests.total}`);
+    setContractProofField('bytecode', bytecodeHash ? `${bytecodeHash.slice(0, 12)}…` : 'UNAVAILABLE');
+    setContractProofField('parity', `${proof.attackVectors.parity} · ${proof.attackVectors.passed}/${proof.attackVectors.total}`);
+    setContractProofField('environment', proof.environment.replace('_', ' '));
+    setContractProofField('funds', String(proof.realFundsMoved).toUpperCase());
+    document.documentElement.dataset.contractProof = 'verified';
+  } catch (error) {
+    setContractProofField('tests', 'UNAVAILABLE');
+    setContractProofField('bytecode', 'UNAVAILABLE');
+    setContractProofField('parity', 'UNAVAILABLE');
+    document.documentElement.dataset.contractProof = 'unavailable';
+    console.warn('Aegis contract proof could not be loaded.', error);
+  }
+}
+
 function cancelMetricAnimations() {
   for (const frame of state.animationFrames.values()) cancelAnimationFrame(frame);
   state.animationFrames.clear();
@@ -1241,7 +1267,7 @@ function toggleJudgeTrace() {
 
 function trapJudgeFocus(event) {
   if (event.key !== 'Tab' || $('#judgeModal').classList.contains('hidden')) return;
-  const focusable = $$('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])', $('#judgeCard')).filter(element => !element.classList.contains('hidden'));
+  const focusable = $$('button:not([disabled]), summary, [href], [tabindex]:not([tabindex="-1"])', $('#judgeCard')).filter(element => !element.classList.contains('hidden'));
   if (!focusable.length) return;
   const first = focusable.at(0);
   const last = focusable.at(-1);
@@ -1257,6 +1283,7 @@ function trapJudgeFocus(event) {
 function initInteractions() {
   createEngine();
   renderAll();
+  loadContractProof();
   $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
   $$('.scenario-button, .attack-option').forEach(button => button.addEventListener('click', () => executeScenario(button.dataset.scenario)));
   $$('[data-freeze-button]').forEach(button => button.addEventListener('click', freezeAgent));

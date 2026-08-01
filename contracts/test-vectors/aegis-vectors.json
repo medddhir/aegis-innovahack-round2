@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "description": "Shared deterministic scenarios for the Aegis browser risk engine and local-EVM Policy Wallet. Amounts are Mock INR/test values only.",
+  "environment": "SIMULATED_TEST_FUNDS",
+  "vectors": [
+    {
+      "id": "approved-payment",
+      "request": { "amount": 1000, "recipient": "APPROVED", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "CURRENT" },
+      "expected": { "request": "PENDING", "final": "SETTLED", "reason": "FINAL_REVALIDATION", "fundsMoved": 1000 }
+    },
+    {
+      "id": "oversized-payment",
+      "request": { "amount": 2501, "recipient": "APPROVED", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "CURRENT" },
+      "expected": { "final": "BLOCKED", "reason": "PER_TRANSACTION_LIMIT", "fundsMoved": 0 }
+    },
+    {
+      "id": "unknown-recipient",
+      "request": { "amount": 1000, "recipient": "UNKNOWN", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "CURRENT" },
+      "expected": { "final": "BLOCKED", "reason": "RECIPIENT_ALLOWLIST", "fundsMoved": 0 }
+    },
+    {
+      "id": "wrong-task",
+      "request": { "amount": 1000, "recipient": "APPROVED", "task": "WRONG", "nonce": "UNIQUE", "policyVersion": "CURRENT" },
+      "expected": { "final": "BLOCKED", "reason": "TASK_CAPSULE", "fundsMoved": 0 }
+    },
+    {
+      "id": "cumulative-limit",
+      "request": { "amount": 1500, "recipient": "APPROVED", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "CURRENT", "priorCommittedOrReserved": 9000 },
+      "expected": { "final": "BLOCKED", "reason": "CUMULATIVE_BUDGET", "fundsMoved": 0 }
+    },
+    {
+      "id": "duplicate-nonce",
+      "request": { "amount": 900, "recipient": "APPROVED", "task": "CURRENT", "nonce": "REUSED", "policyVersion": "CURRENT", "priorNonceAmount": 1000 },
+      "expected": { "final": "BLOCKED", "reason": "NONCE_REPLAY", "fundsMoved": 0 }
+    },
+    {
+      "id": "pending-freeze",
+      "request": { "amount": 1200, "recipient": "APPROVED", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "CURRENT", "ownerAction": "FREEZE_BEFORE_SETTLEMENT" },
+      "expected": { "request": "PENDING", "final": "INVALIDATED", "reason": "OWNER_VERSION_INVALIDATION", "fundsMoved": 0 }
+    },
+    {
+      "id": "stale-version",
+      "request": { "amount": 1000, "recipient": "APPROVED", "task": "CURRENT", "nonce": "UNIQUE", "policyVersion": "STALE" },
+      "expected": { "final": "BLOCKED", "reason": "POLICY_VERSION", "fundsMoved": 0 }
+    }
+  ]
+}

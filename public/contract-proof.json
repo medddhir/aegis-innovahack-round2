@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "contractName": "AegisPolicyWallet",
+  "mockAsset": "Mock INR Test Token (mINR-TEST)",
+  "compilerVersion": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+  "hashes": {
+    "algorithm": "SHA-256",
+    "contractSource": "sha256:44aaaccf792364d35ee9410e3a394e81f9409affd1b3fb6871f4c5cb55b5918c",
+    "deploymentBytecode": "sha256:20a6786e638da9437d218323dd2780dbd84b1e9916fd237bc5189c3f338a546b",
+    "abi": "sha256:1916c50007cb6609a582c6ca3194d28cbc2397f068ca0a6b00ba0b133d5b786e"
+  },
+  "deploymentBytecodeBytes": 6908,
+  "contractTests": {
+    "total": 33,
+    "passed": 33,
+    "failed": 0
+  },
+  "attackVectors": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "parity": "PASS"
+  },
+  "environment": "LOCAL_EVM",
+  "deploymentStatus": "NOT_PUBLICLY_DEPLOYED",
+  "realFundsMoved": false,
+  "sourcePath": "contracts/src/AegisPolicyWallet.sol"
+}

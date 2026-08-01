@@ -4,6 +4,8 @@ Open **Judge Mode**. It always resets to the deterministic baseline and starts a
 
 The visual language is consistent in every scenario: cyan marks active evaluation, emerald marks a completed authorisation or settlement, amber marks a pending owner/settlement state, and red appears only at a real policy stop, invalidation, or freeze. The central Aegis Core shows four independent rings—Identity, Task Intent, Limits, and Behaviour Risk—and selects the exact ring associated with the decisive engine rule. The four-stage pipeline and textual result always remain the primary evidence; colour is supplementary. **SIMULATED FUNDS** remains visible throughout.
 
+The compact **CONTRACT-BACKED RULE PARITY** badge is supporting evidence, not a claim that the live click is on-chain. Expand it to show the generated contract test count, eight-vector parity result, `LOCAL EVM` environment, and source link. The badge states that Judge Mode uses simulated browser execution while core settlement controls are independently implemented in Solidity.
+
 ## 1. Normal operation
 Run **Authorised payment**.
 
@@ -42,3 +44,7 @@ Run Scenario 6, then open **Forensics**. The incident scrubber selects available
 - An unexpected presentation error enters `ERROR`, preserves engine and ledger evidence, and leaves **Restart Scenario** available.
 - Motion only visualises returned engine state. `prefers-reduced-motion: reduce` removes the transitions without changing decisions or controls.
 - At mobile widths, the scenario context, pipeline, result, and expandable trace stack inside the scrollable dialog body while the presenter controls remain reachable.
+
+## Contract proof handoff
+
+After Judge Mode, scroll to **Enforced twice. Explained once.** The first panel identifies the browser risk/explanation layer; the second identifies the Solidity Policy Wallet's owner/agent roles, allowlist, limits, nonce, two-phase settlement, and version invalidation. The strip below is loaded from `contract-proof.json` and shows the actual passing contract-test count, bytecode hash prefix, vector parity, local environment, and `REAL FUNDS MOVED: FALSE`.

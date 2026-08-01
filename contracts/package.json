@@ -1,0 +1,22 @@
+{
+  "name": "aegis-policy-wallet-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local-EVM proof for the Aegis Policy Wallet using mock test funds only.",
+  "type": "commonjs",
+  "scripts": {
+    "compile": "XDG_CONFIG_HOME=.hardhat-config XDG_DATA_HOME=.hardhat-data XDG_CACHE_HOME=.hardhat-cache hardhat compile",
+    "test": "XDG_CONFIG_HOME=.hardhat-config XDG_DATA_HOME=.hardhat-data XDG_CACHE_HOME=.hardhat-cache hardhat test",
+    "demo": "XDG_CONFIG_HOME=.hardhat-config XDG_DATA_HOME=.hardhat-data XDG_CACHE_HOME=.hardhat-cache hardhat run scripts/run-aegis-attack-suite.js",
+    "parity": "XDG_CONFIG_HOME=.hardhat-config XDG_DATA_HOME=.hardhat-data XDG_CACHE_HOME=.hardhat-cache hardhat run scripts/check-vector-parity.js",
+    "proof": "node scripts/generate-contract-proof.js",
+    "deploy:testnet": "XDG_CONFIG_HOME=.hardhat-config XDG_DATA_HOME=.hardhat-data XDG_CACHE_HOME=.hardhat-cache hardhat run scripts/deploy-testnet.js --network testnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "3.0.8",
+    "chai": "4.5.0",
+    "ethers": "6.13.4",
+    "hardhat": "2.22.17",
+    "solc": "0.8.24"
+  }
+}

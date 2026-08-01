@@ -15,7 +15,7 @@ Autonomous agents can request and execute financial activity faster than a human
 
 ## Solution
 
-Aegis places an independent deterministic enforcement layer between the agent and the protected wallet. The agent requests a transaction; Aegis decides whether it is approved, held, blocked, invalidated, or frozen.
+Aegis places two independent controls between the agent and settlement. The deterministic browser risk engine explains whether a request should be approved, held, blocked, invalidated, or frozen. A genuine Solidity Policy Wallet separately enforces caller roles, task hash, allowlisted recipients, spending limits, nonce protection, pending-budget reservation, delayed settlement, and owner-controlled version invalidation using mock test tokens in a local EVM.
 
 ## Six locked innovations
 
@@ -30,6 +30,11 @@ Aegis places an independent deterministic enforcement layer between the agent an
 
 ```bash
 npm test
+npm run contract:test
+npm run contract:demo
+npm run contract:parity
+npm run contract:proof
+npm run test:all
 npm run build
 npm run start
 ```
@@ -48,7 +53,13 @@ Motion is dependency-free and only visualises real engine state: transaction flo
 
 The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Signature-pass screenshot evidence is stored in [`docs/screenshots/design-v2`](docs/screenshots/design-v2/).
 
-The test suite currently contains **47 passing tests**: the original 32 enforcement, Judge Mode, and premium-shell tests plus 15 signature visual-contract tests. The new tests also pin SHA-256 hashes for the locked engine and Judge runtime.
+The browser/presentation suite contains **52 passing tests**, preserving all 47 locked engine, Judge Mode, premium-shell, and signature tests and adding five contract-proof boundary checks. The isolated Hardhat suite adds **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, and visual-state hashes remain pinned.
+
+## Contract enforcement proof
+
+The contract workspace is isolated under [`contracts`](contracts/), with its own dependency lockfile and pinned compiler. `public/contract-proof.json` is generated from actual compiler artifacts, contract test output, and vector parity; the website displays that evidence as `LOCAL EVM CONTRACT SANDBOX` and explicitly says browser clicks are simulated execution rather than on-chain transactions.
+
+Read the [contract enforcement architecture](docs/CONTRACT_ENFORCEMENT.md) and [12-scenario attack report](docs/CONTRACT_ATTACK_REPORT.md). No public contract address is claimed because no testnet deployment was performed.
 
 ## Team
 

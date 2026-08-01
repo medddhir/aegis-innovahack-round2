@@ -352,6 +352,36 @@ Waiting for a policy decision...</pre>
       <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>47</strong><span>VERIFIED TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
     </section>
 
+    <section class="contract-enforcement section-shell" id="contract-enforcement" aria-labelledby="contractEnforcementTitle">
+      <div class="contract-enforcement-head">
+        <div><span class="eyebrow">INDEPENDENT CONTRACT PROOF</span><h2 id="contractEnforcementTitle">Enforced twice. Explained once.</h2></div>
+        <span class="contract-environment"><i></i><b data-contract-field="environment">LOCAL EVM</b> CONTRACT SANDBOX</span>
+      </div>
+      <p class="contract-enforcement-intro">The live product demonstration remains a deterministic browser simulation. The overlapping settlement controls are separately implemented and executed in an auditable Solidity policy wallet using Mock INR test tokens.</p>
+      <div class="enforcement-layers">
+        <article class="enforcement-layer risk-layer">
+          <div class="layer-number">LAYER 1</div>
+          <h3>Aegis Risk Engine</h3>
+          <p>Explains why an autonomous request should be allowed, held or blocked.</p>
+          <ul><li>Behaviour monitoring</li><li>Task intent</li><li>Evasion Shield</li><li>Adaptive Risk Governor</li><li>Explainable decision evidence</li></ul>
+        </article>
+        <div class="enforcement-link" aria-hidden="true"><span></span><b>SAME ATTACK VECTORS</b><span></span></div>
+        <article class="enforcement-layer wallet-layer">
+          <div class="layer-number">LAYER 2</div>
+          <h3>Aegis Policy Wallet</h3>
+          <p>Independently enforces who may request and whether test-token settlement may execute.</p>
+          <ul><li>Owner / agent separation</li><li>Allowlisted recipients</li><li>Transaction + cumulative limits</li><li>Permanent nonce protection</li><li>Two-phase settlement</li><li>Freeze + version invalidation</li></ul>
+        </article>
+      </div>
+      <div class="contract-proof-strip" aria-live="polite">
+        <div><small>CONTRACT TESTS</small><strong><span data-contract-field="tests">—</span> PASSED</strong></div>
+        <div><small>BYTECODE SHA-256</small><strong class="mono" data-contract-field="bytecode">LOADING</strong></div>
+        <div><small>VECTOR PARITY</small><strong data-contract-field="parity">LOADING</strong></div>
+        <div><small>REAL FUNDS MOVED</small><strong data-contract-field="funds">FALSE</strong></div>
+        <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source <span>↗</span></a>
+      </div>
+    </section>
+
     <section class="final-cta section-shell">
       <div>
         <span class="eyebrow">LIVE PROTOTYPE</span>
@@ -375,7 +405,18 @@ Waiting for a policy decision...</pre>
     <div class="judge-card" id="judgeCard" tabindex="-1">
       <div class="judge-head">
         <div class="judge-head-title"><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div>
-        <div class="judge-head-actions"><span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button></div>
+        <div class="judge-head-actions">
+          <details class="judge-contract-proof">
+            <summary>CONTRACT-BACKED RULE PARITY</summary>
+            <div>
+              <strong><span data-contract-field="tests">—</span> CONTRACT TESTS PASSED</strong>
+              <span><b data-contract-field="parity">LOADING</b> VECTOR PARITY · <b data-contract-field="environment">LOCAL EVM</b></span>
+              <p>The live demonstration uses simulated browser execution. Core settlement controls are independently implemented and verified in the Aegis Policy Wallet contract.</p>
+              <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source ↗</a>
+            </div>
+          </details>
+          <span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button>
+        </div>
       </div>
       <div class="judge-body">
         <aside class="judge-context">
