@@ -49,43 +49,44 @@
         </div>
         <div class="hero-trust reveal-5">
           <span>✓ Simulated INR</span>
-          <span>✓ No real funds</span>
           <span>✓ Deterministic enforcement</span>
           <span>✓ Owner-controlled freeze</span>
+          <span>✓ ₹0 real funds</span>
         </div>
       </div>
 
-      <div class="hero-system reveal-3" id="heroFlow" data-flow="idle" aria-label="Transaction path: autonomous agent, Aegis policy layer, protected wallet">
+      <div class="hero-system signature-system reveal-3" id="heroFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" aria-label="Transaction path through the four-layer Aegis Core to a protected wallet">
         <div class="system-kicker"><span class="live-dot"></span> INDEPENDENT POLICY PATH <b>TEST ENVIRONMENT</b></div>
-        <div class="system-stage agent-node">
-          <span class="node-icon">AI</span>
-          <strong>Autonomous Agent</strong>
-          <small>Requests payment</small>
-        </div>
-        <div class="beam beam-one"><span></span></div>
-        <div class="system-stage aegis-node">
-          <div class="aegis-core">
-            <span class="shield-glyph">A</span>
-            <div class="core-ring ring-a"></div>
-            <div class="core-ring ring-b"></div>
+        <div class="core-scene">
+          <div class="core-endpoint core-agent"><span>AI</span><strong>AUTONOMOUS<br>AGENT</strong><small>Transaction intent</small></div>
+          <div class="core-rail rail-in" aria-hidden="true"><i></i><b></b></div>
+          <div class="signature-core" aria-label="Aegis Core policy layers">
+            <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="coreTitle coreDesc">
+              <title id="coreTitle">Aegis Core</title><desc id="coreDesc">Four independent enforcement layers surrounding the Aegis shield.</desc>
+              <circle class="core-orbit core-orbit-risk" data-core-layer="risk" cx="200" cy="200" r="164" pathLength="100" />
+              <circle class="core-orbit core-orbit-limits" data-core-layer="limits" cx="200" cy="200" r="132" pathLength="100" />
+              <circle class="core-orbit core-orbit-intent" data-core-layer="intent" cx="200" cy="200" r="100" pathLength="100" />
+              <circle class="core-orbit core-orbit-identity" data-core-layer="identity" cx="200" cy="200" r="68" pathLength="100" />
+              <path class="core-shield" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
+              <path class="core-a" d="m178 226 22-61 22 61m-35-24h26" />
+              <path class="core-gate-line" d="M139 200H72m189 0h67" />
+            </svg>
+            <span class="core-layer-label label-risk">04 · BEHAVIOUR RISK</span>
+            <span class="core-layer-label label-limits">03 · LIMITS</span>
+            <span class="core-layer-label label-intent">02 · TASK INTENT</span>
+            <span class="core-layer-label label-identity">01 · IDENTITY</span>
+            <div class="core-collision" aria-hidden="true"></div>
+            <div class="core-rule-callout"><small>DECISIVE RULE</small><strong id="heroIntentRule">AWAITING_TRANSACTION_INTENT</strong></div>
           </div>
-          <strong>AEGIS POLICY LAYER</strong>
-          <small>Independently enforces rules</small>
-          <div class="policy-flashes" aria-hidden="true">
-            <i>IDENTITY</i><i>LIMITS</i><i>INTENT</i><i>RISK</i>
-          </div>
+          <div class="core-rail rail-out" aria-hidden="true"><i></i><b></b></div>
+          <div class="core-endpoint core-wallet"><span>₹</span><strong>PROTECTED<br>WALLET</strong><small>Simulated settlement</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div></div>
+          <div class="core-lock-seal" aria-hidden="true"><span>AUTHORITY<br>REVOKED</span></div>
         </div>
-        <div class="beam beam-two"><span></span></div>
-        <div class="system-stage wallet-node">
-          <span class="node-icon wallet-icon">₹</span>
-          <strong>Protected Wallet</strong>
-          <small>Settles only if revalidated</small>
-        </div>
-        <div class="hero-intent-card" id="heroIntentCard">
-          <div><span class="intent-pulse"></span> ENGINE STATUS</div>
-          <strong id="heroIntentAmount">₹0 simulated</strong>
-          <small id="heroIntentRule">AWAITING TRANSACTION INTENT</small>
-          <b id="heroIntentStatus">READY</b>
+        <div class="core-status-strip" id="heroIntentCard">
+          <div><span class="intent-pulse"></span><small>AEGIS CORE STATUS</small><b id="heroIntentStatus">NEUTRAL</b></div>
+          <div><small>TRANSACTION</small><strong id="heroIntentAmount">₹0 · SIMULATED</strong></div>
+          <div><small>POLICY LAYERS</small><strong>4 / 4 INDEPENDENT</strong></div>
+          <div><small>WALLET GATE</small><strong class="wallet-gate-status">OPEN · IDLE</strong></div>
         </div>
       </div>
     </section>
@@ -111,7 +112,7 @@
     </section>
 
     <section class="control-wrap" id="control-centre">
-      <div class="control-shell">
+      <div class="control-shell" id="controlShell">
         <aside class="sidebar">
           <div class="sidebar-head">
             <span class="brand-mark small"><span></span></span>
@@ -258,19 +259,22 @@
 
           <div class="view-panel" data-panel="twin">
             <div class="feature-intro"><span class="feature-index">FEATURE 03</span><h3>Policy Digital Twin</h3><p>Test a policy against the same attacks before putting it in front of real financial activity.</p></div>
-            <div class="twin-grid">
+            <div class="twin-sync-head"><span>SYNCHRONISED ENGINE REPLAY</span><strong id="twinStageLabel">READY · SAME SIX ATTACKS</strong><small id="twinSyncClock">00 / 06</small></div>
+            <div class="twin-grid twin-replay-grid">
               <article class="policy-card weak">
                 <div class="policy-version"><span>POLICY V1</span><b>LEGACY</b></div>
                 <h4>Basic Static Limits</h4>
-                <ul><li>₹2,000 per payment</li><li>₹10,000 daily maximum</li><li>Three approved vendors</li><li class="off">No evasion detection</li><li class="off">No in-flight revocation</li></ul>
-                <div class="simulation-result"><span>ATTACK OUTCOME</span><strong id="v1Result">Not tested</strong></div>
+                <div class="twin-replay" id="v1Replay" aria-live="polite"><div class="twin-empty">Awaiting synchronized replay</div></div>
+                <div class="twin-loss"><span>CUMULATIVE SIMULATED LOSS</span><strong id="v1Loss">₹0</strong></div>
+                <div class="simulation-result"><span>FINAL OUTCOME</span><strong id="v1Result">Not tested</strong></div>
               </article>
-              <div class="twin-control"><span>THE SAME<br>ATTACK SUITE</span><button id="runTwin">Run 6 Attacks</button><small>Overspend · Unknown recipient · Split payment · Rapid fire · Retry · Pending intent</small></div>
+              <div class="twin-control"><span>SAME REQUEST<br>SAME CLOCK</span><div class="twin-stage-dots" id="twinStageDots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><button id="runTwin">Run 6 Attacks</button><small>Both policies use actual canonical-engine output.</small></div>
               <article class="policy-card strong">
                 <div class="policy-version"><span>POLICY V2</span><b>AEGIS</b></div>
                 <h4>Adaptive Enforcement</h4>
-                <ul><li>₹2,000 per payment</li><li>₹10,000 daily maximum</li><li>Three approved vendors</li><li>Evasion Shield enabled</li><li>In-flight revocation enabled</li></ul>
-                <div class="simulation-result"><span>ATTACK OUTCOME</span><strong id="v2Result">Not tested</strong></div>
+                <div class="twin-replay" id="v2Replay" aria-live="polite"><div class="twin-empty">Awaiting synchronized replay</div></div>
+                <div class="twin-loss prevented"><span>CUMULATIVE LOSS PREVENTED</span><strong id="v2Loss">₹0</strong></div>
+                <div class="simulation-result"><span>FINAL OUTCOME</span><strong id="v2Result">Not tested</strong></div>
               </article>
             </div>
             <div class="twin-summary hidden" id="twinSummary"><span>POLICY COMPARISON</span><strong>Run both configurations through the canonical engine.</strong><small>Results are calculated from recorded attack-suite settlements.</small></div>
@@ -290,9 +294,8 @@
               <section class="panel attack-visual">
                 <div class="attack-status" id="attackStatus"><span class="attack-radar"></span><strong>AWAITING ATTACK</strong><small>Select a scenario to test enforcement.</small></div>
                 <div class="attack-cluster hidden" id="attackCluster">
-                  <div class="cluster-payments"><span>₹1,999</span><span>₹1,999</span><span>₹1,999</span><span>₹1,999</span></div>
-                  <div class="cluster-bracket"></div>
-                  <div class="cluster-result"><b>₹7,996</b><span>Combined attempted value</span><small>Pattern: THRESHOLD_SPLITTING · Window: 11s</small></div>
+                  <div class="cluster-heading"><span>RELATED TRANSACTION INTENTS</span><b>EVASION SHIELD · CORRELATION ACTIVE</b></div>
+                  <div class="cluster-canvas" id="clusterCanvas"></div>
                 </div>
                 <div class="enforcement-result hidden" id="enforcementResult"><span>AEGIS DECISION</span><strong>DECISION</strong><p>Canonical engine result appears here.</p><small>Funds moved: read from ledger</small></div>
                 <div class="settlement-pipeline" aria-label="Two-phase settlement path"><span>INTENT</span><i></i><span>AUTHORISED</span><i></i><span>PENDING</span><i></i><span>FINAL REVALIDATION</span><i></i><span>SETTLED / INVALIDATED</span></div>
@@ -302,6 +305,10 @@
 
           <div class="view-panel" data-panel="forensics" id="proof">
             <div class="feature-intro"><span class="feature-index">FEATURE 06</span><h3>Forensic Proof Ledger & Attack Replay</h3><p>Every decision is traceable to the exact agent, policy version, risk signal and owner action that produced it.</p></div>
+            <section class="incident-scrubber panel" aria-label="Recorded incident stages">
+              <div class="scrubber-head"><div><span>INCIDENT SCRUBBER</span><strong>SELECT RECORDED EVIDENCE</strong></div><small>LEDGER-BACKED · NO CRYPTOGRAPHIC CLAIM</small></div>
+              <div class="scrubber-track" id="incidentScrubber"></div>
+            </section>
             <div class="forensic-layout">
               <section class="panel replay-panel">
                 <div class="panel-head"><h3>Attack Timeline</h3><div class="replay-buttons"><button id="replayPrev">←</button><button id="replayPlay">Play Replay</button><button id="replayNext">→</button></div></div>
@@ -342,7 +349,7 @@ Waiting for a policy decision...</pre>
 
     <section class="technical-proof section-shell" aria-labelledby="technicalProofTitle">
       <div class="technical-proof-copy"><span class="eyebrow">TECHNICAL PROOF</span><h2 id="technicalProofTitle">Enforcement you can inspect.</h2><p>Every demo decision comes from the same deterministic engine and is preserved as replayable evidence.</p></div>
-      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>32</strong><span>VERIFIED TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
+      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>47</strong><span>VERIFIED TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
     </section>
 
     <section class="final-cta section-shell">
@@ -374,11 +381,29 @@ Waiting for a policy decision...</pre>
         <aside class="judge-context">
           <div class="judge-number" id="judgeNumber">01</div>
           <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p></div>
-          <div class="judge-facts" id="judgeFacts" aria-label="Scenario evidence"></div>
         </aside>
         <section class="judge-execution" aria-label="Live decision pipeline">
-          <div class="judge-visual" id="judgeVisual" data-flow="idle">
-            <div class="judge-flow" aria-label="Agent to Aegis to simulated wallet flow"><span>AGENT</span><i></i><b>AEGIS</b><i></i><span>SIMULATED WALLET</span></div>
+          <div class="judge-visual" id="judgeVisual" data-flow="idle" data-risk="normal" data-fail-layer="none">
+            <div class="judge-core-scene" aria-label="Agent transaction through the Aegis Core to the simulated wallet">
+              <div class="judge-endpoint"><span>AI</span><small>AGENT</small></div>
+              <div class="judge-rail judge-rail-in"><i></i></div>
+              <div class="signature-core judge-signature-core">
+                <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="judgeCoreTitle judgeCoreDesc">
+                  <title id="judgeCoreTitle">Aegis Core decision state</title><desc id="judgeCoreDesc">Four policy rings independently validate the transaction.</desc>
+                  <circle class="core-orbit core-orbit-risk" data-core-layer="risk" cx="200" cy="200" r="164" pathLength="100" />
+                  <circle class="core-orbit core-orbit-limits" data-core-layer="limits" cx="200" cy="200" r="132" pathLength="100" />
+                  <circle class="core-orbit core-orbit-intent" data-core-layer="intent" cx="200" cy="200" r="100" pathLength="100" />
+                  <circle class="core-orbit core-orbit-identity" data-core-layer="identity" cx="200" cy="200" r="68" pathLength="100" />
+                  <path class="core-shield" d="M200 119 250 138v43c0 43-19 72-50 91-31-19-50-48-50-91v-43l50-19Z" />
+                  <path class="core-a" d="m178 226 22-61 22 61m-35-24h26" />
+                </svg>
+                <div class="core-collision" aria-hidden="true"></div>
+              </div>
+              <div class="judge-rail judge-rail-out"><i></i></div>
+              <div class="judge-endpoint judge-wallet"><span>₹</span><small>SIMULATED WALLET</small><div class="wallet-gate" aria-hidden="true"><i></i><i></i></div></div>
+              <div class="owner-kill-pulse" aria-hidden="true"></div>
+              <div class="invalidated-seal" aria-hidden="true"><span>INVALIDATED</span><small>WALLET NOT REACHED</small></div>
+            </div>
             <strong id="judgeAmount">₹1,200 → CloudGrid</strong>
             <div class="judge-live-meta">
               <div><small>CURRENT RULE</small><b id="judgeCurrentRule">NOT STARTED</b></div>
@@ -388,10 +413,14 @@ Waiting for a policy decision...</pre>
             <div class="judge-scenario-visual" id="judgeScenarioVisual"><span class="hidden" id="judgeSettlementCountdown">0</span></div>
           </div>
           <ol class="judge-pipeline" id="judgePipeline" aria-label="Decision pipeline stages"></ol>
+        </section>
+        <aside class="judge-proof" aria-label="Engine result and evidence">
+          <div class="judge-proof-label"><span>ENGINE DECISION</span><small>CANONICAL OUTPUT</small></div>
           <div class="judge-result" id="judgeResult" role="status" aria-live="polite"><span>READY · Waiting for the presenter.</span></div>
+          <div class="judge-facts" id="judgeFacts" aria-label="Scenario evidence"></div>
           <button class="judge-trace-toggle hidden" id="judgeTraceToggle" aria-expanded="false" aria-controls="judgeRuleTrace">View rule trace</button>
           <div class="judge-rule-trace hidden" id="judgeRuleTrace"></div>
-        </section>
+        </aside>
       </div>
       <div class="judge-foot">
         <div class="judge-restart-controls"><button class="secondary-cta" id="judgeReset">Restart Demo</button><button class="secondary-cta" id="judgeRestart">Restart Scenario</button></div>

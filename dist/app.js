@@ -11,6 +11,13 @@ import {
   extractLedgerEvidence,
   extractRuleTrace,
 } from './judge-mode.js';
+import {
+  createCoreVisualState,
+  createEvasionClusterModel,
+  createIncidentStages,
+  createTwinReplayModel,
+  visualStateForRisk,
+} from './visual-state.js';
 
 const JUDGE_SCENARIOS = [
   {
@@ -216,6 +223,7 @@ function renderMetrics() {
 
 function renderRisk() {
   const { risk } = state.engine.getSnapshot();
+  applyGlobalVisualState(risk.state);
   const className = `state-${risk.state.toLowerCase()}`;
   const priorState = $('#stateValue').dataset.riskState;
   $('#topAgentState').textContent = risk.state;
@@ -257,9 +265,10 @@ function renderAll({ focusLatest = true } = {}) {
   renderForensics();
 }
 
-function showAttackResult(result, { cluster = false, reason } = {}) {
+function showAttackResult(result, { cluster = false, clusterModel = null, reason } = {}) {
   $('#attackStatus').classList.add('hidden');
   $('#attackCluster').classList.toggle('hidden', !cluster);
+  if (cluster && clusterModel) renderEvasionCluster(clusterModel);
   const panel = $('#enforcementResult');
   panel.classList.remove('hidden');
   panel.closest('.attack-visual').dataset.outcome = decisionClass(result.decision);
@@ -268,25 +277,46 @@ function showAttackResult(result, { cluster = false, reason } = {}) {
   $('small', panel).textContent = `Funds moved: ${formatINR(result.fundsMoved)} (simulated)`;
 }
 
+function applyGlobalVisualState(riskState) {
+  const visualState = visualStateForRisk(riskState);
+  document.body.dataset.riskState = visualState;
+  for (const selector of ['#heroFlow', '#judgeVisual', '#controlShell', '#capsuleCard']) {
+    const element = $(selector);
+    if (element) element.dataset.risk = visualState;
+  }
+}
+
+function applyCoreVisualState(element, result = null, flowOverride = null) {
+  if (!element) return null;
+  const visual = createCoreVisualState(result, state.engine?.getSnapshot().risk.state ?? 'NORMAL');
+  element.dataset.flow = flowOverride ?? visual.flow;
+  element.dataset.risk = visual.risk;
+  element.dataset.failLayer = visual.failingLayer;
+  element.dataset.walletGate = visual.walletGate;
+  return visual;
+}
+
 function setHeroFlow(result = null) {
   const flow = $('#heroFlow');
   const status = $('#heroIntentStatus');
   const rule = $('#heroIntentRule');
   const amount = $('#heroIntentAmount');
   if (!result) {
-    flow.dataset.flow = 'idle';
+    applyCoreVisualState(flow);
     status.textContent = 'READY';
     rule.textContent = 'AWAITING TRANSACTION INTENT';
-    amount.textContent = '₹0 simulated';
+    amount.textContent = '₹0 · SIMULATED';
+    $('.wallet-gate-status', flow).textContent = 'OPEN · PROTECTED';
     return;
   }
-  const flowState = result.decision === 'APPROVE' ? 'approved'
-    : result.decision === 'HOLD' || result.decision === 'REQUIRE_APPROVAL' ? 'pending'
-      : result.decision === 'INVALIDATE' ? 'invalidated' : 'blocked';
-  flow.dataset.flow = flowState;
+  const visual = applyCoreVisualState(flow, result);
   status.textContent = displayDecision(result.decision);
   rule.textContent = result.ruleChecked;
   amount.textContent = result.intent ? `${formatINR(result.intent.amount)} → ${result.intent.recipient}` : 'Owner policy action';
+  $('.wallet-gate-status', flow).textContent = visual.walletGate === 'closed'
+    ? 'CLOSED · NO TRANSFER'
+    : visual.flow === 'approved' ? 'OPEN · SETTLED'
+      : visual.flow === 'pending' ? 'OPEN · UNSETTLED' : 'OPEN · NO TRANSFER';
 }
 
 function afterDecision(result, options = {}) {
@@ -328,14 +358,38 @@ function runEvasion({ present = true } = {}) {
   const results = state.engine.processIntentBatch(intents, { incidentId: `SPLIT-${state.intentSequence}` });
   const result = results.at(-1);
   const total = intents.reduce((sum, intent) => sum + intent.amount, 0);
+  const clusterModel = createEvasionClusterModel(intents, result);
   if (present) {
     afterDecision(result, {
       attackResult: true,
       cluster: true,
+      clusterModel,
       reason: `${intents.length} related requests were evaluated as one ${formatINR(total)} coordinated attempt. ${result.reason}`,
     });
   }
   return result;
+}
+
+function evasionClusterMarkup(model, { compact = false } = {}) {
+  const intentCards = model.intents.map((intent, index) => `<div class="cluster-intent" data-cluster-index="${index}">
+    <small>INTENT ${String(index + 1).padStart(2, '0')}</small>
+    <b>${escapeHTML(formatINR(intent.amount))}</b>
+    <span>${escapeHTML(intent.id)}</span>
+  </div>`).join('');
+  return `<div class="evasion-convergence${compact ? ' compact' : ''}">
+    <div class="cluster-sources">${intentCards}</div>
+    <div class="cluster-relations" aria-hidden="true"><i></i><i></i><i></i><i></i><b>RELATION WINDOW</b></div>
+    <div class="cluster-verdict">
+      <small>COORDINATED ATTEMPT</small><strong>${escapeHTML(formatINR(model.total))}</strong>
+      <span>${escapeHTML(`${model.windowSeconds}-SECOND WINDOW`)}</span>
+      <code>${escapeHTML(model.decisiveRule)}</code>
+      <b>${escapeHTML(displayDecision(model.decision))} · FUNDS MOVED ${escapeHTML(formatINR(model.fundsMoved))}</b>
+    </div>
+  </div>`;
+}
+
+function renderEvasionCluster(model) {
+  $('#clusterCanvas').innerHTML = evasionClusterMarkup(model);
 }
 
 function runRapid() {
@@ -491,28 +545,65 @@ function activateCapsule() {
 function runTwin() {
   state.twinTimers.forEach(timer => clearTimeout(timer));
   state.twinTimers = [];
-  const v1 = $('#v1Result');
-  const v2 = $('#v2Result');
-  v1.textContent = 'Testing…';
-  v2.textContent = 'Testing…';
+  const runButton = $('#runTwin');
+  runButton.disabled = true;
+  runButton.textContent = 'REPLAYING SAME ATTACK SUITE…';
   $('#twinSummary').classList.add('hidden');
+  $('.twin-replay-grid .policy-card.strong')?.classList.remove('twin-winner');
   state.twinResults = runPolicyDigitalTwin();
-  const { legacy, hardened } = state.twinResults;
+  const model = createTwinReplayModel(state.twinResults);
+  const replayMarkup = side => model.stages.map(stage => {
+    const outcome = stage[side];
+    return `<div class="twin-replay-row" data-stage="${stage.index}">
+      <span>${String(stage.index + 1).padStart(2, '0')}</span><b>${escapeHTML(stage.name)}</b>
+      <em data-decision>${escapeHTML(outcome.decision)}</em><small data-funds>${escapeHTML(formatINR(outcome.fundsMoved))}</small>
+    </div>`;
+  }).join('');
+  $('#v1Replay').innerHTML = replayMarkup('legacy');
+  $('#v2Replay').innerHTML = replayMarkup('hardened');
+  $('#twinStageDots').innerHTML = model.stages.map(stage => `<i data-stage="${stage.index}"></i>`).join('');
+  $('#twinStageLabel').textContent = 'SYNCHRONISED REQUEST';
+  $('#twinSyncClock').textContent = `STAGE 0 / ${model.totalAttacks}`;
+  $('#v1Loss').textContent = formatINR(0);
+  $('#v2Loss').textContent = formatINR(0);
+  $('#v1Result').textContent = 'REPLAY IN PROGRESS';
+  $('#v2Result').textContent = 'REPLAY IN PROGRESS';
+
+  model.stages.forEach((stage, index) => {
+    const delay = reducedMotion() ? 0 : 120 + index * 150;
+    state.twinTimers.push(setTimeout(() => {
+      $$('.twin-replay-row').forEach(row => row.classList.toggle('active', Number(row.dataset.stage) === index));
+      $$('#twinStageDots i').forEach(dot => {
+        const dotIndex = Number(dot.dataset.stage);
+        dot.classList.toggle('active', dotIndex === index);
+        dot.classList.toggle('complete', dotIndex < index);
+      });
+      $('#twinStageLabel').textContent = `EVALUATING · ${stage.name.toUpperCase()}`;
+      $('#twinSyncClock').textContent = `STAGE ${index + 1} / ${model.totalAttacks}`;
+      $('#v1Loss').textContent = formatINR(stage.legacy.cumulativeMoved);
+      $('#v2Loss').textContent = formatINR(stage.cumulativeLossPrevented);
+    }, delay));
+  });
+
+  const completionDelay = reducedMotion() ? 0 : 120 + model.stages.length * 150;
   state.twinTimers.push(setTimeout(() => {
-    v1.textContent = `${legacy.attacksSucceeded} of ${legacy.attacks.length} attacks succeeded`;
-    v1.style.color = legacy.attacksSucceeded ? 'var(--red)' : 'var(--green)';
-  }, 450));
-  state.twinTimers.push(setTimeout(() => {
-    v2.textContent = `${hardened.attacksSucceeded} of ${hardened.attacks.length} attacks succeeded`;
-    v2.style.color = hardened.attacksSucceeded ? 'var(--red)' : 'var(--green)';
-  }, 750));
-  state.twinTimers.push(setTimeout(() => {
+    $$('.twin-replay-row').forEach(row => row.classList.remove('active'));
+    $$('#twinStageDots i').forEach(dot => { dot.classList.remove('active'); dot.classList.add('complete'); });
+    $('#twinStageLabel').textContent = 'REPLAY COMPLETE · SAME ENGINE ATTACK SUITE';
+    $('#twinSyncClock').textContent = `${model.totalAttacks} / ${model.totalAttacks} VERIFIED`;
+    $('#v1Result').textContent = `${model.legacyBypassed} OF ${model.totalAttacks} ATTACKS BYPASSED`;
+    $('#v1Result').style.color = model.legacyBypassed ? 'var(--red)' : 'var(--green)';
+    $('#v2Result').textContent = `${model.hardenedBypassed} OF ${model.totalAttacks} ATTACKS BYPASSED`;
+    $('#v2Result').style.color = model.hardenedBypassed ? 'var(--red)' : 'var(--green)';
+    $('.twin-replay-grid .policy-card.strong')?.classList.add('twin-winner');
     const summary = $('#twinSummary');
     summary.classList.remove('hidden');
-    $('strong', summary).textContent = `V2 contained ${hardened.attacksContained} of ${hardened.attacks.length} attacks using the canonical engine.`;
-    $('small', summary).textContent = `V1 moved ${formatINR(legacy.attacks.reduce((sum, attack) => sum + attack.fundsMoved, 0))}; V2 moved ${formatINR(hardened.attacks.reduce((sum, attack) => sum + attack.fundsMoved, 0))} in the attack suite.`;
+    $('strong', summary).textContent = `AEGIS V2 contained ${model.totalAttacks - model.hardenedBypassed} of ${model.totalAttacks} attacks using the canonical engine.`;
+    $('small', summary).textContent = `V1 moved ${formatINR(model.legacyMoved)}; V2 moved ${formatINR(model.hardenedMoved)}. Simulated loss prevented: ${formatINR(model.lossPrevented)}.`;
+    runButton.disabled = false;
+    runButton.textContent = 'RUN SYNCHRONISED ATTACK REPLAY';
     toast('Both policy configurations completed the same six engine-driven attacks');
-  }, 1_000));
+  }, completionDelay));
   return state.twinResults;
 }
 
@@ -523,6 +614,7 @@ function eventTitle(event) {
 function renderForensics() {
   const ledger = state.engine.getLedger();
   const timeline = $('#forensicTimeline');
+  renderIncidentScrubber(ledger);
   if (ledger.length === 0) {
     timeline.innerHTML = '<div class="timeline-item active"><span class="timeline-time">—</span><div class="timeline-point"><span></span></div><div class="timeline-content"><strong>No recorded events</strong><small>Run a scenario to create replayable evidence.</small></div></div>';
     $('#proofTerminal').textContent = '$ aegis verify --latest\n\nNo recorded policy event.\nReset state is deterministic and uses simulated funds only.';
@@ -540,6 +632,13 @@ function renderForensics() {
     </div>`;
   }).join('');
   renderProofTerminal(ledger[state.replayIndex]);
+}
+
+function renderIncidentScrubber(ledger) {
+  const stages = createIncidentStages(ledger);
+  $('#incidentScrubber').innerHTML = stages.map(stage => `<button type="button" class="incident-stage${stage.index === state.replayIndex ? ' active' : ''}" ${stage.available ? `data-replay-index="${stage.index}"` : 'disabled'}>
+    <i aria-hidden="true"></i><span>${escapeHTML(stage.label)}</span><small>${stage.available ? escapeHTML(displayTime(stage.event.timestamp)) : 'NOT YET RECORDED'}</small>
+  </button>`).join('');
 }
 
 function renderProofTerminal(event) {
@@ -618,6 +717,16 @@ function resetEnvironment({ notify = true, preserveView = false, resetJudge = tr
   $('#v1Result').style.color = '';
   $('#v2Result').textContent = 'Not tested';
   $('#v2Result').style.color = '';
+  $('#v1Replay').innerHTML = '';
+  $('#v2Replay').innerHTML = '';
+  $('#v1Loss').textContent = '₹0';
+  $('#v2Loss').textContent = '₹0';
+  $('#twinStageDots').innerHTML = '';
+  $('#twinStageLabel').textContent = 'SYNCHRONISED REQUEST';
+  $('#twinSyncClock').textContent = 'STAGE 0 / 6';
+  $('.twin-replay-grid .policy-card.strong')?.classList.remove('twin-winner');
+  $('#runTwin').disabled = false;
+  $('#runTwin').textContent = 'RUN SYNCHRONISED ATTACK REPLAY';
   $('#twinSummary').classList.add('hidden');
   $('#replayPlay').textContent = 'Play Replay';
   $('#capsuleTask').value = DEFAULT_POLICY.task;
@@ -684,10 +793,7 @@ function normaliseLedgerResult(event) {
 }
 
 function judgeFlowFor(result) {
-  if (result.decision === 'APPROVE') return 'approved';
-  if (result.decision === 'HOLD' || result.decision === 'REQUIRE_APPROVAL') return 'pending';
-  if (result.decision === 'INVALIDATE') return 'invalidated';
-  return 'blocked';
+  return createCoreVisualState(result).flow;
 }
 
 function makeJudgeView(result, {
@@ -739,7 +845,7 @@ function renderJudgeTrace(trace = []) {
 
 function renderJudgeView(view, { activeStage = null, statusText = null } = {}) {
   state.judgeView = view;
-  $('#judgeVisual').dataset.flow = activeStage === null ? view.flow : 'running';
+  applyCoreVisualState($('#judgeVisual'), view.result, activeStage === null ? view.flow : 'running');
   $('#judgeCurrentRule').textContent = view.currentRule ?? 'NOT APPLICABLE';
   $('#judgePolicyVersion').textContent = view.policyVersion ? `PROCUREMENT-V${view.policyVersion}` : state.engine.getSnapshot().policyLabel;
   $('#judgeRiskState').textContent = `${view.riskState ?? 'NORMAL'} · ${view.riskScore ?? 0}/100`;
@@ -782,7 +888,8 @@ function updateJudgeModal() {
   $('#judgeTitle').textContent = scenario.title;
   $('#judgeDescription').textContent = scenario.description;
   $('#judgeAmount').textContent = scenario.amount;
-  $('#judgeVisual').dataset.flow = 'idle';
+  applyCoreVisualState($('#judgeVisual'));
+  $('#judgeCard').classList.remove('kill-choreography');
   $('#judgeCurrentRule').textContent = 'NOT STARTED';
   const baseline = state.engine.getSnapshot();
   $('#judgePolicyVersion').textContent = baseline.policyLabel;
@@ -867,19 +974,16 @@ function scenarioTwoView(result) {
 }
 
 function scenarioThreeView(result, evidence) {
-  const attempted = evidence.intents.reduce((sum, intent) => sum + intent.amount, 0);
-  const start = new Date(evidence.intents.at(0).requestedAt).getTime();
-  const end = new Date(evidence.intents.at(-1).requestedAt).getTime();
-  const observedSeconds = Math.round((end - start) / 1_000);
+  const cluster = createEvasionClusterModel(evidence.intents, result);
   return makeJudgeView(result, {
     title: 'COORDINATED ATTACK BLOCKED',
     facts: [
       { label: 'INDIVIDUAL INTENTS', value: evidence.intents.map(intent => formatINR(intent.amount)).join(' · ') },
-      { label: 'GROUPED VALUE', value: formatINR(attempted), tone: 'failed' },
-      { label: 'OBSERVED WINDOW', value: `${observedSeconds}s / ${Math.round(state.engine.policy.evasionWindowMs / 1_000)}s detection window` },
+      { label: 'GROUPED VALUE', value: formatINR(cluster.total), tone: 'failed' },
+      { label: 'OBSERVED WINDOW', value: `${cluster.windowSeconds}s / ${Math.round(state.engine.policy.evasionWindowMs / 1_000)}s detection window` },
       { label: 'ENGINE RESULT', value: 'ONE COORDINATED ATTACK', tone: 'failed' },
     ],
-    visual: `<div class="judge-split-group">${evidence.intents.map(intent => `<span>${escapeHTML(formatINR(intent.amount))}</span>`).join('')}<b>GROUPED → ${escapeHTML(formatINR(attempted))}</b></div>`,
+    visual: evasionClusterMarkup(cluster, { compact: true }),
   });
 }
 
@@ -982,18 +1086,19 @@ function activateJudgeKillSwitch() {
     const result = normaliseLedgerResult(outcome);
     const newVersion = state.engine.policy.version;
     const view = makeJudgeView(result, {
-      title: 'INVALIDATED BEFORE THE WALLET',
+      title: 'FINANCIAL AUTHORITY REVOKED',
+      detail: `PENDING INTENT INVALIDATED. ${result.reason}`,
       facts: [
         { label: 'OWNER ACTION', value: 'KILL SWITCH · VERIFIED OWNER', tone: 'failed' },
         { label: 'POLICY VERSION', value: `V${oldVersion} → V${newVersion}`, tone: 'failed' },
         { label: 'FINAL STATUS', value: outcome.finalSettlementStatus, tone: 'failed' },
         { label: 'FUNDS MOVED', value: `${formatINR(outcome.fundsMoved)} · SIMULATED`, tone: 'passed' },
       ],
-      visual: '<div class="judge-revocation"><span>PHASE 1 AUTHORISED</span><i>→</i><b>OWNER FREEZE</b><i>⊣</i><span>WALLET NOT REACHED</span></div>',
+      visual: '<div class="judge-revocation"><span>PHASE 1 AUTHORISED</span><i>→</i><b>OWNER FREEZE</b><i>⊣</i><span>WALLET NOT REACHED</span></div><div class="revocation-verdict"><strong>PENDING INTENT INVALIDATED</strong><span>FUNDS MOVED: ₹0</span></div>',
       authorisationEvent: state.judgeEvidence.get(4)?.pending?.ledgerEvent,
     });
     renderJudgeView(view);
-    pulseOnce($('#judgeCard'), 'freeze-pulse');
+    pulseOnce($('#judgeCard'), 'kill-choreography');
     judgeMachine.complete(token);
     renderJudgeControls();
   } catch (error) {
@@ -1007,7 +1112,7 @@ function executeJudgeScenario() {
   const token = judgeMachine.start();
   if (!token) return;
   renderJudgeControls();
-  $('#judgeVisual').dataset.flow = 'running';
+  applyCoreVisualState($('#judgeVisual'), null, 'running');
   $('#judgeResult').className = 'judge-result running';
   $('#judgeResult').innerHTML = '<strong>RUNNING</strong><span>The canonical engine is evaluating the transaction intent.</span><small>NO RESULT IS DISPLAYED UNTIL THE ENGINE RETURNS</small>';
   try {
@@ -1171,6 +1276,13 @@ function initInteractions() {
       renderForensics();
     }
   });
+  $('#incidentScrubber').addEventListener('click', event => {
+    const item = event.target.closest('[data-replay-index]');
+    if (item) {
+      state.replayIndex = Number(item.dataset.replayIndex);
+      renderForensics();
+    }
+  });
   const narrative = $('.narrative-band');
   narrative.classList.add('reveal-statement');
   if (reducedMotion() || !('IntersectionObserver' in window)) narrative.classList.add('is-revealed');
@@ -1203,6 +1315,15 @@ function initInteractions() {
     activeView: () => $('.nav-item.active')?.dataset.view ?? null,
     selectedForensicEvent: () => $('#proofTerminal').dataset.eventId || null,
     heroFlow: () => $('#heroFlow').dataset.flow,
+    coreVisual: () => ({
+      flow: $('#heroFlow').dataset.flow,
+      risk: $('#heroFlow').dataset.risk,
+      failingLayer: $('#heroFlow').dataset.failLayer,
+      walletGate: $('#heroFlow').dataset.walletGate,
+    }),
+    visualRiskState: () => document.body.dataset.riskState,
+    incidentStages: () => createIncidentStages(state.engine.getLedger()).map(stage => ({ id: stage.id, index: stage.index, available: stage.available })),
+    twinReplay: () => state.twinResults ? createTwinReplayModel(state.twinResults) : null,
   });
 }
 

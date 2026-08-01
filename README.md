@@ -42,11 +42,13 @@ Judge Mode is a presentation state machine (`READY`, `RUNNING`, `AWAITING_OWNER_
 
 ## Competition visual system
 
-The static interface uses a restrained navy/graphite financial-security system with semantic emerald, amber, orange, crimson, and cyan state roles. Motion is dependency-free and only visualises real engine state: transaction flow, changed metrics, new ledger entries, risk transitions, pending countdowns, owner freeze, and newly selected forensic evidence. The hero is motionless while the engine is idle, all typography uses local system fonts, and reduced-motion mode produces the same exact results without animated transitions.
+The static interface uses a restrained navy/graphite financial-security system with semantic emerald, amber, orange, crimson, and cyan state roles. Its signature visual is the Aegis Core: four independent SVG policy rings for **Identity**, **Task Intent**, **Limits**, and **Behaviour Risk** surrounding the protected shield. A failed engine rule selects its exact ring; approved flow reaches the simulated wallet, while blocked and invalidated paths visibly stop before it.
 
-The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Screenshot evidence is stored in [`docs/screenshots/design-v1`](docs/screenshots/design-v1/).
+Motion is dependency-free and only visualises real engine state: transaction flow, changed metrics, new ledger entries, risk transitions, pending countdowns, owner freeze, and newly selected forensic evidence. The manual Scenario 5 kill switch closes the Core and wallet gate only after the verified owner action reaches the engine. The hero is motionless while idle, all typography uses local system fonts, and reduced-motion mode produces the same exact results without choreography.
 
-The test suite currently contains **32 passing tests**: the original 27 enforcement and Judge Mode tests plus five visual-contract tests.
+The responsive Judge and Control Centre flows are browser-audited at `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`. Signature-pass screenshot evidence is stored in [`docs/screenshots/design-v2`](docs/screenshots/design-v2/).
+
+The test suite currently contains **47 passing tests**: the original 32 enforcement, Judge Mode, and premium-shell tests plus 15 signature visual-contract tests. The new tests also pin SHA-256 hashes for the locked engine and Judge runtime.
 
 ## Team
 

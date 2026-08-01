@@ -11,6 +11,23 @@ The hierarchy is designed for a projected judging screen:
 3. Decisive rule, policy version, risk state, and funds moved
 4. Expandable supporting evidence
 
+## Signature Aegis Core
+
+The Aegis Core is the system’s primary visual explanation. Four nested policy rings map to the canonical check families:
+
+1. **Identity** — agent existence, freeze state, policy version, and nonce validity
+2. **Task Intent** — Capsule task, expiry, counterparty, and category
+3. **Limits** — positive amount, transaction cap, and cumulative budget
+4. **Behaviour Risk** — Evasion Shield and Risk Governor
+
+The centre shield represents the independent enforcement boundary. A neutral Core is static. During an actual evaluation the rings validate in order; an approval completes the emerald path to the simulated wallet, a block marks only the decisive ring, a pending intent pauses in amber, and invalidation closes the wallet gate. A verified owner freeze closes every ring and deactivates the path. `public/visual-state.js` performs only this result-to-presentation mapping and has no financial decision authority.
+
+## System state choreography
+
+Canonical risk state changes a narrowly scoped visual perimeter: ambient edge light, the Aegis Core, top status strip, active sidebar line, transaction path, and current policy boundary. `NORMAL` is quiet navy/cyan; `CAUTION` uses amber; `RESTRICTED` orange; `QUARANTINED` violet-crimson; and `FROZEN` deep crimson. Content text and unrelated cards are never globally recoloured.
+
+The surface system has three levels only: base canvas, operational panel, and critical active surface. Inner highlights, restrained edge reflections, and soft shadow separation provide depth without applying glass or gradients to every component.
+
 ## Colour roles
 
 | Role | Token | Meaning |
@@ -57,6 +74,9 @@ Every decision surface includes the decisive rule or final revalidation state, t
 | Terminal reveal | selected forensic evidence | selected ledger event |
 | Border glow | active Capsule and active Judge state | active UI/engine state |
 | Text reveal | “The agent may be autonomous. The money never is.” | one viewport entry only |
+| Aegis Core rings | identity, task intent, limits, behaviour risk | decisive canonical rule and engine risk state |
+| Incident scrubber | valid payment through pending invalidation | matching recorded ledger events only |
+| Synchronized Twin replay | Policy V1 and Aegis V2 | same six canonical engine attack runs |
 
 No component fabricates activity. Empty states remain empty, and the hero is motionless until a real scenario result exists.
 
@@ -66,6 +86,7 @@ No component fabricates activity. Empty states remain empty, and the hero is mot
 - Panel reveal: 250–400 ms.
 - Transaction motion: tied to Judge execution state; it never delays the engine.
 - Freeze: one controlled red pulse.
+- Kill switch: an 850 ms owner pulse, Core lock, gate close, and invalidation seal after the engine response.
 - New event: one insertion reveal.
 - Forensic evidence: one short reveal when selection changes.
 - No screen shake, particles, marquee, looping typewriter, moving background, or continuous idle beam.
@@ -77,7 +98,7 @@ Under `prefers-reduced-motion: reduce`, metric values update directly, transacti
 - Desktop Control Centre uses a persistent vertical navigation line and five operational metrics.
 - Tablet widths wrap the top status strip and reduce the metric grid without hiding owner controls.
 - Mobile uses a horizontally scrollable Control Centre navigation row, a two-column status strip, one-column panels, and a full-width Freeze Agent control.
-- Judge Mode uses a two-column explanation/evidence layout on desktop and a single scrollable body on mobile, with controls retained in the dialog footer.
+- Judge Mode uses a three-zone theatre layout—scenario context, dominant Core, canonical proof—on desktop and a single scrollable body on mobile, with controls retained in the dialog footer.
 - Forensic grids use `minmax(0, …)` and breakable evidence lines to prevent long policy traces from widening the page.
 
 Verified viewport targets: `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`.

@@ -2,7 +2,7 @@
 
 Open **Judge Mode**. It always resets to the deterministic baseline and starts at `READY · SCENARIO 1 OF 6`. Each scenario moves through `READY → RUNNING → COMPLETE`; Scenario 5 pauses at `AWAITING_OWNER_ACTION`. While the engine is running, Previous and Next are disabled and repeated clicks cannot submit another intent.
 
-The visual language is consistent in every scenario: cyan marks active evaluation, emerald marks a completed authorisation or settlement, amber marks a pending owner/settlement state, and red appears only at a real policy stop, invalidation, or freeze. The four-stage pipeline and textual result always remain the primary evidence; colour is supplementary. **SIMULATED FUNDS** remains visible throughout.
+The visual language is consistent in every scenario: cyan marks active evaluation, emerald marks a completed authorisation or settlement, amber marks a pending owner/settlement state, and red appears only at a real policy stop, invalidation, or freeze. The central Aegis Core shows four independent rings—Identity, Task Intent, Limits, and Behaviour Risk—and selects the exact ring associated with the decisive engine rule. The four-stage pipeline and textual result always remain the primary evidence; colour is supplementary. **SIMULATED FUNDS** remains visible throughout.
 
 ## 1. Normal operation
 Run **Authorised payment**.
@@ -19,7 +19,7 @@ Run **Threshold splitting attack**.
 
 Expected: four requests of `₹1,999` inside the recorded 11-second sequence are grouped as one `₹7,996` coordinated attempt and blocked.
 
-The four payment cards are visually bracketed into the single combined value, while the beam stops at Aegis before the simulated wallet.
+The four real intent cards converge through relation lines into one `COORDINATED ATTEMPT · ₹7,996 · 11-SECOND WINDOW` verdict, while the Behaviour Risk ring stops the beam before the simulated wallet.
 
 ## 4. Adaptive Risk Governor
 Show the engine-calculated transition from the prior state to `RESTRICTED`, including the exact signals added, calculated score, and automatic response. This panel reuses the actual risk evidence produced by the engine in the attack sequence.
@@ -29,10 +29,10 @@ Run the pending `₹1,500 → ComputeHub` payment. If the prior attack has place
 
 Expected: the verified owner freeze advances the policy version, the pending intent becomes `INVALIDATED`, the wallet is not reached, and `₹0` moves. Judge Mode never auto-freezes. If the countdown is allowed to expire, it displays the engine's real final settlement result instead. **Restart Scenario** rebuilds the deterministic prerequisite sequence.
 
-The click produces one restrained freeze pulse. The policy path terminates before the wallet and the owner action, version transition, final status, and zero-funds result appear together.
+After the engine responds, the click produces one restrained owner-to-Core pulse. The rings lock, the wallet gate closes, the pending beam terminates, and the result states `FINANCIAL AUTHORITY REVOKED`, `PENDING INTENT INVALIDATED`, and `FUNDS MOVED: ₹0`. The owner action, V4→V5 transition, and final status remain visible together.
 
 ## 6. Forensic proof
-Run Scenario 6, then open **Forensics**. The scenario shows the selected ledger event ID, intent, policy version, decisive rule, owner action, final status, and funds moved. Attack Replay uses the same recorded event.
+Run Scenario 6, then open **Forensics**. The incident scrubber selects available ledger-backed stages from valid payment through pending invalidation; unavailable stages remain explicitly unrecorded. The terminal shows the selected event ID, intent, policy version, decisive rule, owner action, final status, and funds moved. It makes no cryptographic-proof claim.
 
 ## Reset and failure safety
 

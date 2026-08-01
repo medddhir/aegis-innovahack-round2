@@ -69,7 +69,7 @@ The Forensic Proof Ledger is written by the engine, not by the display layer. At
 
 ## Presentation boundary
 
-`public/app.js` is a projection layer over engine snapshots, decisions, `rulesEvaluated`, and ledger events. It may format INR, select the current panel, animate a returned state, and coordinate Judge Mode presentation; it may not calculate approval, risk, settlement, or evidence independently. `public/judge-mode.js` owns only the demo lifecycle and timer cleanup. `public/styles.css` maps returned states to visual treatment without delaying or changing them.
+`public/app.js` is a projection layer over engine snapshots, decisions, `rulesEvaluated`, and ledger events. It may format INR, select the current panel, animate a returned state, and coordinate Judge Mode presentation; it may not calculate approval, risk, settlement, or evidence independently. `public/judge-mode.js` owns only the demo lifecycle and timer cleanup. `public/visual-state.js` maps returned rules, decisions, risk states, transaction groups, Twin runs, and ledger stages into presentation models; it never evaluates a transaction. `public/styles.css` maps those returned states to visual treatment without delaying or changing them.
 
 The live intent stream and forensic terminal read recorded ledger entries. Metric transitions terminate at the engine snapshot value, and reduced-motion mode writes that value directly. Browser diagnostics are read-only and exist to verify visible state against the engine during local tests.
 
