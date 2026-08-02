@@ -6,11 +6,12 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "python3 -m http.server 4173 -d dist",
-    "test": "node tests/run-tests.js && node tests/final-art-direction.test.js",
+    "test": "node tests/run-tests.js && node tests/final-art-direction.test.js && node tests/black-label.test.js",
     "contract:test": "npm --prefix contracts test",
     "contract:demo": "npm --prefix contracts run demo",
     "contract:parity": "npm --prefix contracts run parity",
     "contract:proof": "npm --prefix contracts run proof",
-    "test:all": "npm test && npm run contract:test && npm run contract:parity"
+    "component:audit": "node scripts/audit-components.mjs",
+    "test:all": "npm test && npm run component:audit && npm run contract:test && npm run contract:parity"
   }
 }

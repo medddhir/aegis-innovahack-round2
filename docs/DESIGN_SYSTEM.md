@@ -1,10 +1,10 @@
-# Aegis Design System — Institutional Futurism
+# Aegis Design System — Black Label
 
 ## Visual philosophy
 
-Aegis balances academic precision, financial-infrastructure restraint, and cinematic technical demonstration: approximately 70% calm authority, 20% analytical detail, and 10% impact. Normal operation is quiet, structured, and blue-toned; defensive states become progressively more explicit only when the canonical engine reports risk, a block, invalidation, or freeze. The interface avoids trading-terminal density, game motifs, neon spectacle, and idle animation.
+Aegis combines compact financial-infrastructure density with cinematic technical demonstration. Normal operation is structured and blue-toned; defensive states become explicit only when the canonical engine reports risk, a block, invalidation, or freeze. The interface avoids giant pitch-deck typography, identical card grids, crypto motifs, and decorative idle motion.
 
-The public experience is five chapters rather than a feature-card catalogue: Thesis, Authority, Intervention, Proof, and The System. Each viewport has one dominant idea, no more than three surface levels, no repeated trust badge, and at most one active glow.
+The implementation is zoned rather than presented as a component catalogue: Hero/Core, Threat Scan, Authority Builder, Control Centre, Attack Theatre, Proof Lab, Illustrative Policy Network, and Judge Mode. Each zone has a strict animation budget, no more than one strong glow, and a defined mobile and reduced-motion strategy. The complete mapping is documented in `COMPONENT_USAGE_MATRIX.md` and validated by `scripts/audit-components.mjs`.
 
 The hierarchy is designed for a projected judging screen:
 
@@ -24,7 +24,7 @@ The Aegis Instrument is the system’s primary visual explanation. Four nested p
 
 The centre shield represents the independent enforcement boundary. A neutral Core is static. During an actual evaluation the rings validate in order; an approval completes the emerald path to the simulated wallet, a block marks only the decisive ring, a pending intent pauses in amber, and invalidation closes the wallet gate. A verified owner freeze closes every ring and deactivates the path. `public/visual-state.js` performs only this result-to-presentation mapping and has no financial decision authority.
 
-Desktop may receive one progressive raw-WebGL ring accent. It is local, lazy, bounded to the hero, paused off-screen, capped at 1.5 device-pixel ratio, and disposed on page exit or context loss. It reads visual state already produced by the locked mapping. The complete SVG/CSS object remains visible and is mandatory on mobile, reduced-motion, low-power, and failure paths.
+Desktop may receive one progressive raw-WebGL ring accent. It is local, lazy, bounded to the hero, paused off-screen, capped at 1.5 device-pixel ratio, and disposed on page exit or context loss. It reads visual state already produced by the locked mapping. The complete SVG/CSS object remains visible and is mandatory on mobile, reduced-motion, low-power, and failure paths. The entire site uses one rendering context on desktop and none on mobile.
 
 ## System state choreography
 
@@ -51,7 +51,7 @@ Red is deliberately rare. It is never used as a decorative brand accent or idle 
 - Interface and narrative: local system sans-serif stack (`Inter` when already installed, then platform UI fonts).
 - Evidence: local system monospace stack for policy IDs, intent IDs, rule names, timestamps, and forensic output.
 - No remote font request is made.
-- Interface body copy targets 16–18 px. Important controls are 14–16 px; critical labels are 13–15 px; decisive rules and amounts are at least 14 px; technical identifiers and regulatory copy are at least 12.5–14 px.
+- Interface body copy targets 15–17 px. The desktop hero is capped at 50 px and section headings at 40 px; mobile hero copy is 32–38 px. Important controls are 14–16 px; critical labels are 13–15 px; decisive rules and amounts are at least 14 px; technical identifiers and regulatory copy are at least 12.5–14 px.
 - Financial values use tabular numerals and preserve exact engine formatting.
 
 ## Status language
@@ -82,7 +82,7 @@ Every decision surface includes the decisive rule or final revalidation state, t
 | Incident scrubber | valid payment through pending invalidation | matching recorded ledger events only |
 | Synchronized Twin replay | Policy V1 and Aegis V2 | same six canonical engine attack runs |
 
-No component fabricates activity. Empty states remain empty, and the hero is motionless until a real scenario result exists.
+No component fabricates activity. Empty states remain empty, and the hero is motionless until a real scenario result exists. All 32 supplied concepts are visible or interactively reachable: 18 direct ports and 14 Aegis-specific adaptations.
 
 ## Motion rules
 

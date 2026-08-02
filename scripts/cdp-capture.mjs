@@ -63,6 +63,10 @@ await send('Emulation.setTouchEmulationEnabled', { enabled: isMobile, maxTouchPo
 await send('Page.navigate', { url });
 browserErrors.length = 0;
 await new Promise(resolve => setTimeout(resolve, waitMs));
+if (new URL(url).searchParams.has('captureSet')) {
+  await send('Runtime.evaluate', { expression: 'scrollTo(0, 0)' });
+  await new Promise(resolve => setTimeout(resolve, 80));
+}
 
 const auditResult = await send('Runtime.evaluate', {
   expression: `JSON.stringify({

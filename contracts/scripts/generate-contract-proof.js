@@ -36,7 +36,7 @@ const browserTestTotal = fs.readdirSync(browserTestRoot)
   .filter(file => file.endsWith('.test.js'))
   .reduce((total, file) => {
     const source = fs.readFileSync(path.join(browserTestRoot, file), 'utf8');
-    return total + (source.match(/\btest\s*\(/g) || []).length;
+    return total + (source.match(/^\s*test\s*\(/gm) || []).length;
   }, 0);
 
 if (testResults.failed !== 0 || parityResults.parity !== 'PASS') {

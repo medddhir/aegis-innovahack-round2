@@ -2,6 +2,8 @@
 
 Open **Judge Mode**. It always resets to the deterministic baseline and starts at `READY · SCENARIO 1 OF 6`. Each scenario moves through `READY → RUNNING → COMPLETE`; Scenario 5 pauses at `AWAITING_OWNER_ACTION`. While the engine is running, Previous and Next are disabled and repeated clicks cannot submit another intent.
 
+For a short prelude, use **Threat Scan** to submit the oversized intent through the canonical engine, then move to **Authority Builder** to show how task, budget, counterparties, expiry, and activation form one Capsule. **Run Full Attack Suite** advances the real interface scenarios only as far as the pending transaction; it intentionally cannot activate the owner Kill Switch. Command/Research theme selection is presentational and persists locally.
+
 The visual language is consistent in every scenario: cyan marks active evaluation, emerald marks a completed authorisation or settlement, amber marks a pending owner/settlement state, and red appears only at a real policy stop, invalidation, or freeze. The central Aegis Core shows four independent rings—Identity, Task Intent, Limits, and Behaviour Risk—and selects the exact ring associated with the decisive engine rule. The four-stage pipeline and textual result always remain the primary evidence; colour is supplementary. **SIMULATED FUNDS** remains visible throughout.
 
 The compact **CONTRACT-BACKED RULE PARITY** badge is supporting evidence, not a claim that the live click is on-chain. Expand it to show the generated contract test count, eight-vector parity result, `LOCAL EVM` environment, and source link. The badge states that Judge Mode uses simulated browser execution while core settlement controls are independently implemented in Solidity.
@@ -48,3 +50,5 @@ Run Scenario 6, then open **Forensics**. The incident scrubber selects available
 ## Contract proof handoff
 
 After Judge Mode, scroll to Chapter 4, **Enforced twice. Explained once.** Its unified proof surface presents the engine-derived Policy Digital Twin, the latest actual ledger evidence, and the Solidity Policy Wallet together. Contract values are loaded from `contract-proof.json`: the actual passing test count, vector parity, local environment, and `REAL FUNDS MOVED: FALSE`. Full source and bytecode hashes stay behind **View complete technical evidence** so the default view remains readable.
+
+The adjacent **Illustrative Test Network** is an architecture diagram only. Mumbai, Singapore, London, New York, and Seoul are synthetic policy nodes; the section explicitly states that there are no live payment rails, customers, deployments, or regulatory-coverage claims.

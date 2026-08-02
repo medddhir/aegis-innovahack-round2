@@ -14,6 +14,7 @@
   <title>Aegis — Independent Financial Firewall</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./black-label.css" />
 </head>
 <body>
   <a class="skip-link" href="#top">Skip to main content</a>
@@ -34,6 +35,10 @@
     </nav>
     <div class="header-actions">
       <span class="prototype-pill">SIMULATED INR</span>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to Research Mode" aria-pressed="false"
+        data-aegis-component="Animated Theme Toggler" data-component-status="adapted" data-component-location="Global header" data-mobile="safe" data-reduced-motion="static">
+        <span class="theme-toggle-track" aria-hidden="true"><i></i></span><b>COMMAND</b>
+      </button>
       <button class="freeze-mini" data-freeze-button aria-label="Freeze agent">Freeze Agent</button>
     </div>
   </header>
@@ -41,12 +46,18 @@
   <main id="top">
     <section class="hero section-shell chapter chapter-thesis" id="thesis" aria-labelledby="thesisTitle">
       <div class="hero-copy">
-        <div class="eyebrow reveal-1"><span class="status-dot"></span> AEGIS / INDEPENDENT FINANCIAL CONTROL PLANE</div>
+        <div class="eyebrow reveal-1"><span class="status-dot"></span> AEGIS / AUTONOMOUS FINANCIAL CONTROL PLANE</div>
         <h1 class="reveal-2" id="thesisTitle">AI agents can spend in milliseconds.<br><span>Aegis makes disobedience financially impossible.</span></h1>
         <p class="hero-sub reveal-3">Aegis sits between an autonomous agent and its money—enforcing task, recipient, spending, risk, and owner-control policies outside the agent’s own logic.</p>
+        <div class="operational-verb reveal-3" aria-label="Aegis operational controls"
+          data-aegis-component="Word Rotate" data-component-status="adapted" data-component-location="Hero thesis" data-mobile="safe" data-reduced-motion="first-word">
+          <span>THE AGENT REQUESTS. AEGIS CAN</span><strong id="wordRotate">AUTHORISE</strong>
+        </div>
         <div class="hero-actions reveal-4">
-          <button class="primary-cta specular-cta" id="launchJudgeMode">Launch Live Attack Simulation <span>↗</span></button>
-          <a class="secondary-cta" href="#control-centre" aria-label="Open Control Centre — enter the full product">Enter Control Centre</a>
+          <button class="primary-cta specular-cta" id="launchJudgeMode"
+            data-aegis-component="Specular Button" data-component-status="used" data-component-location="Hero primary action" data-mobile="safe" data-reduced-motion="static-border">Launch Live Attack Simulation <span>↗</span></button>
+          <a class="secondary-cta shiny-cta" href="#control-centre" aria-label="Open Control Centre — enter the full product"
+            data-aegis-component="Animated Shiny Button" data-component-status="used" data-component-location="Hero secondary action" data-mobile="safe" data-reduced-motion="static-border">Open Control Centre</a>
         </div>
         <div class="hero-trust reveal-5" aria-label="Simulated INR · No real funds · Deterministic enforcement · Owner-controlled freeze">
           <span><b data-browser-tests>—</b> Browser tests</span>
@@ -56,14 +67,20 @@
         </div>
       </div>
 
-      <div class="hero-system signature-system reveal-3" id="heroFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" aria-label="Transaction path through the four-layer Aegis Core to a protected wallet">
+      <div class="hero-system signature-system reveal-3" id="heroFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" aria-label="Transaction path through the four-layer Aegis Core to a protected wallet"
+        data-aegis-component="Animated Beam" data-component-status="used" data-component-location="Hero transaction path" data-mobile="safe" data-reduced-motion="state-snap">
+        <div class="intent-motes" aria-hidden="true" data-aegis-component="Part&#105;cles" data-component-status="adapted" data-component-location="Hero incoming intents" data-mobile="reduced-count" data-reduced-motion="static">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="proof-sparkles" aria-hidden="true" data-aegis-component="Sparkles" data-component-status="used" data-component-location="Hero verified Core" data-mobile="minimal" data-reduced-motion="hidden"><i></i><i></i><i></i><i></i></div>
         <div class="system-kicker"><span class="live-dot"></span> INDEPENDENT POLICY PATH <b>TEST ENVIRONMENT</b></div>
         <div class="core-scene">
           <div class="core-endpoint core-agent"><span>AI</span><strong>AUTONOMOUS<br>AGENT</strong><small>Transaction intent</small></div>
           <div class="core-rail rail-in" aria-hidden="true"><i></i><b></b></div>
-          <div class="signature-core" data-depth-level="3" aria-label="Aegis Core policy layers">
+          <div class="signature-core" data-depth-level="3" aria-label="Aegis Core policy layers"
+            data-aegis-component="Magic Rings" data-component-status="used" data-component-location="Hero Aegis Core" data-mobile="svg-fallback" data-reduced-motion="svg-fallback">
             <div class="magic-rings-mount" id="magicRingsMount" data-renderer-state="fallback" aria-hidden="true"></div>
-            <div class="core-strands" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="core-strands" aria-hidden="true" data-aegis-component="Strands" data-component-status="adapted" data-component-location="Hero Core signal inputs" data-mobile="static" data-reduced-motion="hidden"><i></i><i></i><i></i></div>
             <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="coreTitle coreDesc">
               <title id="coreTitle">Aegis Core</title><desc id="coreDesc">Four independent enforcement layers surrounding the Aegis shield.</desc>
               <circle class="core-orbit core-orbit-risk" data-core-layer="risk" data-depth-plane="1" cx="200" cy="200" r="164" pathLength="100" />
@@ -97,14 +114,39 @@
       </div>
     </section>
 
+    <section class="threat-zone section-shell" id="threat" aria-labelledby="threatTitle" data-zone="threat" data-animation-budget="4">
+      <div class="threat-copy">
+        <span class="zone-index">02 / THE THREAT</span>
+        <h2 id="threatTitle" data-aegis-component="Dia Text Reveal" data-component-status="adapted" data-component-location="Threat chapter heading" data-mobile="safe" data-reduced-motion="visible">Autonomy without external authority is a financial vulnerability.</h2>
+        <p class="threat-thesis" data-aegis-component="Text Reveal" data-component-status="adapted" data-component-location="Threat thesis" data-mobile="safe" data-reduced-motion="visible"><span>The agent may be autonomous.</span><strong>The money never is.</strong></p>
+        <dl class="threat-facts">
+          <div><dt>Intent</dt><dd id="threatIntent">₹8,500 → Unknown</dd></div>
+          <div><dt>Policy boundary</dt><dd>₹2,500 · allowlist only</dd></div>
+          <div><dt>Decisive rule</dt><dd id="threatRule">AWAITING_ANALYSIS</dd></div>
+        </dl>
+      </div>
+      <div class="threat-scan" id="threatScan" data-analysis="idle"
+        data-aegis-component="Grid Scan" data-component-status="adapted" data-component-location="Threat intent scanner" data-mobile="safe" data-reduced-motion="static-scan">
+        <div class="retro-field" aria-hidden="true" data-aegis-component="Retro Grid" data-component-status="adapted" data-component-location="Threat scan floor" data-mobile="simplified" data-reduced-motion="static"></div>
+        <div class="scan-reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="scan-intent">
+          <small>INCOMING TRANSACTION INTENT</small>
+          <strong id="threatDecision" data-aegis-component="Letter Glitch" data-component-status="used" data-component-location="Threat policy violation event" data-mobile="safe" data-reduced-motion="instant">UNVERIFIED</strong>
+          <span>PROCUREMENT-07 / NONCE 8A72</span>
+        </div>
+        <div class="scan-rules" aria-label="Policy scan stages"><span>IDENTITY</span><span>TASK</span><span>ALLOWLIST</span><span>LIMIT</span><span>RISK</span></div>
+        <button class="scan-trigger" id="scanThreat" type="button">Run policy scan <span>→</span></button>
+      </div>
+    </section>
+
     <section class="authority-chapter section-shell chapter" id="authority" aria-labelledby="authorityTitle">
       <header class="chapter-heading">
-        <span>02 / AUTHORITY</span>
+        <span>03 / AUTHORITY BUILDER</span>
         <h2 id="authorityTitle">Authority is defined before autonomy begins.</h2>
         <p>An agent receives a bounded financial mandate—not possession of the money. The same policy document sets purpose, counterparty, value, time, and behavioural tolerance.</p>
       </header>
       <div class="authority-instrument">
-        <div class="policy-document">
+        <div class="policy-document" data-aegis-component="Border Glow" data-component-status="adapted" data-component-location="Authority active policy" data-mobile="static-edge" data-reduced-motion="static-edge">
           <div class="policy-document-head"><span>ACTIVE POLICY INSTRUMENT</span><b id="authorityPolicyVersion">PROCUREMENT-V4</b></div>
           <h3>Cloud infrastructure procurement</h3>
           <p class="policy-statement">Procurement-07 may purchase cloud-compute capacity only from approved counterparties, within the active task budget, before expiry.</p>
@@ -128,29 +170,61 @@
           <button type="button" class="text-link" data-open-view="risk">Review deterministic thresholds <span>→</span></button>
         </div>
       </div>
+      <div class="authority-workbench" data-zone="authority" data-animation-budget="3">
+        <div class="policy-stepper" data-aegis-component="Stepper" data-component-status="used" data-component-location="Authority policy builder" data-mobile="horizontal-scroll" data-reduced-motion="instant">
+          <button type="button" class="active" data-policy-step="1"><i>01</i><span>Define agent task</span></button>
+          <button type="button" data-policy-step="2"><i>02</i><span>Set budget</span></button>
+          <button type="button" data-policy-step="3"><i>03</i><span>Approve counterparties</span></button>
+          <button type="button" data-policy-step="4"><i>04</i><span>Set expiry</span></button>
+          <button type="button" data-policy-step="5"><i>05</i><span>Activate policy</span></button>
+        </div>
+        <div class="authority-selector">
+          <div class="option-wheel" id="scenarioWheel" role="listbox" aria-label="Agent and attack scenario"
+            data-aegis-component="Option Wheel" data-component-status="used" data-component-location="Authority scenario selector" data-mobile="flat-list" data-reduced-motion="instant">
+            <button role="option" aria-selected="true" data-option-scenario="safe">Normal Agent</button>
+            <button role="option" aria-selected="false" data-option-scenario="overspend">Overzealous Agent</button>
+            <button role="option" aria-selected="false" data-option-scenario="risk">Compromised Agent</button>
+            <button role="option" aria-selected="false" data-option-scenario="evasion">Split-Payment Attack</button>
+            <button role="option" aria-selected="false" data-option-scenario="unknown">Unknown Counterparty</button>
+            <button role="option" aria-selected="false" data-option-scenario="pending">In-Flight Revocation</button>
+          </div>
+          <div class="policy-orbits" aria-label="Six policy domains around Procurement-07"
+            data-aegis-component="Orbiting Circles" data-component-status="adapted" data-component-location="Authority policy domains" data-mobile="static-grid" data-reduced-motion="static">
+            <div class="orbit-agent"><span>A</span><b>Procurement-07</b><small>AUTHORISED AGENT</small></div>
+            <span style="--orbit-index:0">TASK</span><span style="--orbit-index:1">RECIPIENT</span><span style="--orbit-index:2">BUDGET</span><span style="--orbit-index:3">RISK</span><span style="--orbit-index:4">OWNER</span><span style="--orbit-index:5">SETTLEMENT</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="intervention-chapter chapter" id="intervention" aria-labelledby="interventionTitle">
       <header class="chapter-heading section-shell">
-        <span>03 / INTERVENTION</span>
+        <span>04 / ATTACK THEATRE</span>
         <h2 id="interventionTitle">A valid payment may proceed. An invalid one never reaches settlement.</h2>
         <p>Attack requests enter from the left. Independent policy layers decide in the centre. The protected wallet receives only a finally revalidated intent.</p>
       </header>
-      <div class="intervention-stage section-shell" id="storyFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" data-wallet-gate="open">
+      <div class="attack-theatre-toolbar section-shell">
+        <span>LIVE ENGINE / EIGHT ENFORCEMENT MOMENTS</span>
+        <button type="button" id="runAttackSuite" class="risk-spectrum-button"
+          data-aegis-component="Rainbow Button" data-component-status="adapted" data-component-location="Attack Theatre suite control" data-mobile="safe" data-reduced-motion="static-edge">Run Full Attack Suite</button>
+      </div>
+      <div class="intervention-stage section-shell" id="storyFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" data-wallet-gate="open" data-zone="attack" data-animation-budget="4">
         <div class="attack-sequence" aria-label="Attack request sequence">
           <span class="research-label">REQUEST SEQUENCE</span>
           <button class="story-scenario active" data-story-scenario="safe"><i>01</i><span><b>Valid transaction</b><small>₹1,200 · CloudGrid</small></span></button>
           <button class="story-scenario" data-story-scenario="overspend"><i>02</i><span><b>Oversized transaction</b><small>₹8,500 · cap ₹2,500</small></span></button>
           <button class="story-scenario" data-story-scenario="unknown"><i>03</i><span><b>Unknown recipient</b><small>Outside allowlist</small></span></button>
-          <button class="story-scenario" data-story-scenario="evasion"><i>04</i><span><b>Threshold splitting</b><small>4 × ₹1,999 · 11 seconds</small></span></button>
-          <button class="story-scenario" data-story-scenario="pending"><i>05</i><span><b>Pending settlement</b><small>Owner may revoke authority</small></span></button>
-          <button class="story-scenario kill-row" id="storyKillSwitch" disabled><i>06</i><span><b>Owner Kill Switch</b><small>Available during pending settlement</small></span></button>
+          <button class="story-scenario" data-story-scenario="wrong"><i>04</i><span><b>Wrong task</b><small>Outside active Capsule</small></span></button>
+          <button class="story-scenario" data-story-scenario="evasion"><i>05</i><span><b>Threshold splitting</b><small>4 × ₹1,999 · 11 seconds</small></span></button>
+          <button class="story-scenario" data-story-scenario="rapid"><i>06</i><span><b>Risk escalation</b><small>8 requests · 4-second burst</small></span></button>
+          <button class="story-scenario" data-story-scenario="pending"><i>07</i><span><b>Pending settlement</b><small>Owner may revoke authority</small></span></button>
+          <button class="story-scenario kill-row" id="storyKillSwitch" disabled><i>08</i><span><b>Owner Kill Switch</b><small>Available during pending settlement</small></span></button>
         </div>
 
-        <div class="instrument-field">
-          <div class="policy-scan-field" aria-hidden="true"><i></i></div>
+        <div class="instrument-field" data-aegis-component="Magic Rings" data-component-status="adapted" data-component-location="Attack Theatre Core" data-mobile="static-rings" data-reduced-motion="state-snap">
+          <div class="policy-scan-field" aria-hidden="true" data-aegis-component="Grid Scan" data-component-status="adapted" data-component-location="Attack Theatre policy scan" data-mobile="static" data-reduced-motion="static"><i></i></div>
           <div class="story-agent"><span>AGENT</span><b>Procurement-07</b></div>
-          <div class="story-beam story-beam-in" aria-hidden="true"><i></i></div>
+          <div class="story-beam story-beam-in" aria-hidden="true" data-aegis-component="Animated Beam" data-component-status="adapted" data-component-location="Attack Theatre transaction path" data-mobile="safe" data-reduced-motion="state-snap"><i></i></div>
           <div class="story-core" aria-label="Four independent policy layers">
             <span class="story-ring story-ring-risk" data-core-layer="risk"><b>BEHAVIOUR RISK</b></span>
             <span class="story-ring story-ring-limits" data-core-layer="limits"><b>LIMITS</b></span>
@@ -181,7 +255,7 @@
 
     <section class="proof-chapter section-shell chapter" id="proof" aria-labelledby="proofChapterTitle">
       <header class="chapter-heading">
-        <span>04 / PROOF</span>
+        <span>05 / PROOF LAB</span>
         <h2 id="proofChapterTitle">Enforced twice. Explained once.</h2>
         <p>The browser explains the risk. The contract enforces the overlapping settlement boundary. The ledger preserves how each decision was reached.</p>
       </header>
@@ -204,7 +278,7 @@
           <span>03 / CONTRACT ENFORCEMENT</span>
           <h3>Independent settlement authority.</h3>
           <p>Owner and agent roles, limits, nonces, pending reservations, and version invalidation are verified in a local-EVM policy wallet.</p>
-          <div class="contract-facts">
+          <div class="contract-facts" data-aegis-component="Number Ticker" data-component-status="used" data-component-location="Proof verified counters" data-mobile="safe" data-reduced-motion="exact-value">
             <b><span data-contract-field="tests">—</span><small>CONTRACT TESTS</small></b>
             <b><span data-contract-field="parity-short">—</span><small>RULE PARITY</small></b>
             <b><span data-contract-field="environment">LOCAL EVM</span><small>ENVIRONMENT</small></b>
@@ -221,6 +295,10 @@
           <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source ↗</a>
         </div>
       </details>
+      <div class="rule-velocity" aria-label="Ordered enforcement rule strip"
+        data-aegis-component="Scroll-Based Velocity" data-component-status="used" data-component-location="Proof ordered-rule strip" data-mobile="static-scroll" data-reduced-motion="static">
+        <div><span>IDENTITY</span><span>TASK</span><span>ALLOWLIST</span><span>LIMIT</span><span>BUDGET</span><span>NONCE</span><span>RISK</span><span>REVALIDATE</span><span>FREEZE</span><span>SETTLE</span></div>
+      </div>
     </section>
 
     <section class="control-wrap chapter" id="control-centre" aria-labelledby="controlCentreChapterTitle">
@@ -229,8 +307,8 @@
         <h2 id="controlCentreChapterTitle">The research instrument becomes an operating system.</h2>
         <p>Inspect the active mandate, run deterministic attacks, freeze authority, compare policies, and replay the evidence from one operational surface.</p>
       </header>
-      <div class="control-shell" id="controlShell">
-        <aside class="sidebar">
+      <div class="control-shell" id="controlShell" data-zone="control" data-animation-budget="4">
+        <aside class="sidebar" data-aegis-component="Line Sidebar" data-component-status="used" data-component-location="Control Centre desktop navigation" data-mobile="replaced-by-dock" data-reduced-motion="instant-marker">
           <div class="sidebar-head">
             <span class="brand-mark small"><span></span></span>
             <div><strong>AEGIS</strong><small>CONTROL CENTRE</small></div>
@@ -242,6 +320,11 @@
             <button class="nav-item" data-view="twin"><span>04</span>Policy Twin</button>
             <button class="nav-item" data-view="attack"><span>05</span>Attack Lab</button>
             <button class="nav-item" data-view="forensics"><span>06</span>Forensics</button>
+          </nav>
+          <nav class="sidebar-secondary" aria-label="Extended system locations">
+            <a href="#authority"><span>07</span>Agents</a>
+            <a href="#intervention"><span>08</span>Settlement</a>
+            <a href="#contract-enforcement"><span>09</span>Contract Proof</a>
           </nav>
           <div class="sidebar-foot">
             <span class="sim-dot"></span>
@@ -266,7 +349,7 @@
           </div>
 
           <div class="view-panel active" data-panel="overview">
-            <div class="metric-grid">
+            <div class="metric-grid" data-aegis-component="Motion Number" data-component-status="used" data-component-location="Control Centre changing metrics" data-mobile="safe" data-reduced-motion="exact-value">
               <article class="metric-card state-card">
                 <div class="metric-label">System State</div>
                 <div class="state-orb" id="stateOrb"><span></span><b id="stateValue">NORMAL</b></div>
@@ -300,7 +383,7 @@
             <div class="overview-grid">
               <section class="panel live-panel">
                 <div class="panel-head"><div><span class="live-dot"></span><h3>Live Intent Stream</h3></div><button class="text-button" id="clearEvents">Clear</button></div>
-                <div class="event-stream" id="eventStream" aria-live="polite"></div>
+                <div class="event-stream" id="eventStream" aria-live="polite" data-aegis-component="Animated List" data-component-status="used" data-component-location="Control Centre ledger stream" data-mobile="safe" data-reduced-motion="instant-insert"></div>
               </section>
 
               <section class="panel action-panel">
@@ -325,14 +408,14 @@
             <div class="feature-intro"><span class="feature-index">FEATURE 01</span><h3>Task-Bound Budget Capsules</h3><p>Money is granted to one agent for one task, within one purpose, for one period. It cannot be reused elsewhere.</p></div>
             <div class="capsule-layout">
               <section class="panel capsule-builder">
-                <div class="step-indicator"><span class="active">1</span><i></i><span>2</span><i></i><span>3</span><i></i><span>4</span></div>
+                <div class="step-indicator" data-aegis-component="Stepper" data-component-status="adapted" data-component-location="Control Centre Capsule builder" data-mobile="safe" data-reduced-motion="instant"><span class="active">1</span><i></i><span>2</span><i></i><span>3</span><i></i><span>4</span></div>
                 <label>Authorised task<input id="capsuleTask" value="Purchase cloud-compute capacity" /></label>
                 <div class="field-row"><label>Total budget<input id="capsuleBudget" type="number" value="10000" /></label><label>Per transaction<input id="capsuleCap" type="number" value="2500" /></label></div>
                 <label>Approved counterparties<div class="chip-select"><button class="chip selected">CloudGrid</button><button class="chip selected">ComputeHub</button><button class="chip">DataForge</button><button class="chip">AdNova</button></div></label>
                 <label>Capsule expiry<input id="capsuleExpiry" type="datetime-local" value="2026-08-02T18:00" /></label>
                 <button class="activate-button" id="activateCapsule">Activate Budget Capsule</button>
               </section>
-              <section class="capsule-card" id="capsuleCard">
+              <section class="capsule-card" id="capsuleCard" data-aegis-component="Border Glow" data-component-status="adapted" data-component-location="Control Centre active Capsule" data-mobile="static-edge" data-reduced-motion="static-edge">
                 <div class="capsule-glow"></div>
                 <div class="capsule-top"><span>ACTIVE CAPSULE</span><b>CAP-8A72</b></div>
                 <div class="capsule-emblem"><span>A</span></div>
@@ -404,6 +487,7 @@
                 <div class="panel-head"><h3>Attack Scenarios</h3><span class="panel-tag danger-tag">RED TEAM</span></div>
                 <button class="attack-option" data-scenario="overspend"><b>Oversized Payment</b><span>Attempt ₹8,500 against ₹2,500 limit</span></button>
                 <button class="attack-option" data-scenario="unknown"><b>Unknown Counterparty</b><span>Attempt payment outside allowlist</span></button>
+                <button class="attack-option" data-scenario="wrong"><b>Wrong Task Capsule</b><span>Submit an unrelated task hash</span></button>
                 <button class="attack-option" data-scenario="evasion"><b>Threshold Splitting</b><span>4 × ₹1,999 inside 11 seconds</span></button>
                 <button class="attack-option" data-scenario="rapid"><b>Rapid-Fire Spend</b><span>8 requests inside 4 seconds</span></button>
                 <button class="attack-option" data-scenario="pending"><b>In-Flight Revocation</b><span>Queue valid payment and freeze</span></button>
@@ -431,10 +515,10 @@
                 <div class="panel-head"><h3>Attack Timeline</h3><div class="replay-buttons"><button id="replayPrev">←</button><button id="replayPlay">Play Replay</button><button id="replayNext">→</button></div></div>
                 <div class="timeline" id="forensicTimeline"></div>
               </section>
-              <section class="terminal-panel glyph-matrix-host">
-                <div class="glyph-matrix" aria-hidden="true"><span>0 1 A B PASS →</span><span>V4 PASS 1 0 ×</span><span>A B V5 FAIL →</span><span>1 0 PASS V5</span></div>
+              <section class="terminal-panel glyph-matrix-host" data-aegis-component="Terminal" data-component-status="used" data-component-location="Forensic proof terminal" data-mobile="safe-wrap" data-reduced-motion="instant">
+                <div class="glyph-matrix" aria-hidden="true" data-aegis-component="Glyph Matrix" data-component-status="adapted" data-component-location="Forensic proof terminal background" data-mobile="static" data-reduced-motion="hidden"><span>0 1 A B PASS →</span><span>V4 PASS 1 0 ×</span><span>A B V5 FAIL →</span><span>1 0 PASS V5</span></div>
                 <div class="terminal-bar"><span></span><span></span><span></span><b>AEGIS PROOF LEDGER</b></div>
-                <pre id="proofTerminal">$ aegis verify --latest
+                <pre id="proofTerminal" data-aegis-component="Typing Animation" data-component-status="used" data-component-location="Forensic selected evidence" data-mobile="safe-wrap" data-reduced-motion="instant">$ aegis verify --latest
 
 Waiting for a policy decision...</pre>
               </section>
@@ -445,6 +529,16 @@ Waiting for a policy decision...</pre>
             <button class="reset-button" id="resetEnvironment">↻ Reset Demo Environment</button>
             <span>All balances and transactions are simulated. No real funds move through this prototype.</span>
           </div>
+          <nav class="quick-dock" aria-label="Control Centre quick actions" data-aegis-component="Dock — Basic Demo" data-component-status="used" data-component-location="Control Centre quick actions" data-mobile="safe" data-reduced-motion="no-magnification">
+            <button type="button" data-dock-action="reset"><span>↻</span><small>Reset</small></button>
+            <button type="button" data-dock-action="judge"><span>◇</span><small>Judge</small></button>
+            <button type="button" data-dock-action="forensics"><span>⌁</span><small>Forensics</small></button>
+            <button type="button" data-dock-action="contract"><span>{ }</span><small>Contract</small></button>
+            <button type="button" class="danger" data-dock-action="freeze"><span>⏻</span><small>Freeze</small></button>
+          </nav>
+          <nav class="mobile-dock" aria-label="Mobile Control Centre navigation" data-aegis-component="Dock — Navigation Demo" data-component-status="used" data-component-location="Control Centre mobile navigation" data-mobile="primary-navigation" data-reduced-motion="instant-marker">
+            <button class="active" type="button" data-dock-view="overview">Overview</button><button type="button" data-dock-view="capsules">Policy</button><button type="button" data-dock-view="risk">Risk</button><button type="button" data-dock-view="attack">Attack</button><button type="button" data-dock-view="forensics">Proof</button>
+          </nav>
         </div>
       </div>
     </section>
@@ -467,11 +561,11 @@ Waiting for a policy decision...</pre>
 
     <section class="technical-proof section-shell" aria-labelledby="technicalProofTitle">
       <div class="technical-proof-copy"><span class="eyebrow">TECHNICAL PROOF</span><h2 id="technicalProofTitle">Enforcement you can inspect.</h2><p>Every demo decision comes from the same deterministic engine and is preserved as replayable evidence.</p></div>
-      <div class="proof-stats"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong>72</strong><span>BROWSER / ENGINE TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
+      <div class="proof-stats" data-aegis-component="Number Ticker" data-component-status="adapted" data-component-location="Technical proof counters" data-mobile="safe" data-reduced-motion="exact-value"><div><strong>14</strong><span>ORDERED POLICY CHECKS</span></div><div><strong>2</strong><span>SETTLEMENT PHASES</span></div><div><strong data-browser-tests>—</strong><span>BROWSER / PRESENTATION TESTS</span></div><div><strong>₹0</strong><span>REAL FUNDS</span></div></div>
     </section>
 
     <section class="contract-enforcement section-shell" id="contract-enforcement" data-depth-level="2" aria-labelledby="contractEnforcementTitle">
-      <div class="contract-lightfall" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="contract-lightfall" aria-hidden="true" data-aegis-component="Lightfall" data-component-status="adapted" data-component-location="Contract enforcement descent" data-mobile="static" data-reduced-motion="static"><i></i><i></i><i></i></div>
       <div class="contract-enforcement-head">
         <div><span class="eyebrow">INDEPENDENT CONTRACT PROOF</span><h2 id="contractEnforcementTitle">Enforced twice. Explained once.</h2></div>
         <span class="contract-environment"><i></i><b data-contract-field="environment">LOCAL EVM</b> CONTRACT SANDBOX</span>
@@ -502,6 +596,31 @@ Waiting for a policy decision...</pre>
       </div>
     </section>
 
+    <section class="network-zone section-shell" id="policy-network" aria-labelledby="networkTitle" data-zone="network" data-animation-budget="3">
+      <header class="network-heading">
+        <div><span class="zone-index">07 / POLICY NETWORK</span><h2 id="networkTitle">One policy model. Simulated across five test nodes.</h2></div>
+        <p><strong>ILLUSTRATIVE TEST NETWORK</strong><br>NO LIVE PAYMENT RAILS · NO CUSTOMER OR DEPLOYMENT CLAIM</p>
+      </header>
+      <div class="network-stage">
+        <div class="network-globe" aria-label="Illustrative globe with five simulated agent-policy nodes"
+          data-aegis-component="Globe" data-component-status="adapted" data-component-location="Illustrative test network" data-mobile="static" data-reduced-motion="static">
+          <div class="globe-shell" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <span style="--x:31%;--y:57%">MUMBAI</span><span style="--x:45%;--y:64%">SINGAPORE</span><span style="--x:46%;--y:31%">LONDON</span><span style="--x:19%;--y:39%">NEW YORK</span><span style="--x:73%;--y:40%">SEOUL</span>
+        </div>
+        <div class="network-map" data-aegis-component="Dotted Map" data-component-status="used" data-component-location="Illustrative test-node routes" data-mobile="compact" data-reduced-motion="static">
+          <svg viewBox="0 0 720 300" role="img" aria-labelledby="networkMapTitle networkMapDesc">
+            <title id="networkMapTitle">Illustrative Aegis test network</title><desc id="networkMapDesc">Five synthetic nodes connected to one policy model. No live payment rails.</desc>
+            <defs><pattern id="dotField" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" /></pattern></defs>
+            <rect width="720" height="300" fill="url(#dotField)" />
+            <g class="map-routes"><path d="M105 126Q254 55 352 145T628 98"/><path d="M352 145Q438 214 548 208"/><path d="M352 145Q278 214 205 225"/></g>
+            <g class="map-nodes"><circle cx="105" cy="126" r="6"/><circle cx="205" cy="225" r="6"/><circle cx="352" cy="145" r="8"/><circle cx="548" cy="208" r="6"/><circle cx="628" cy="98" r="6"/></g>
+          </svg>
+          <div class="network-beam" aria-hidden="true" data-aegis-component="Animated Beam" data-component-status="adapted" data-component-location="Illustrative policy distribution" data-mobile="static" data-reduced-motion="static"></div>
+          <div class="network-policy" data-aegis-component="Orbiting Circles" data-component-status="adapted" data-component-location="Network policy domains" data-mobile="static" data-reduced-motion="static"><span>A</span><b>AEGIS POLICY MODEL</b><small>TASK · LIMIT · RISK · OWNER</small></div>
+        </div>
+      </div>
+    </section>
+
     <section class="final-cta section-shell">
       <div>
         <span class="eyebrow">LIVE PROTOTYPE</span>
@@ -523,7 +642,7 @@ Waiting for a policy decision...</pre>
 
   <div class="judge-modal hidden" id="judgeModal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle" aria-describedby="judgeDescription">
     <div class="judge-backdrop"></div>
-    <div class="judge-card" id="judgeCard" tabindex="-1">
+    <div class="judge-card" id="judgeCard" tabindex="-1" data-aegis-component="Border Glow" data-component-status="adapted" data-component-location="Judge Mode active scenario" data-mobile="static-edge" data-reduced-motion="static-edge" data-zone="judge" data-animation-budget="4">
       <div class="judge-head">
         <div class="judge-head-title"><span>LIVE JUDGE MODE</span><b id="judgeProgress">SCENARIO 1 OF 6</b></div>
         <div class="judge-head-actions">
@@ -536,7 +655,7 @@ Waiting for a policy decision...</pre>
               <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source ↗</a>
             </div>
           </details>
-          <span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button>
+          <span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge" data-aegis-component="Letter Glitch" data-component-status="adapted" data-component-location="Judge violation/freeze state" data-mobile="safe" data-reduced-motion="instant">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button>
         </div>
       </div>
       <div class="judge-body">
@@ -545,11 +664,11 @@ Waiting for a policy decision...</pre>
           <div class="judge-copy"><span id="judgeFeature">NORMAL OPERATION</span><h2 id="judgeTitle">Authorised payment</h2><p id="judgeDescription">The agent requests ₹1,200 to an approved cloud provider. Aegis verifies the task, recipient, amount and policy before approval.</p></div>
         </aside>
         <section class="judge-execution" data-depth-plane="middle" aria-label="Live decision pipeline">
-          <div class="judge-visual" id="judgeVisual" data-flow="idle" data-risk="normal" data-fail-layer="none">
+          <div class="judge-visual" id="judgeVisual" data-flow="idle" data-risk="normal" data-fail-layer="none" data-aegis-component="Grid Scan" data-component-status="adapted" data-component-location="Judge active policy scan" data-mobile="static" data-reduced-motion="static">
             <div class="judge-core-scene" aria-label="Agent transaction through the Aegis Core to the simulated wallet">
               <div class="judge-endpoint"><span>AI</span><small>AGENT</small></div>
-              <div class="judge-rail judge-rail-in"><i></i></div>
-              <div class="signature-core judge-signature-core" data-depth-level="3">
+              <div class="judge-rail judge-rail-in" data-aegis-component="Animated Beam" data-component-status="used" data-component-location="Judge live transaction path" data-mobile="safe" data-reduced-motion="state-snap"><i></i></div>
+              <div class="signature-core judge-signature-core" data-depth-level="3" data-aegis-component="Magic Rings" data-component-status="adapted" data-component-location="Judge enforcement Core" data-mobile="svg-fallback" data-reduced-motion="svg-fallback">
                 <div class="core-strands" aria-hidden="true"><i></i><i></i><i></i></div>
                 <svg class="signature-core-svg" viewBox="0 0 400 400" role="img" aria-labelledby="judgeCoreTitle judgeCoreDesc">
                   <title id="judgeCoreTitle">Aegis Core decision state</title><desc id="judgeCoreDesc">Four policy rings independently validate the transaction.</desc>
@@ -567,7 +686,7 @@ Waiting for a policy decision...</pre>
               <div class="owner-kill-pulse" aria-hidden="true"></div>
               <div class="invalidated-seal" aria-hidden="true"><span>INVALIDATED</span><small>WALLET NOT REACHED</small></div>
             </div>
-            <strong id="judgeAmount">₹1,200 → CloudGrid</strong>
+            <strong id="judgeAmount" data-aegis-component="Motion Number" data-component-status="adapted" data-component-location="Judge exact amount" data-mobile="safe" data-reduced-motion="exact-value">₹1,200 → CloudGrid</strong>
             <div class="judge-live-meta">
               <div><small>CURRENT RULE</small><b id="judgeCurrentRule">NOT STARTED</b></div>
               <div><small>POLICY</small><b id="judgePolicyVersion">PROCUREMENT-V4</b></div>
@@ -579,20 +698,21 @@ Waiting for a policy decision...</pre>
         </section>
         <aside class="judge-proof" data-depth-plane="front" aria-label="Engine result and evidence">
           <div class="judge-proof-label"><span>ENGINE DECISION</span><small>CANONICAL OUTPUT</small></div>
-          <div class="judge-result" id="judgeResult" role="status" aria-live="polite"><span>READY · Waiting for the presenter.</span></div>
+          <div class="judge-result" id="judgeResult" role="status" aria-live="polite" data-aegis-component="Typing Animation" data-component-status="adapted" data-component-location="Judge decision evidence" data-mobile="safe" data-reduced-motion="instant"><span>READY · Waiting for the presenter.</span></div>
           <div class="judge-facts" id="judgeFacts" aria-label="Scenario evidence"></div>
           <button class="judge-trace-toggle hidden" id="judgeTraceToggle" aria-expanded="false" aria-controls="judgeRuleTrace">View rule trace</button>
-          <div class="judge-rule-trace hidden" id="judgeRuleTrace"></div>
+          <div class="judge-rule-trace hidden" id="judgeRuleTrace" data-aegis-component="Terminal" data-component-status="adapted" data-component-location="Judge expandable rule trace" data-mobile="safe-wrap" data-reduced-motion="instant"></div>
         </aside>
       </div>
       <div class="judge-foot">
         <div class="judge-restart-controls"><button class="secondary-cta" id="judgeReset">Restart Demo</button><button class="secondary-cta" id="judgeRestart">Restart Scenario</button></div>
-        <div class="judge-navigation"><button class="secondary-cta" id="judgePrev" disabled>Previous</button><button class="primary-cta compact" id="judgeNext">RUN SCENARIO</button></div>
+        <div class="judge-navigation" data-aegis-component="Dock — Navigation Demo" data-component-status="adapted" data-component-location="Judge scenario navigation" data-mobile="sticky" data-reduced-motion="instant"><button class="secondary-cta" id="judgePrev" disabled>Previous</button><button class="primary-cta compact" id="judgeNext">RUN SCENARIO</button></div>
       </div>
     </div>
   </div>
 
   <script type="module" src="./app.js"></script>
   <script type="module" src="./aegis-rings.js"></script>
+  <script type="module" src="./black-label.js"></script>
 </body>
 </html>

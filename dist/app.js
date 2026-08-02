@@ -471,6 +471,11 @@ function runUnknown() {
   return afterDecision(state.engine.processIntent(intent), { attackResult: true });
 }
 
+function runWrongTask() {
+  const intent = makeIntent('WRONG-TASK', { amount: 1_200, recipient: 'CloudGrid', taskId: 'UNRELATED-RESEARCH-TASK' });
+  return afterDecision(state.engine.processIntent(intent), { attackResult: true });
+}
+
 function runEvasion({ present = true } = {}) {
   const start = state.logicalTime;
   const offsets = [0, 3_000, 7_000, 11_000];
@@ -891,6 +896,7 @@ function executeScenario(name) {
   if (name === 'safe') return runSafe();
   if (name === 'overspend') return runOverspend();
   if (name === 'unknown') return runUnknown();
+  if (name === 'wrong') return runWrongTask();
   if (name === 'evasion') return runEvasion();
   if (name === 'rapid') return runRapid();
   if (name === 'pending') return startPending();
@@ -1492,10 +1498,17 @@ function initLocalCapturePresentation() {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, Math.max(0, window.scrollY + element.getBoundingClientRect().top + offset));
   };
-  if (localCaptureMode === 'authority') return later(() => captureScroll($('#authority')));
-  if (localCaptureMode === 'intervention') return later(() => captureScroll($('#intervention')));
-  if (localCaptureMode === 'proof') return later(() => captureScroll($('#proof')));
+  if (localCaptureMode === 'research') return later(() => { if (document.documentElement.dataset.theme !== 'research') $('#themeToggle')?.click(); window.scrollTo(0, 0); }, 90);
+  if (localCaptureMode === 'threat') return later(() => { $('#scanThreat')?.click(); captureScroll($('#threat'), -58); }, 120);
+  if (localCaptureMode === 'authority') return later(() => captureScroll($('.authority-instrument'), -58));
+  if (localCaptureMode === 'intervention') return later(() => captureScroll($('#intervention'), -58));
+  if (localCaptureMode === 'proof') return later(() => captureScroll($('#proof'), -58));
   if (localCaptureMode === 'control') return later(() => captureScroll($('#control-centre'), -45));
+  if (localCaptureMode === 'mobile-control') return later(() => captureScroll($('#control-centre'), -58));
+  if (localCaptureMode === 'risk') return later(() => { switchView('risk'); injectRisk(); captureScroll($('#control-centre'), -58); });
+  if (localCaptureMode === 'stream') return later(() => { runSafe(); runOverspend(); captureScroll($('#control-centre'), -58); });
+  if (localCaptureMode === 'attack-theatre') return later(() => { runOverspend(); captureScroll($('#intervention'), -58); });
+  if (localCaptureMode === 'network') return later(() => captureScroll($('#policy-network'), -58));
   if (localCaptureMode === 'core') return later(() => { runSafe(); document.body.classList.add('capture-core'); });
   if (localCaptureMode === 'judge-approved') return later(() => { openJudgeMode(); executeJudgeScenario(); });
   if (localCaptureMode === 'judge-blocked') return later(() => { openJudgeMode(); rebuildJudgeTo(1); executeJudgeScenario(); });
@@ -1517,7 +1530,7 @@ function initLocalCapturePresentation() {
     runTwin();
     captureScroll($('[data-panel="twin"]'), -82);
   });
-  if (localCaptureMode === 'contract') return later(() => captureScroll($('#proof')));
+  if (localCaptureMode === 'contract') return later(() => captureScroll($('#contract-enforcement'), -58));
   if (localCaptureMode === 'forensics') return later(() => {
     openJudgeMode();
     rebuildJudgeTo(4);
