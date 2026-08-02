@@ -82,10 +82,12 @@ npm run contract:test
 npm run contract:demo
 npm run contract:parity
 npm run contract:proof
+npm run proof:refresh
+npm run proof:check
 npm run test:all
 ```
 
-`contract:proof` reads actual compiler artifacts, test results, and parity results before producing `public/contract-proof.json`. It refuses to publish a passing proof when tests or parity have failed. The normal Vercel static build does not start an EVM or compile Solidity.
+`contract:proof` reads actual compiler artifacts, test results, and parity results before producing `public/contract-proof.json`. `proof:refresh` is the explicit local workflow that reruns the Solidity tests, attack demo, vector parity, contract proof, browser suite, and project-proof synchronization. `proof:check` is the production-safe path: it verifies the committed proof against tracked browser and Solidity test declarations, the attack-suite source, shared vectors, contract source hash, README block, and the two public proof files. It does not read ignored result files, install contract dependencies, start an EVM, or compile Solidity. Both paths refuse inconsistent or failed evidence.
 
 ## Events and rejected requests
 

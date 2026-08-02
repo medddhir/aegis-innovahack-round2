@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "source": "GENERATED_PROJECT_EVIDENCE",
-  "currentCommit": "ab81804fba8529f738b0a4f7556f5aa1c6341b39",
+  "currentCommit": "d6fd394a3050997ba657d5926f6ca76a77a367cc",
   "browserPresentation": {
-    "total": 198,
-    "passed": 198,
+    "total": 211,
+    "passed": 211,
     "failed": 0,
     "source": "tests/*.test.js",
-    "sourceFiles": 11
+    "sourceFiles": 12
   },
   "contractTests": {
     "total": 33,

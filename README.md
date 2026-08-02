@@ -64,9 +64,9 @@ Its signature Aegis Instrument combines the agent identity, transaction, four in
 Run `npm run component:audit` to validate the complete component catalogue, visible DOM locations, animation budgets, mobile strategy, and reduced-motion strategy. The responsive browser audit covers `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`; the 21-view Black Label evidence and contact sheet are in [`docs/screenshots/black-label`](docs/screenshots/black-label/).
 
 <!-- AEGIS_PROJECT_PROOF_START -->
-The generated release proof records **198 passing browser/presentation tests**, **33 passing Solidity tests**, **12/12 deterministic contract attack scenarios**, and **8/8 shared vectors with PASS parity**. Failed checks: **0**. Environment: **LOCAL_EVM**; real funds moved: **false**.
+The generated release proof records **211 passing browser/presentation tests**, **33 passing Solidity tests**, **12/12 deterministic contract attack scenarios**, and **8/8 shared vectors with PASS parity**. Failed checks: **0**. Environment: **LOCAL_EVM**; real funds moved: **false**.
 
-These values are generated from the current test declarations and verified local-EVM artifacts by `npm run proof:generate`; `npm run build` refuses stale visible evidence.
+These values are refreshed from verified local-EVM results by `npm run proof:refresh`; `npm run proof:check` and the production build validate the tracked evidence without requiring local contract artifacts.
 <!-- AEGIS_PROJECT_PROOF_END -->
 
 ## Contract enforcement proof

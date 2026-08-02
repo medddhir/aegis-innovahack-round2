@@ -16,8 +16,8 @@
     "failed": 0
   },
   "browserTests": {
-    "total": 198,
-    "passed": 198,
+    "total": 211,
+    "passed": 211,
     "failed": 0,
     "source": "public/project-proof.json"
   },

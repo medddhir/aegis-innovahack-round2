@@ -5,6 +5,27 @@ const MAX_REQUEST_BYTES = 48 * 1024;
 const TIMEOUT_MS = 11_000;
 const json = (res, status, body) => res.status(status).json(body);
 
+function configuration(env = process.env) {
+  const enabled = env.LYZR_ENABLED === '1' || env.LYZR_ENABLED === 'true';
+  if (!enabled) return { enabled: false, configured: false, status: 'DISABLED', apiKey: null, agentId: null, apiUrl: null };
+  const apiKey = env.LYZR_API_KEY;
+  const agentId = env.LYZR_AGENT_ID;
+  const apiUrl = env.LYZR_API_URL;
+  if (!apiKey || !agentId || !apiUrl) return { enabled: true, configured: false, status: 'INCOMPLETE_CONFIGURATION', apiKey: null, agentId: null, apiUrl: null };
+  try {
+    const url = new URL(apiUrl);
+    if (url.protocol !== 'https:') throw new Error('HTTPS required');
+    return { enabled: true, configured: true, status: 'READY', apiKey, agentId, apiUrl: url };
+  } catch {
+    return { enabled: true, configured: false, status: 'INCOMPLETE_CONFIGURATION', apiKey: null, agentId: null, apiUrl: null };
+  }
+}
+
+export function sentinelConfiguration(env = process.env) {
+  const { enabled, configured, status } = configuration(env);
+  return Object.freeze({ enabled, configured, status });
+}
+
 function sameOrigin(req) {
   const origin = req.headers?.origin;
   const host = req.headers?.['x-forwarded-host'] ?? req.headers?.host;
@@ -36,9 +57,14 @@ function sentinelMessage(incident) {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  const config = configuration();
+  if (req.method === 'GET') {
+    const { enabled, configured, status } = config;
+    return json(res, 200, { ok: true, enabled, configured, status, advisory_only: true });
+  }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return json(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED', message: 'Sentinel accepts POST requests only.' });
+    res.setHeader('Allow', 'GET, POST');
+    return json(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED', message: 'Sentinel accepts GET diagnostics and POST advisory requests only.' });
   }
   if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'SAME_ORIGIN_REQUIRED', message: 'Sentinel requests must originate from this Aegis deployment.' });
   if (!String(req.headers?.['content-type'] ?? '').toLowerCase().startsWith('application/json')) return json(res, 415, { ok: false, error: 'JSON_REQUIRED', message: 'Sentinel accepts JSON only.' });
@@ -46,11 +72,8 @@ export default async function handler(req, res) {
   const serializedLength = Buffer.byteLength(JSON.stringify(req.body ?? {}));
   if ((declaredLength && declaredLength > MAX_REQUEST_BYTES) || serializedLength > MAX_REQUEST_BYTES) return json(res, 413, { ok: false, error: 'REQUEST_TOO_LARGE', message: 'Sentinel evidence exceeds the request limit.' });
 
-  if (process.env.LYZR_ENABLED !== '1' && process.env.LYZR_ENABLED !== 'true') return json(res, 503, { ok: false, error: 'SENTINEL_UNAVAILABLE', message: 'Advisory analysis is currently unavailable. Deterministic Aegis enforcement remains operational.' });
-  const apiKey = process.env.LYZR_API_KEY;
-  const agentId = process.env.LYZR_AGENT_ID;
-  const apiUrl = process.env.LYZR_API_URL;
-  if (!apiKey || !agentId || !apiUrl) return json(res, 503, { ok: false, error: 'SENTINEL_UNAVAILABLE', message: 'Advisory analysis is currently unavailable. Deterministic Aegis enforcement remains operational.' });
+  if (!config.enabled) return json(res, 503, { ok: false, error: 'SENTINEL_DISABLED', status: config.status, message: 'Advisory analysis is disabled. Deterministic Aegis enforcement remains operational.' });
+  if (!config.configured) return json(res, 503, { ok: false, error: 'SENTINEL_INCOMPLETE_CONFIGURATION', status: config.status, message: 'Advisory analysis is not configured. Deterministic Aegis enforcement remains operational.' });
 
   let incident;
   try { incident = validateIncident(req.body); }
@@ -59,21 +82,15 @@ export default async function handler(req, res) {
     return json(res, 400, { ok: false, error: code, message: error.message });
   }
 
-  let url;
-  try {
-    url = new URL(apiUrl);
-    if (url.protocol !== 'https:') throw new Error();
-  } catch { return json(res, 503, { ok: false, error: 'SENTINEL_UNAVAILABLE', message: 'Advisory analysis is currently unavailable. Deterministic Aegis enforcement remains operational.' }); }
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const upstream = await fetch(url, {
+    const upstream = await fetch(config.apiUrl, {
       method: 'POST',
-      headers: { accept: 'application/json', 'content-type': 'application/json', 'x-api-key': apiKey },
+      headers: { accept: 'application/json', 'content-type': 'application/json', 'x-api-key': config.apiKey },
       body: JSON.stringify({
         user_id: stableId('user', incident.client_id),
-        agent_id: agentId,
+        agent_id: config.agentId,
         session_id: stableId('incident', incident.incident_hash),
         message: sentinelMessage(incident),
         system_prompt_variables: {},
@@ -82,14 +99,14 @@ export default async function handler(req, res) {
       }),
       signal: controller.signal,
     });
-    if (!upstream.ok) return json(res, 502, { ok: false, error: 'SENTINEL_UPSTREAM_ERROR', message: 'Advisory analysis is unavailable. Deterministic Aegis enforcement remains operational.' });
+    if (!upstream.ok) return json(res, 502, { ok: false, error: 'SENTINEL_UPSTREAM_UNAVAILABLE', status: 'UPSTREAM_UNAVAILABLE', message: 'Advisory analysis is unavailable. Deterministic Aegis enforcement remains operational.' });
     const payload = await upstream.json();
     const recommendation = validateRecommendation(parseLyzrResponse(payload), incident);
-    return json(res, 200, { ok: true, recommendation, incident_hash: incident.incident_hash, advisory_only: true });
+    return json(res, 200, { ok: true, status: 'SUCCESS', recommendation, incident_hash: incident.incident_hash, advisory_only: true });
   } catch (error) {
     if (error?.name === 'AbortError') return json(res, 504, { ok: false, error: 'SENTINEL_TIMEOUT', message: 'Advisory analysis timed out. Deterministic Aegis enforcement remains operational.' });
     if (error instanceof SentinelValidationError) return json(res, 502, { ok: false, error: error.code, message: 'The advisory response failed Aegis safety validation and was not accepted.' });
-    return json(res, 502, { ok: false, error: 'SENTINEL_UPSTREAM_ERROR', message: 'Advisory analysis is unavailable. Deterministic Aegis enforcement remains operational.' });
+    return json(res, 502, { ok: false, error: 'SENTINEL_UPSTREAM_UNAVAILABLE', status: 'UPSTREAM_UNAVAILABLE', message: 'Advisory analysis is unavailable. Deterministic Aegis enforcement remains operational.' });
   } finally {
     clearTimeout(timeout);
   }

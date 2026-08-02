@@ -33,9 +33,11 @@ The browser only calls `/api/lyzr-sentinel`. The serverless function reads `LYZR
 
 The proxy follows Lyzr’s documented v3 chat inference envelope: `user_id`, `agent_id`, `session_id`, `message`, `system_prompt_variables`, `filter_variables`, and `features`, authenticated server-side with `x-api-key`. The first-party reference is [Lyzr Chat With Agent (Inference v3)](https://docs.lyzr.ai/agent-apis/agents/MultimodalChat).
 
-## Request controls
+## Request controls and deployment diagnostics
 
-- POST and JSON only
+- `POST` is the only advisory request method and accepts JSON only
+- `GET /api/lyzr-sentinel` returns only `enabled`, `configured`, and a bounded status; it never returns an environment value, Agent JSON, upstream header, URL, ID, or key
+- configuration states are `DISABLED`, `INCOMPLETE_CONFIGURATION`, and `READY`; a configured upstream failure is normalized as `UPSTREAM_UNAVAILABLE`, while a validated response is `SUCCESS`
 - 48 KiB request ceiling
 - same-origin browser request required
 - versioned `TEST_ENVIRONMENT` or `LOCAL_EVM` evidence only
