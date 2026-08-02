@@ -112,10 +112,14 @@ function updateProofLedgerSummary() {
 
 async function loadContractProof() {
   try {
-    const response = await fetch('./contract-proof.json', { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Contract proof unavailable (${response.status}).`);
-    const proof = await response.json();
+    const [response, projectResponse] = await Promise.all([
+      fetch('./contract-proof.json', { cache: 'no-store' }),
+      fetch('./project-proof.json', { cache: 'no-store' }),
+    ]);
+    if (!response.ok || !projectResponse.ok) throw new Error(`Generated proof unavailable (${response.status}/${projectResponse.status}).`);
+    const [proof, projectProof] = await Promise.all([response.json(), projectResponse.json()]);
     if (proof.environment !== 'LOCAL_EVM' || proof.realFundsMoved !== false) throw new Error('Contract proof boundary is invalid.');
+    if (proof.projectProofSource !== 'public/project-proof.json' || projectProof.realFundsMoved !== false || proof.browserTests?.total !== projectProof.browserPresentation?.total) throw new Error('Generated project proof is inconsistent.');
     const bytecodeHash = String(proof.hashes?.deploymentBytecode ?? '').replace(/^sha256:/, '');
     const sourceHash = String(proof.hashes?.contractSource ?? '').replace(/^sha256:/, '');
     setContractProofField('tests', `${proof.contractTests.passed}/${proof.contractTests.total}`);
@@ -126,7 +130,7 @@ async function loadContractProof() {
     setContractProofField('parity-short', `${proof.attackVectors.passed}/${proof.attackVectors.total}`);
     setContractProofField('environment', proof.environment.replace('_', ' '));
     setContractProofField('funds', String(proof.realFundsMoved).toUpperCase());
-    $$('[data-browser-tests]').forEach(element => { element.textContent = String(proof.browserTests?.total ?? '—'); });
+    $$('[data-browser-tests]').forEach(element => { element.textContent = String(projectProof.browserPresentation?.passed ?? '—'); });
     document.documentElement.dataset.contractProof = 'verified';
   } catch (error) {
     setContractProofField('tests', 'UNAVAILABLE');
@@ -1556,6 +1560,11 @@ function initInteractions() {
     getActivePolicy: () => state.engine.getSnapshot().policy,
     beforeOpen: () => { if (!$('#judgeModal').classList.contains('hidden')) closeJudgeMode(); },
     returnToJudgeMode: openJudgeMode,
+  });
+  document.addEventListener('aegis:reset-all', () => {
+    resetEnvironment({ notify: false });
+    state.redTeam?.reset?.();
+    toast('Control Centre, Judge Mode and Red Team Lab restored to one deterministic baseline');
   });
   initDepthPresentation();
   $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));

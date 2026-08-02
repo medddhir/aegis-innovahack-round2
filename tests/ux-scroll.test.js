@@ -37,8 +37,8 @@ async function filesBelow(directory) {
 test('137. the exact visible-copy snapshot remains locked', () => {
   const check = spawnSync(process.execPath, ['scripts/snapshot-visible-copy.mjs', '--check'], { cwd: new URL('.', root), encoding: 'utf8' });
   assert.equal(check.status, 0, check.stderr || check.stdout);
-  assert.equal(copyLock.global.characters, 14800);
-  assert.equal(copyLock.global.sha256, 'e8682750b07863cb484e78a26e129d738e0a6af5cc8eb3ec741770b5d2d98669');
+  assert.equal(copyLock.global.characters, 15849);
+  assert.equal(copyLock.global.sha256, '3f4febdfd711c5c0e7eb3e9b34bc2c1043330f4f7270725accbbeb683b3ec0cc');
 });
 
 test('138. the six locked features remain present without a seventh product feature', () => {

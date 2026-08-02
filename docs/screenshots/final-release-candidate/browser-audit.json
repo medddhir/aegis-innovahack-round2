@@ -1,0 +1,145 @@
+{
+  "capturedAt": "2026-08-02T10:48:33.432Z",
+  "records": [
+    {
+      "file": "01-logo-command-mode.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "02-logo-research-mode.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "03-startup-frame-1.png",
+      "startupFrame": 90
+    },
+    {
+      "file": "04-startup-midpoint.png",
+      "startupFrame": 650
+    },
+    {
+      "file": "05-startup-completed.png",
+      "startupFrame": 1550
+    },
+    {
+      "file": "06-research-mode-hero.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "07-research-mode-control-centre.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "08-research-mode-judge-mode.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "09-research-mode-red-team-lab.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "10-research-mode-forensics.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "11-sentinel-idle.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "12-sentinel-loading.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "13-sentinel-recommendation.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "14-digital-twin-recommendation-simulation.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "15-lyzr-unavailable.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "16-mobile-command-mode.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "17-mobile-research-mode.png",
+      "overflow": 0,
+      "theme": "research",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    },
+    {
+      "file": "18-mobile-sentinel.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": true,
+      "errors": []
+    },
+    {
+      "file": "19-projector-1280x720.png",
+      "overflow": 0,
+      "theme": "command",
+      "proof": "verified",
+      "sentinelOpen": false,
+      "errors": []
+    }
+  ]
+}

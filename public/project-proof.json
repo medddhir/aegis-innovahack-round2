@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "source": "GENERATED_PROJECT_EVIDENCE",
+  "currentCommit": "ab81804fba8529f738b0a4f7556f5aa1c6341b39",
+  "browserPresentation": {
+    "total": 198,
+    "passed": 198,
+    "failed": 0,
+    "source": "tests/*.test.js",
+    "sourceFiles": 11
+  },
+  "contractTests": {
+    "total": 33,
+    "passed": 33,
+    "failed": 0
+  },
+  "attackDemo": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "vectorParity": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "result": "PASS"
+  },
+  "failedCount": 0,
+  "environment": "LOCAL_EVM",
+  "realFundsMoved": false,
+  "evidenceHashes": {
+    "contractProof": "sha256:441c7df53e31bf2e3df5a49c83a1cb59c87ab8a59f2e33a2157fa799409b6ffd",
+    "contractResults": "sha256:f11e6afd3af1f0e2fe630f816d8b537208066095902b9159f9c8af72ec4db51b",
+    "attackReport": "sha256:b30f721329f576ecf8e95cd8aa2de0899351f248f8f6a73c963c185e9004d348",
+    "parityResults": "sha256:f96ec2d3c22f11306c89543c2f794490cd12f36d50433021001c1d959179b3b9"
+  }
+}

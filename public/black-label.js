@@ -34,7 +34,10 @@ function applyTheme(theme, { persist = false } = {}) {
 }
 
 function initTheme() {
-  applyTheme(safeStorageGet('aegis-theme') === 'research' ? 'research' : 'command');
+  const saved = safeStorageGet('aegis-theme');
+  const prepainted = document.documentElement.dataset.theme;
+  const systemTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'research' : 'command';
+  applyTheme(saved === 'research' || saved === 'command' ? saved : prepainted || systemTheme);
   $('#themeToggle')?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'research' ? 'command' : 'research';
     applyTheme(next, { persist: true });
@@ -204,7 +207,7 @@ function initDocks() {
   }));
   $$('[data-dock-action]').forEach(button => button.addEventListener('click', () => {
     const action = button.dataset.dockAction;
-    if (action === 'reset') $('#resetEnvironment')?.click();
+    if (action === 'reset') document.dispatchEvent(new CustomEvent('aegis:reset-all'));
     if (action === 'judge') $('#launchJudgeMode')?.click();
     if (action === 'forensics') activateDockView('forensics');
     if (action === 'contract') $('#contract-enforcement')?.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth' });

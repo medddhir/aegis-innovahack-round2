@@ -47,7 +47,7 @@ Judge Mode is a presentation state machine (`READY`, `RUNNING`, `AWAITING_OWNER_
 
 ## Judge vs Aegis — Red Team Lab
 
-**Red Team Lab** is a full-screen defensive adversarial transaction simulator available from Attack Theatre, the Control Centre quick actions, and the completed Judge Mode flow. A judge can enter any paise-safe simulated amount, choose an approved or custom recipient, select the authorised or an incorrect task, replay a nonce, submit a stale policy version, coordinate up to ten requests, or activate a fresh owner-defined test policy. Presets populate those controls; they never determine the result.
+**Red Team Lab** is a full-screen defensive adversarial transaction simulator available from Attack Theatre, the Control Centre quick actions, and the completed Judge Mode flow. A judge can enter a safe simulated amount with up to two decimal places, choose an approved or custom recipient, select the authorised or an incorrect task, replay a nonce, submit a stale policy version, coordinate up to ten requests, or activate a fresh owner-defined test policy. The Lab normalizes its input to integer paise before creating a canonical intent; the browser engine remains a deterministic simulated-rupee model, while the Solidity wallet uses integer test-token units. Presets populate those controls; they never determine the result.
 
 Every attempt runs through a new isolated instance of the same canonical `AegisPolicyEngine`. Single intents use the normal intent path, coordinated requests use the real batch/Evasion Shield path, and pending requests use the normal two-phase settlement path. A pending custom request settles if left alone or becomes `INVALIDATED` only after the judge manually activates the owner Kill Switch. The pipeline, decisive rule, risk evidence, ledger, session totals, and funds moved are rendered from returned engine evidence.
 
@@ -63,13 +63,23 @@ Its signature Aegis Instrument combines the agent identity, transaction, four in
 
 Run `npm run component:audit` to validate the complete component catalogue, visible DOM locations, animation budgets, mobile strategy, and reduced-motion strategy. The responsive browser audit covers `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`; the 21-view Black Label evidence and contact sheet are in [`docs/screenshots/black-label`](docs/screenshots/black-label/).
 
-The browser/presentation suite contains **136 passing tests**. The isolated Hardhat suite contains **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, visual-state mapping, Solidity policy, and pre-existing test hashes remain pinned.
+<!-- AEGIS_PROJECT_PROOF_START -->
+The generated release proof records **198 passing browser/presentation tests**, **33 passing Solidity tests**, **12/12 deterministic contract attack scenarios**, and **8/8 shared vectors with PASS parity**. Failed checks: **0**. Environment: **LOCAL_EVM**; real funds moved: **false**.
+
+These values are generated from the current test declarations and verified local-EVM artifacts by `npm run proof:generate`; `npm run build` refuses stale visible evidence.
+<!-- AEGIS_PROJECT_PROOF_END -->
 
 ## Contract enforcement proof
 
 The contract workspace is isolated under [`contracts`](contracts/), with its own dependency lockfile and pinned compiler. `public/contract-proof.json` is generated from actual compiler artifacts, contract test output, and vector parity; the website displays that evidence as `LOCAL EVM CONTRACT SANDBOX` and explicitly says browser clicks are simulated execution rather than on-chain transactions.
 
 Read the [contract enforcement architecture](docs/CONTRACT_ENFORCEMENT.md) and [12-scenario attack report](docs/CONTRACT_ATTACK_REPORT.md). No public contract address is claimed because no testnet deployment was performed.
+
+## Aegis Sentinel
+
+**AEGIS SENTINEL** is a Lyzr-powered, advisory-only policy hardening agent. An explicit user action sends sanitized simulated ledger evidence through the same-origin serverless proxy; strict validation rejects any recommendation that expands authority. A validated recommendation may be simulated through the canonical Policy Digital Twin, but it cannot approve or block a transaction, mutate engine or ledger state, activate policy, settle funds, add a recipient, or trigger the Kill Switch.
+
+The integration fails closed when Lyzr is unavailable, caches deterministic incident results per browser session to protect credits, and never makes live calls during automated tests. See [the Sentinel architecture](docs/LYZR_SENTINEL_INTEGRATION.md) and [InnovaHack evidence](docs/LYZR_INNOVAHACK_EVIDENCE.md).
 
 ## Team
 

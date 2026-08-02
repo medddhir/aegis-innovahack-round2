@@ -16,8 +16,10 @@
     "failed": 0
   },
   "browserTests": {
-    "total": 136,
-    "source": "tests/*.test.js"
+    "total": 198,
+    "passed": 198,
+    "failed": 0,
+    "source": "public/project-proof.json"
   },
   "attackVectors": {
     "total": 8,
@@ -28,5 +30,6 @@
   "environment": "LOCAL_EVM",
   "deploymentStatus": "NOT_PUBLICLY_DEPLOYED",
   "realFundsMoved": false,
-  "sourcePath": "contracts/src/AegisPolicyWallet.sol"
+  "sourcePath": "contracts/src/AegisPolicyWallet.sol",
+  "projectProofSource": "public/project-proof.json"
 }

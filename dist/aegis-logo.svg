@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Aegis policy gate</title>
+  <desc id="desc">Four enforcement layers form a shield around a protected transaction path.</desc>
+  <path fill="#07131d" stroke="#58c8ef" stroke-width="2.4" stroke-linejoin="round" d="M32 4.5 54 13v17.2c0 13.8-7.6 23.7-22 29.3C17.6 53.9 10 44 10 30.2V13L32 4.5Z"/>
+  <path fill="none" stroke="#3278d4" stroke-width="1.6" d="M32 9 49.5 15.7v14.1c0 11-5.7 19.1-17.5 24.2-11.8-5.1-17.5-13.2-17.5-24.2V15.7L32 9Zm0 6 12.2 4.7v9.6c0 7.6-3.8 13.3-12.2 17.3-8.4-4-12.2-9.7-12.2-17.3v-9.6L32 15Z" opacity=".9"/>
+  <path fill="none" stroke="#ecf8fb" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="m24.5 39 7.5-19 7.5 19M27 33h10M4.5 27H18m28 0h13.5"/>
+  <path stroke="#58c8ef" stroke-width="1.8" stroke-linecap="round" d="M7 18h8M5.5 22.5h11M48 18h8m-9.5 4.5h12"/>
+</svg>

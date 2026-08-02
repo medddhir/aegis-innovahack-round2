@@ -14,7 +14,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/control-centre", "destination": "/index.html" },
-    { "source": "/judge-mode", "destination": "/index.html" }
+    { "source": "/control-centre", "destination": "/" },
+    { "source": "/judge-mode", "destination": "/" }
   ]
 }

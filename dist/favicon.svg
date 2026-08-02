@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#071019"/>
-  <path d="M32 7 52 15v15c0 13.2-7.6 22.6-20 28C19.6 52.6 12 43.2 12 30V15L32 7Z" fill="#0d1b28" stroke="#58b9ff" stroke-width="3"/>
-  <path d="m22 43 10-24 10 24M26 34h12" fill="none" stroke="#f3f7fb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M8 30h10m28 0h10" stroke="#35d3c6" stroke-width="3" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Aegis</title><desc id="desc">A four-layer financial policy gate.</desc>
+  <rect width="64" height="64" rx="13" fill="#071019"/>
+  <path fill="#0a1822" stroke="#58c8ef" stroke-width="2.8" stroke-linejoin="round" d="M32 5 53 13v17c0 13.5-7.3 23.2-21 29-13.7-5.8-21-15.5-21-29V13L32 5Z"/>
+  <path fill="none" stroke="#3278d4" stroke-width="1.7" d="M32 11 48 17v12.5c0 10.2-5.2 17.6-16 22.4-10.8-4.8-16-12.2-16-22.4V17l16-6Zm0 6 10.7 4v8c0 6.8-3.3 11.8-10.7 15.5C24.6 40.8 21.3 35.8 21.3 29v-8L32 17Z"/>
+  <path fill="none" stroke="#eef9fb" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" d="m25 39 7-18 7 18M27.7 32.5h8.6M5 28h13m28 0h13"/>
 </svg>

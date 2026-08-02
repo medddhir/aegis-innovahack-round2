@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>try{const saved=localStorage.getItem('aegis-theme');const theme=saved==='research'||saved==='command'?saved:(matchMedia('(prefers-color-scheme: light)').matches?'research':'command');document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme==='research'?'light':'dark';if(sessionStorage.getItem('aegis-intro-seen')==='1'&&!new URLSearchParams(location.search).has('intro'))document.documentElement.classList.add('aegis-intro-seen')}catch{document.documentElement.dataset.theme='command';document.documentElement.style.colorScheme='dark'}</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#071019" />
   <meta name="color-scheme" content="dark" />
@@ -17,17 +18,27 @@
   <link rel="stylesheet" href="./black-label.css" />
   <link rel="stylesheet" href="./red-team-lab.css" />
   <link rel="stylesheet" href="./ux-scroll.css" />
+  <link rel="stylesheet" href="./release-candidate.css" />
 </head>
 <body>
   <a class="skip-link" href="#top">Skip to main content</a>
+  <div class="boot-sequence" id="bootSequence" role="status" aria-label="Aegis startup sequence" aria-live="polite">
+    <button type="button" id="bootSkip">Skip intro</button>
+    <div class="boot-instrument" aria-hidden="true">
+      <i class="boot-layer boot-layer-1"></i><i class="boot-layer boot-layer-2"></i><i class="boot-layer boot-layer-3"></i><i class="boot-layer boot-layer-4"></i>
+      <span class="boot-logo"></span>
+    </div>
+    <span class="boot-wordmark" aria-hidden="true"></span>
+    <p>INDEPENDENT FINANCIAL CONTROL PLANE</p>
+  </div>
   <div class="ambient ambient-one" aria-hidden="true"></div>
   <div class="ambient ambient-two" aria-hidden="true"></div>
   <div class="grid-noise" aria-hidden="true"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Aegis home">
-      <span class="brand-mark" aria-hidden="true"><span></span></span>
-      <span>AEGIS</span>
+      <span class="aegis-brand-symbol" aria-hidden="true"></span>
+      <span class="aegis-brand-word" aria-hidden="true"></span>
     </a>
     <nav class="header-nav" aria-label="Primary navigation">
       <a href="#authority">Authority</a>
@@ -271,6 +282,7 @@
           <p>Both configurations receive the same six engine-generated attack vectors on the same deterministic clock.</p>
           <div class="proof-comparison"><b>V1 <em id="proofTwinV1">AWAITING REPLAY</em></b><i>→</i><b>V2 <em id="proofTwinV2">AWAITING REPLAY</em></b></div>
           <button class="text-link" type="button" data-open-view="twin">Run synchronized comparison <span>→</span></button>
+          <button class="sentinel-entry" type="button" data-sentinel-open data-sentinel-context="POLICY_DIGITAL_TWIN">ASK AEGIS SENTINEL</button>
         </article>
         <article class="proof-mode">
           <span>02 / FORENSIC LEDGER</span>
@@ -278,6 +290,7 @@
           <p>Intent, policy version, decisive rule, risk signals, owner action, settlement state, and funds moved remain connected.</p>
           <div class="proof-event"><small>SELECTED EVIDENCE</small><b id="proofEventRule">NO RECORDED EVENT</b><em id="proofEventStatus">Run a scenario · ledger-backed · no cryptographic claim</em></div>
           <button class="text-link" type="button" data-open-view="forensics">Inspect recorded evidence <span>→</span></button>
+          <button class="sentinel-entry" type="button" data-sentinel-open data-sentinel-context="FORENSIC_PROOF_LEDGER">ASK AEGIS SENTINEL</button>
         </article>
         <article class="proof-mode contract-mode">
           <span>03 / CONTRACT ENFORCEMENT</span>
@@ -315,7 +328,7 @@
       <div class="control-shell" id="controlShell" data-zone="control" data-animation-budget="4">
         <aside class="sidebar" data-aegis-component="Line Sidebar" data-component-status="used" data-component-location="Control Centre desktop navigation" data-mobile="replaced-by-dock" data-reduced-motion="instant-marker">
           <div class="sidebar-head">
-            <span class="brand-mark small"><span></span></span>
+            <span class="aegis-brand-symbol small" aria-hidden="true"></span>
             <div><strong>AEGIS</strong><small>CONTROL CENTRE</small></div>
           </div>
           <nav id="sidebarNav" aria-label="Control centre sections">
@@ -638,13 +651,54 @@ Waiting for a policy decision...</pre>
   </main>
 
   <footer>
-    <div class="brand"><span class="brand-mark small"><span></span></span><span>AEGIS</span></div>
+    <div class="brand" aria-label="Aegis"><span class="aegis-brand-symbol small" aria-hidden="true"></span><span class="aegis-brand-word" aria-hidden="true"></span></div>
     <p>Research prototype by Medhir Lokhande and Hrushikesh Lokhande · TurboPay Technologies Pvt. Ltd.</p>
     <a class="footer-source" href="https://github.com/medddhir/aegis-innovahack-round2" target="_blank" rel="noreferrer">Source and verification evidence ↗</a>
     <p class="legal">This prototype uses simulated/test funds. Any production deployment involving real-money movement, custody or operation of a payment system would require applicable regulatory approvals and integration with licensed financial or payment partners.</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog class="sentinel-dialog" id="sentinelDialog" aria-labelledby="sentinelTitle" aria-describedby="sentinelBoundary">
+    <div class="sentinel-shell">
+      <header class="sentinel-head">
+        <div><span>AEGIS SENTINEL</span><h2 id="sentinelTitle">Lyzr-powered policy hardening agent</h2></div>
+        <button type="button" id="sentinelClose" aria-label="Close Aegis Sentinel">×</button>
+      </header>
+      <div class="sentinel-status-line"><span>Powered by Lyzr AI</span><b>ADVISORY ANALYSIS</b><em id="sentinelContext">FORENSIC EVIDENCE</em></div>
+      <main class="sentinel-body">
+        <section class="sentinel-intro" id="sentinelIdle">
+          <div class="sentinel-orbit" aria-hidden="true"><i></i><i></i><i></i><b>A</b></div>
+          <div><span>DETERMINISTIC EVIDENCE IN · BOUNDED ADVICE OUT</span><h3>Ask for a policy-hardening review.</h3><p id="sentinelBoundary">Sentinel advises. The deterministic Aegis engine and Policy Wallet remain the enforcement authority.</p><small>Only simulated, sanitized ledger evidence is sent. No transaction decision, policy state, settlement, recipient, limit, or Kill Switch can be changed by Sentinel.</small></div>
+        </section>
+        <section class="sentinel-loading hidden" id="sentinelLoading" role="status">
+          <div class="sentinel-scan" aria-hidden="true"><i></i></div><span>ADVISORY ANALYSIS IN PROGRESS</span><p>Validating deterministic evidence and bounded policy controls…</p>
+        </section>
+        <section class="sentinel-error hidden" id="sentinelError" role="alert">
+          <span>ADVISORY UNAVAILABLE</span><h3>Core Aegis enforcement remains operational.</h3><p id="sentinelErrorMessage"></p><button type="button" id="sentinelRetry">Retry advisory analysis</button>
+        </section>
+        <section class="sentinel-result hidden" id="sentinelResult" aria-label="Sentinel recommendation">
+          <div class="sentinel-result-head"><span id="sentinelSeverity">SEVERITY</span><b id="sentinelClassification">CLASSIFICATION</b><em id="sentinelConfidence">0% CONFIDENCE</em></div>
+          <div class="sentinel-result-grid">
+            <article><small>INCIDENT SUMMARY</small><p id="sentinelSummary"></p></article>
+            <article><small>EVIDENCE USED</small><ul id="sentinelEvidence"></ul></article>
+            <article><small>BOUNDED POLICY PROPOSAL</small><dl id="sentinelPatch"></dl></article>
+            <article><small>RATIONALE</small><p id="sentinelRationale"></p></article>
+            <article><small>LIMITATIONS</small><ul id="sentinelLimitations"></ul></article>
+            <article class="sentinel-approval"><small>HUMAN CONTROL</small><strong>HUMAN APPROVAL REQUIRED</strong><p>Simulation never activates the proposed policy.</p></article>
+          </div>
+          <section class="sentinel-twin hidden" id="sentinelTwin" aria-live="polite">
+            <div><small>CURRENT POLICY</small><b id="sentinelTwinCurrent">—</b></div><i>→</i><div><small>PROPOSED POLICY</small><b id="sentinelTwinProposed">—</b></div><p id="sentinelTwinDifference"></p>
+          </section>
+        </section>
+      </main>
+      <footer class="sentinel-foot">
+        <button type="button" class="sentinel-clear" id="sentinelClearCache">Clear Sentinel cache</button>
+        <div><button type="button" class="sentinel-simulate hidden" id="sentinelSimulate">SIMULATE RECOMMENDATION</button><button type="button" class="sentinel-primary" id="sentinelAsk">ASK AEGIS SENTINEL</button></div>
+      </footer>
+      <div class="sr-only" id="sentinelLive" role="status" aria-live="polite"></div>
+    </div>
+  </dialog>
 
   <div class="judge-modal hidden" id="judgeModal" role="dialog" aria-modal="true" aria-labelledby="judgeTitle" aria-describedby="judgeDescription">
     <div class="judge-backdrop"></div>
@@ -659,6 +713,7 @@ Waiting for a policy decision...</pre>
               <span><b data-contract-field="parity">LOADING</b> VECTOR PARITY · <b data-contract-field="environment">LOCAL EVM</b></span>
               <p>The live demonstration uses simulated browser execution. Core settlement controls are independently implemented and verified in the Aegis Policy Wallet contract.</p>
               <a href="https://github.com/medddhir/aegis-innovahack-round2/tree/main/contracts" target="_blank" rel="noreferrer">View contract source ↗</a>
+              <button class="sentinel-entry compact" type="button" data-sentinel-open data-sentinel-context="JUDGE_MODE_EVIDENCE">ASK AEGIS SENTINEL</button>
             </div>
           </details>
           <span class="judge-simulated-badge">SIMULATED FUNDS</span><span class="judge-state-badge ready" id="judgeStateBadge" data-aegis-component="Letter Glitch" data-component-status="adapted" data-component-location="Judge violation/freeze state" data-mobile="safe" data-reduced-motion="instant">READY</span><button id="closeJudgeMode" aria-label="Close Judge Mode">×</button>
@@ -817,6 +872,7 @@ No custom attempt has been submitted.</pre>
             <p id="redTeamBoundary">This custom challenge is evaluated live by the deterministic Aegis browser engine. Core settlement boundaries are independently implemented and verified through the Aegis Policy Wallet local-EVM contract suite.</p>
             <div><span><b data-contract-field="tests">—</b> CONTRACT TESTS</span><span><b data-contract-field="parity-short">—</b> VECTOR PARITY</span><span><b data-contract-field="environment">LOCAL EVM</b> ENVIRONMENT</span></div>
           </details>
+          <button class="sentinel-entry red-team-sentinel" type="button" data-sentinel-open data-sentinel-context="RED_TEAM_RESULT">ASK AEGIS SENTINEL</button>
           <section class="red-team-ledger">
             <div class="red-team-ledger-head"><b>SESSION LEDGER</b><small id="redLedgerCount">0 EVENTS</small></div>
             <div id="redTeamLedger" data-aegis-component="Animated List" data-component-status="used" data-component-location="Red Team session ledger" data-mobile="safe" data-reduced-motion="instant"><p>No recorded custom attempts.</p></div>
@@ -836,9 +892,11 @@ No custom attempt has been submitted.</pre>
 
   <script defer src="./gsap.min.js"></script>
   <script defer src="./ScrollTrigger.min.js"></script>
+  <script type="module" src="./boot-sequence.js"></script>
   <script type="module" src="./app.js"></script>
   <script type="module" src="./aegis-rings.js"></script>
   <script type="module" src="./black-label.js"></script>
   <script type="module" src="./ux-scroll.js"></script>
+  <script type="module" src="./sentinel.js"></script>
 </body>
 </html>
