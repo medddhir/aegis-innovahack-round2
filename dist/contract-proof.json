@@ -16,7 +16,7 @@
     "failed": 0
   },
   "browserTests": {
-    "total": 112,
+    "total": 136,
     "source": "tests/*.test.js"
   },
   "attackVectors": {

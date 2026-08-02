@@ -15,6 +15,7 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./black-label.css" />
+  <link rel="stylesheet" href="./red-team-lab.css" />
 </head>
 <body>
   <a class="skip-link" href="#top">Skip to main content</a>
@@ -205,8 +206,11 @@
       </header>
       <div class="attack-theatre-toolbar section-shell">
         <span>LIVE ENGINE / EIGHT ENFORCEMENT MOMENTS</span>
-        <button type="button" id="runAttackSuite" class="risk-spectrum-button"
-          data-aegis-component="Rainbow Button" data-component-status="adapted" data-component-location="Attack Theatre suite control" data-mobile="safe" data-reduced-motion="static-edge">Run Full Attack Suite</button>
+        <div class="attack-theatre-actions">
+          <button type="button" class="red-team-launch" data-open-red-team>Try to Break Aegis</button>
+          <button type="button" id="runAttackSuite" class="risk-spectrum-button"
+            data-aegis-component="Rainbow Button" data-component-status="adapted" data-component-location="Attack Theatre suite control" data-mobile="safe" data-reduced-motion="static-edge">Run Full Attack Suite</button>
+        </div>
       </div>
       <div class="intervention-stage section-shell" id="storyFlow" data-flow="idle" data-risk="normal" data-fail-layer="none" data-wallet-gate="open" data-zone="attack" data-animation-budget="4">
         <div class="attack-sequence" aria-label="Attack request sequence">
@@ -532,6 +536,7 @@ Waiting for a policy decision...</pre>
           <nav class="quick-dock" aria-label="Control Centre quick actions" data-aegis-component="Dock — Basic Demo" data-component-status="used" data-component-location="Control Centre quick actions" data-mobile="safe" data-reduced-motion="no-magnification">
             <button type="button" data-dock-action="reset"><span>↻</span><small>Reset</small></button>
             <button type="button" data-dock-action="judge"><span>◇</span><small>Judge</small></button>
+            <button type="button" data-open-red-team><span>⚑</span><small>Red Team</small></button>
             <button type="button" data-dock-action="forensics"><span>⌁</span><small>Forensics</small></button>
             <button type="button" data-dock-action="contract"><span>{ }</span><small>Contract</small></button>
             <button type="button" class="danger" data-dock-action="freeze"><span>⏻</span><small>Freeze</small></button>
@@ -705,9 +710,126 @@ Waiting for a policy decision...</pre>
         </aside>
       </div>
       <div class="judge-foot">
-        <div class="judge-restart-controls"><button class="secondary-cta" id="judgeReset">Restart Demo</button><button class="secondary-cta" id="judgeRestart">Restart Scenario</button></div>
+        <div class="judge-restart-controls"><button class="secondary-cta" id="judgeReset">Restart Demo</button><button class="secondary-cta" id="judgeRestart">Restart Scenario</button><button class="secondary-cta hidden" id="judgeRedTeam" data-open-red-team>Try to Break Aegis</button></div>
         <div class="judge-navigation" data-aegis-component="Dock — Navigation Demo" data-component-status="adapted" data-component-location="Judge scenario navigation" data-mobile="sticky" data-reduced-motion="instant"><button class="secondary-cta" id="judgePrev" disabled>Previous</button><button class="primary-cta compact" id="judgeNext">RUN SCENARIO</button></div>
       </div>
+    </div>
+  </div>
+
+  <div class="red-team-modal hidden" id="redTeamModal" role="dialog" aria-modal="true" aria-labelledby="redTeamTitle" aria-describedby="redTeamBoundary">
+    <div class="red-team-shell" id="redTeamShell" tabindex="-1" data-flow="idle" data-risk="normal">
+      <header class="red-team-head">
+        <div><span>JUDGE VS AEGIS</span><h2 id="redTeamTitle">RED TEAM LAB</h2></div>
+        <div class="red-team-head-status"><span>SIMULATED INR</span><span>DEFENSIVE SIMULATOR</span><button type="button" id="redTeamClose" aria-label="Close Red Team Lab">×</button></div>
+      </header>
+
+      <div class="red-team-workspace">
+        <aside class="red-team-controls" aria-label="Challenge controls">
+          <section class="red-team-presets">
+            <div class="red-team-section-label"><span>01</span><b>ATTACK PRESET</b><small>POPULATES CONTROLS ONLY</small></div>
+            <div class="red-team-option-wheel" id="redTeamPresets" role="listbox" aria-label="Attack preset selection" data-aegis-component="Option Wheel" data-component-status="used" data-component-location="Red Team Lab presets" data-mobile="flat-list" data-reduced-motion="instant">
+              <button type="button" role="option" aria-selected="true" data-red-preset="compliant">Policy-Compliant Payment</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="oversized">Oversized Payment</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="unknown">Unknown Recipient</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="wrongTask">Wrong Task</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="splitting">Threshold Splitting</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="rapid">Rapid-Fire Spending</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="duplicate">Duplicate Nonce</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="stale">Stale Policy Version</button>
+              <button type="button" role="option" aria-selected="false" data-red-preset="pending">Pending Payment + Kill Switch</button>
+            </div>
+          </section>
+
+          <form class="red-team-form" id="redTeamForm" novalidate>
+            <div class="red-team-section-label"><span>02</span><b>SIMPLE CHALLENGE</b><small>CURRENT POLICY DEFAULT</small></div>
+            <label>Amount · simulated INR<input id="redAmount" name="amount" inputmode="decimal" autocomplete="off" value="1200.00" aria-describedby="redAmountError" /></label>
+            <small class="field-error" id="redAmountError"></small>
+            <label>Recipient<select id="redRecipient" name="recipient"></select></label>
+            <label class="hidden" id="redCustomRecipientField">Custom unapproved recipient<input id="redCustomRecipient" maxlength="64" autocomplete="off" value="Unknown Counterparty" /></label>
+            <label>Task<select id="redTaskMode"><option value="correct">Current authorised task</option><option value="incorrect">Incorrect task</option></select></label>
+
+            <details class="red-team-advanced" id="redTeamAdvanced">
+              <summary>Advanced red team controls <span>+</span></summary>
+              <div class="red-team-field-grid">
+                <label>Request count<input id="redRequestCount" type="number" min="1" max="10" step="1" value="1" /></label>
+                <label>Interval · seconds<input id="redInterval" type="number" min="0" max="60" step="0.001" value="0" /></label>
+                <label>Nonce<select id="redNonceMode"><option value="fresh">Fresh</option><option value="replay">Replay</option></select></label>
+                <label>Policy version<select id="redVersionMode"><option value="current">Current</option><option value="stale">Stale</option></select></label>
+                <label>Settlement<select id="redSettlementMode"><option value="settle">Final settlement</option><option value="pending">Pending queue</option></select></label>
+                <label>Agent state<select id="redAgentMode"><option value="normal">Normal</option><option value="overzealous">Overzealous</option><option value="compromised">Compromised</option></select></label>
+                <label>Attempt type<select id="redAttemptType"><option value="single">Single</option><option value="coordinated">Coordinated</option></select></label>
+              </div>
+            </details>
+            <div class="red-team-form-error" id="redTeamError" role="alert"></div>
+          </form>
+
+          <details class="red-team-policy" id="redPolicyPanel">
+            <summary>Define a fresh test policy <span>OWNER CONTROL</span></summary>
+            <div class="red-policy-stepper" id="redPolicyStepper" data-aegis-component="Stepper" data-component-status="used" data-component-location="Red Team policy activation" data-mobile="scroll" data-reduced-motion="instant">
+              <button type="button" class="active" data-red-policy-step="1"><i>1</i><span>Task</span></button>
+              <button type="button" data-red-policy-step="2"><i>2</i><span>Limits</span></button>
+              <button type="button" data-red-policy-step="3"><i>3</i><span>Recipients</span></button>
+              <button type="button" data-red-policy-step="4"><i>4</i><span>Settlement</span></button>
+              <button type="button" data-red-policy-step="5"><i>5</i><span>Activate</span></button>
+            </div>
+            <div class="red-policy-fields">
+              <div data-red-policy-panel="1"><label>Agent identity<input id="redPolicyAgent" maxlength="48" /></label><label>Authorised task<input id="redPolicyTask" maxlength="100" /></label><label>Task identifier<input id="redPolicyTaskId" maxlength="60" /></label></div>
+              <div class="hidden" data-red-policy-panel="2"><label>Per-transaction cap<input id="redPolicyCap" inputmode="decimal" /></label><label>Daily cumulative cap<input id="redPolicyDaily" inputmode="decimal" /></label><label>Total task budget<input id="redPolicyTotal" inputmode="decimal" /></label></div>
+              <div class="hidden" data-red-policy-panel="3"><label>Approved recipients · comma separated<textarea id="redPolicyRecipients" rows="3" maxlength="240"></textarea></label></div>
+              <div class="hidden" data-red-policy-panel="4"><label>Expiry<input id="redPolicyExpiry" type="datetime-local" /></label><label>Settlement delay · seconds<input id="redPolicyDelay" type="number" min="1" max="60" value="10" /></label><label>Violation threshold<input id="redPolicyThreshold" type="number" min="1" max="100" value="55" /></label></div>
+              <div class="hidden red-policy-review" data-red-policy-panel="5"><p id="redPolicyReview">Review the owner-controlled policy, then activate it through the canonical engine.</p><button type="button" id="redPolicyActivate">Activate Test Policy</button></div>
+            </div>
+          </details>
+        </aside>
+
+        <main class="red-team-stage" aria-label="Live Aegis evaluation">
+          <div class="red-team-stage-head"><span>LIVE DECISION PIPELINE</span><b id="redPolicyLabel">PROCUREMENT-V4</b><small id="redRiskLabel">NORMAL · 12/100</small></div>
+          <div class="red-team-scan" id="redTeamScan" data-analysis="idle" data-aegis-component="Grid Scan" data-component-status="adapted" data-component-location="Red Team rule evaluation" data-mobile="static" data-reduced-motion="static">
+            <div class="red-team-grid" aria-hidden="true"></div>
+            <div class="red-team-path">
+              <div class="red-team-endpoint"><span>AI</span><small>AGENT</small></div>
+              <div class="red-team-beam" aria-hidden="true" data-aegis-component="Animated Beam" data-component-status="used" data-component-location="Red Team transaction movement" data-mobile="state-line" data-reduced-motion="state-snap"><i></i></div>
+              <div class="red-team-core" aria-label="Aegis four-layer enforcement Core" data-aegis-component="Magic Rings" data-component-status="adapted" data-component-location="Red Team enforcement Core" data-mobile="static-rings" data-reduced-motion="state-snap"><span data-layer="risk"><b>RISK</b></span><span data-layer="limits"><b>LIMITS</b></span><span data-layer="intent"><b>TASK</b></span><span data-layer="identity"><b>ID</b></span><i>A</i></div>
+              <div class="red-team-beam out" aria-hidden="true"><i></i></div>
+              <div class="red-team-wallet"><span>₹</span><b>PROTECTED WALLET</b><small id="redWalletState">OPEN · SIMULATED</small></div>
+            </div>
+            <div class="red-team-pending hidden" id="redTeamPending"><small>FINAL REVALIDATION IN</small><strong id="redTeamCountdown">10</strong><span>SECONDS · OWNER WINDOW OPEN</span></div>
+            <div class="red-team-cluster hidden" id="redTeamCluster"></div>
+          </div>
+          <ol class="red-team-pipeline" id="redTeamPipeline" aria-label="Canonical policy rule pipeline"></ol>
+          <section class="red-team-result" id="redTeamResult" role="status" aria-live="polite">
+            <span>READY</span><h3>Try to break Aegis.</h3><p>Define an attempt. The canonical engine—not the selected preset—decides the outcome.</p>
+          </section>
+          <div class="red-team-result-facts" id="redTeamFacts"></div>
+        </main>
+
+        <aside class="red-team-evidence" aria-label="Forensic evidence and session ledger">
+          <div class="red-team-section-label"><span>03</span><b>ENGINE EVIDENCE</b><small>LEDGER-BACKED</small></div>
+          <details class="red-team-trace" open>
+            <summary>Complete rule trace</summary>
+            <pre id="redTeamTerminal" data-aegis-component="Terminal" data-component-status="used" data-component-location="Red Team complete rule trace" data-mobile="wrap" data-reduced-motion="instant">$ aegis red-team --await-intent
+
+No custom attempt has been submitted.</pre>
+          </details>
+          <details class="red-team-contract">
+            <summary>Contract coverage explanation</summary>
+            <p id="redTeamBoundary">This custom challenge is evaluated live by the deterministic Aegis browser engine. Core settlement boundaries are independently implemented and verified through the Aegis Policy Wallet local-EVM contract suite.</p>
+            <div><span><b data-contract-field="tests">—</b> CONTRACT TESTS</span><span><b data-contract-field="parity-short">—</b> VECTOR PARITY</span><span><b data-contract-field="environment">LOCAL EVM</b> ENVIRONMENT</span></div>
+          </details>
+          <section class="red-team-ledger">
+            <div class="red-team-ledger-head"><b>SESSION LEDGER</b><small id="redLedgerCount">0 EVENTS</small></div>
+            <div id="redTeamLedger" data-aegis-component="Animated List" data-component-status="used" data-component-location="Red Team session ledger" data-mobile="safe" data-reduced-motion="instant"><p>No recorded custom attempts.</p></div>
+          </section>
+          <section class="red-team-summary" aria-label="Red Team Lab session summary">
+            <div><small>ATTEMPTS</small><b id="redSummaryAttempts">0</b></div><div><small>APPROVED</small><b id="redSummaryApproved">0</b></div><div><small>BLOCKED</small><b id="redSummaryBlocked">0</b></div><div><small>INVALIDATED</small><b id="redSummaryInvalidated">0</b></div><div><small>SETTLED</small><b id="redSummarySettled">0</b></div><div><small>ATTEMPTED</small><b id="redSummaryAttempted">₹0</b></div><div><small>FUNDS MOVED</small><b id="redSummaryMoved">₹0</b></div><div><small>PROTECTED</small><b id="redSummaryProtected">₹0</b></div><div><small>FINAL STATE</small><b id="redSummaryRisk">NORMAL · V4</b></div>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="red-team-foot">
+        <div><button type="button" id="redTeamReset">Reset Lab</button><button type="button" id="redTeamReplay" disabled>Replay Last Attempt</button><button type="button" id="redTeamReturnJudge">Return to Judge Mode</button></div>
+        <button type="submit" form="redTeamForm" class="red-team-primary" id="redTeamSubmit">Attempt Transaction</button>
+      </footer>
     </div>
   </div>
 

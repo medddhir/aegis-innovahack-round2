@@ -41,9 +41,17 @@ npm run start
 
 Open `http://localhost:4173`.
 
-The browser UI and the automated tests both import the same deterministic engine from `public/policy-engine.js`. Control Centre, Judge Mode, Attack Lab, Risk Governor, Policy Digital Twin, settlement, and Forensics do not maintain separate outcome tables.
+The browser UI and the automated tests both import the same deterministic engine from `public/policy-engine.js`. Control Centre, Judge Mode, Attack Lab, Red Team Lab, Risk Governor, Policy Digital Twin, settlement, and Forensics do not maintain separate outcome tables.
 
 Judge Mode is a presentation state machine (`READY`, `RUNNING`, `AWAITING_OWNER_ACTION`, `COMPLETE`, `ERROR`) layered over that engine. It disables conflicting controls during execution, owns and clears its timers, renders the returned decision pipeline and rule trace, and requires a manual verified-owner kill-switch action for in-flight revocation. Closing, resetting, or reopening restores a deterministic and accessible demo state; reduced-motion mode changes only the animation.
+
+## Judge vs Aegis — Red Team Lab
+
+**Red Team Lab** is a full-screen defensive adversarial transaction simulator available from Attack Theatre, the Control Centre quick actions, and the completed Judge Mode flow. A judge can enter any paise-safe simulated amount, choose an approved or custom recipient, select the authorised or an incorrect task, replay a nonce, submit a stale policy version, coordinate up to ten requests, or activate a fresh owner-defined test policy. Presets populate those controls; they never determine the result.
+
+Every attempt runs through a new isolated instance of the same canonical `AegisPolicyEngine`. Single intents use the normal intent path, coordinated requests use the real batch/Evasion Shield path, and pending requests use the normal two-phase settlement path. A pending custom request settles if left alone or becomes `INVALIDATED` only after the judge manually activates the owner Kill Switch. The pipeline, decisive rule, risk evidence, ledger, session totals, and funds moved are rendered from returned engine evidence.
+
+The Lab remains explicitly bounded: it uses simulated INR and does not execute arbitrary clicks on-chain. Its contract panel says that core settlement boundaries are independently implemented and verified by the local-EVM Aegis Policy Wallet suite; it does not show fake transaction hashes or a fake public address.
 
 ## Black Label interface
 
@@ -55,7 +63,7 @@ Its signature Aegis Instrument combines the agent identity, transaction, four in
 
 Run `npm run component:audit` to validate the complete component catalogue, visible DOM locations, animation budgets, mobile strategy, and reduced-motion strategy. The responsive browser audit covers `1440×900`, `1280×720`, `1024×768`, `768×1024`, `430×932`, `390×844`, and `360×800`; the 21-view Black Label evidence and contact sheet are in [`docs/screenshots/black-label`](docs/screenshots/black-label/).
 
-The browser/presentation suite contains **112 passing tests**. The isolated Hardhat suite contains **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, visual-state mapping, Solidity policy, and pre-existing test hashes remain pinned.
+The browser/presentation suite contains **136 passing tests**. The isolated Hardhat suite contains **33 passing Solidity tests**, and eight shared vectors pass against both implementations. The critical browser engine, Judge runtime, visual-state mapping, Solidity policy, and pre-existing test hashes remain pinned.
 
 ## Contract enforcement proof
 

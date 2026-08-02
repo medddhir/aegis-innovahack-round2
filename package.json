@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "start": "python3 -m http.server 4173 -d dist",
-    "test": "node tests/run-tests.js && node tests/final-art-direction.test.js && node tests/black-label.test.js",
+    "test": "node tests/run-tests.js && node tests/final-art-direction.test.js && node tests/black-label.test.js && node tests/red-team-lab.test.js",
     "contract:test": "npm --prefix contracts test",
     "contract:demo": "npm --prefix contracts run demo",
     "contract:parity": "npm --prefix contracts run parity",

@@ -18,6 +18,7 @@ import {
   createTwinReplayModel,
   visualStateForRisk,
 } from './visual-state.js';
+import { initRedTeamLab } from './red-team-lab.js';
 
 const JUDGE_SCENARIOS = [
   {
@@ -70,6 +71,7 @@ const state = {
   judgePreviousFocus: null,
   renderedEventIds: new Set(),
   animationFrames: new Map(),
+  redTeam: null,
 };
 
 const judgeMachine = new JudgeModeStateMachine({ scenarioCount: JUDGE_SCENARIOS.length });
@@ -1013,6 +1015,7 @@ function renderJudgeControls() {
   $('#judgeNext').disabled = snapshot.status === JUDGE_MODE_STATES.RUNNING;
   $('#judgeRestart').disabled = snapshot.status === JUDGE_MODE_STATES.RUNNING;
   $('#judgeRestart').classList.toggle('hidden', snapshot.scenarioIndex !== 4 && snapshot.status !== JUDGE_MODE_STATES.ERROR);
+  $('#judgeRedTeam').classList.toggle('hidden', snapshot.status !== JUDGE_MODE_STATES.COMPLETE || snapshot.scenarioIndex !== JUDGE_SCENARIOS.length - 1);
 
   if (snapshot.status === JUDGE_MODE_STATES.READY) $('#judgeNext').textContent = 'RUN SCENARIO';
   if (snapshot.status === JUDGE_MODE_STATES.RUNNING) $('#judgeNext').textContent = 'EVALUATING…';
@@ -1549,6 +1552,11 @@ function initInteractions() {
   createEngine();
   renderAll();
   loadContractProof();
+  state.redTeam = initRedTeamLab({
+    getActivePolicy: () => state.engine.getSnapshot().policy,
+    beforeOpen: () => { if (!$('#judgeModal').classList.contains('hidden')) closeJudgeMode(); },
+    returnToJudgeMode: openJudgeMode,
+  });
   initDepthPresentation();
   $$('.nav-item').forEach(button => button.addEventListener('click', () => switchView(button.dataset.view)));
   $$('.scenario-button, .attack-option').forEach(button => button.addEventListener('click', () => executeScenario(button.dataset.scenario)));
@@ -1625,6 +1633,7 @@ function initInteractions() {
     visualRiskState: () => document.body.dataset.riskState,
     incidentStages: () => createIncidentStages(state.engine.getLedger()).map(stage => ({ id: stage.id, index: stage.index, available: stage.available })),
     twinReplay: () => state.twinResults ? createTwinReplayModel(state.twinResults) : null,
+    redTeam: () => state.redTeam?.diagnostics() ?? null,
   });
   initLocalCapturePresentation();
 }
